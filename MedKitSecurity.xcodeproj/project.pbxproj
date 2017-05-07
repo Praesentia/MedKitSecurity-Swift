@@ -1,0 +1,1388 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		220A342D1EBE17640024DF9E /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 220A342C1EBE17640024DF9E /* LICENSE.txt */; };
+		220A34431EBF41980024DF9E /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 220A34421EBF41980024DF9E /* README.md */; };
+		220A34661EBF46660024DF9E /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 220A34421EBF41980024DF9E /* README.md */; };
+		220A34691EBF466C0024DF9E /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 220A342C1EBE17640024DF9E /* LICENSE.txt */; };
+		220A346A1EBF466F0024DF9E /* Release Notes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 225A46821EB37E76004EE389 /* Release Notes.rtf */; };
+		220EB09F1EA39DF800CF87A9 /* Initialize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220EB09E1EA39DF800CF87A9 /* Initialize.swift */; };
+		220EB0A01EA39E1300CF87A9 /* Initialize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220EB09E1EA39DF800CF87A9 /* Initialize.swift */; };
+		221156451E2E73C800B5D239 /* MedKitSecurity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2211563C1E2E73C800B5D239 /* MedKitSecurity.framework */; };
+		2211564A1E2E73C800B5D239 /* MedKitSecurity_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221156491E2E73C800B5D239 /* MedKitSecurity_iOSTests.swift */; };
+		2211564C1E2E73C800B5D239 /* MedKitSecurity.h in Headers */ = {isa = PBXBuildFile; fileRef = 2211563E1E2E73C800B5D239 /* MedKitSecurity.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		221156611E2E73E300B5D239 /* MedKitSecurity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 221156581E2E73E200B5D239 /* MedKitSecurity.framework */; };
+		221156661E2E73E300B5D239 /* MedKitSecurity_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221156651E2E73E300B5D239 /* MedKitSecurity_macOSTests.swift */; };
+		221156681E2E73E300B5D239 /* MedKitSecurity.h in Headers */ = {isa = PBXBuildFile; fileRef = 2211565A1E2E73E300B5D239 /* MedKitSecurity.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		221156751E2E746200B5D239 /* SHA1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221156721E2E746200B5D239 /* SHA1.swift */; };
+		221156841E2E758E00B5D239 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2211567B1E2E758E00B5D239 /* CommonCrypto.framework */; };
+		221156891E2E758E00B5D239 /* CommonCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221156881E2E758E00B5D239 /* CommonCryptoTests.swift */; };
+		221157921E2E818900B5D239 /* SHA1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221156721E2E746200B5D239 /* SHA1.swift */; };
+		221157A31E2E836600B5D239 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2211567B1E2E758E00B5D239 /* CommonCrypto.framework */; };
+		221157B21E2E85AF00B5D239 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 221157A91E2E85AF00B5D239 /* CommonCrypto.framework */; };
+		221157B71E2E85AF00B5D239 /* CommonCrypto_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221157B61E2E85AF00B5D239 /* CommonCrypto_macOSTests.swift */; };
+		221157C51E2E870900B5D239 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 221157A91E2E85AF00B5D239 /* CommonCrypto.framework */; };
+		221BDAFF1E620BC400AA99FD /* SecurityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221BDAFE1E620BC400AA99FD /* SecurityManager.swift */; };
+		221BDB001E620BD500AA99FD /* SecurityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221BDAFE1E620BC400AA99FD /* SecurityManager.swift */; };
+		2243DEAD1E87FB5200A188FD /* MedKitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2243DEA61E87FB3700A188FD /* MedKitCore.framework */; };
+		2243DEAE1E87FB5800A188FD /* MedKitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2243DEAA1E87FB3700A188FD /* MedKitCore.framework */; };
+		224DDE9C1E3D3BB500FF0AEB /* HMAC256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224DDE9B1E3D3BB500FF0AEB /* HMAC256.swift */; };
+		224DDE9D1E3D3EA600FF0AEB /* HMAC256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224DDE9B1E3D3BB500FF0AEB /* HMAC256.swift */; };
+		225A46831EB37E76004EE389 /* Release Notes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 225A46821EB37E76004EE389 /* Release Notes.rtf */; };
+		225F3D9C1E6326FE00BEFA0D /* NSError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F3D9B1E6326FE00BEFA0D /* NSError.swift */; };
+		225F3D9D1E63273F00BEFA0D /* NSError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F3D9B1E6326FE00BEFA0D /* NSError.swift */; };
+		226F1EE51E64B7EC0079AA8C /* CFString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226F1EE41E64B7EC0079AA8C /* CFString.swift */; };
+		226F1EE61E64B8BE0079AA8C /* CFString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226F1EE41E64B7EC0079AA8C /* CFString.swift */; };
+		226F1EE91E64C04F0079AA8C /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226F1EE71E64C0040079AA8C /* Security.swift */; };
+		22E0AD4E1E33938500540BAB /* SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E0AD4D1E33938500540BAB /* SHA256.swift */; };
+		22E0AD501E33939300540BAB /* SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E0AD4D1E33938500540BAB /* SHA256.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		221156461E2E73C800B5D239 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 221156141E2E738800B5D239 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2211563B1E2E73C800B5D239;
+			remoteInfo = "MedKitSecurity iOS";
+		};
+		221156621E2E73E300B5D239 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 221156141E2E738800B5D239 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 221156571E2E73E200B5D239;
+			remoteInfo = "MedKitSecurity macOS";
+		};
+		221156851E2E758E00B5D239 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 221156141E2E738800B5D239 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2211567A1E2E758E00B5D239;
+			remoteInfo = CommonCrypto;
+		};
+		221156941E2E768800B5D239 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 221156141E2E738800B5D239 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2211567A1E2E758E00B5D239;
+			remoteInfo = CommonCrypto;
+		};
+		221157B31E2E85AF00B5D239 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 221156141E2E738800B5D239 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 221157A81E2E85AF00B5D239;
+			remoteInfo = "CommonCrypto macOS";
+		};
+		221157C31E2E870000B5D239 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 221156141E2E738800B5D239 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 221157A81E2E85AF00B5D239;
+			remoteInfo = "CommonCrypto macOS";
+		};
+		2243DEA51E87FB3700A188FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2243DC791E872BDB00A188FD;
+			remoteInfo = "MedKitCore iOS";
+		};
+		2243DEA71E87FB3700A188FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2243DC811E872BDB00A188FD;
+			remoteInfo = "MedKitCore iOSTests";
+		};
+		2243DEA91E87FB3700A188FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2243DC951E872BF100A188FD;
+			remoteInfo = "MedKitCore macOS";
+		};
+		2243DEAB1E87FB3700A188FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2243DC9D1E872BF100A188FD;
+			remoteInfo = "MedKitCore macOSTests";
+		};
+		2243DEAF1E87FBDD00A188FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 2243DC941E872BF100A188FD;
+			remoteInfo = "MedKitCore macOS";
+		};
+		2243DEB11E87FBE400A188FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 2243DC781E872BDB00A188FD;
+			remoteInfo = "MedKitCore iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		220A342C1EBE17640024DF9E /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		220A34421EBF41980024DF9E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		220EB09E1EA39DF800CF87A9 /* Initialize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Initialize.swift; path = Source/Initialize.swift; sourceTree = "<group>"; };
+		2211563C1E2E73C800B5D239 /* MedKitSecurity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MedKitSecurity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2211563E1E2E73C800B5D239 /* MedKitSecurity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MedKitSecurity.h; sourceTree = "<group>"; };
+		2211563F1E2E73C800B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221156441E2E73C800B5D239 /* MedKitSecurity iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MedKitSecurity iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		221156491E2E73C800B5D239 /* MedKitSecurity_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedKitSecurity_iOSTests.swift; sourceTree = "<group>"; };
+		2211564B1E2E73C800B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221156581E2E73E200B5D239 /* MedKitSecurity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MedKitSecurity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2211565A1E2E73E300B5D239 /* MedKitSecurity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MedKitSecurity.h; sourceTree = "<group>"; };
+		2211565B1E2E73E300B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221156601E2E73E300B5D239 /* MedKitSecurity macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MedKitSecurity macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		221156651E2E73E300B5D239 /* MedKitSecurity_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedKitSecurity_macOSTests.swift; sourceTree = "<group>"; };
+		221156671E2E73E300B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221156721E2E746200B5D239 /* SHA1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; name = SHA1.swift; path = Source/SHA1.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		2211567B1E2E758E00B5D239 /* CommonCrypto.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonCrypto.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2211567E1E2E758E00B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221156831E2E758E00B5D239 /* CommonCrypto iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CommonCrypto iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		221156881E2E758E00B5D239 /* CommonCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonCryptoTests.swift; sourceTree = "<group>"; };
+		2211568A1E2E758E00B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221156921E2E75D500B5D239 /* CommonCrypto iOS.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "CommonCrypto iOS.xcconfig"; sourceTree = "<group>"; };
+		221157A91E2E85AF00B5D239 /* CommonCrypto.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonCrypto.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		221157AC1E2E85AF00B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221157B11E2E85AF00B5D239 /* CommonCrypto macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CommonCrypto macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		221157B61E2E85AF00B5D239 /* CommonCrypto_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonCrypto_macOSTests.swift; sourceTree = "<group>"; };
+		221157B81E2E85AF00B5D239 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		221157C01E2E865700B5D239 /* CommonCrypto macOS.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "CommonCrypto macOS.xcconfig"; sourceTree = "<group>"; };
+		221BDAFE1E620BC400AA99FD /* SecurityManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SecurityManager.swift; path = Source/SecurityManager.swift; sourceTree = "<group>"; };
+		2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MedKitCore.xcodeproj; path = ../MedKitCore-Swift/MedKitCore.xcodeproj; sourceTree = "<group>"; };
+		224DDE9B1E3D3BB500FF0AEB /* HMAC256.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HMAC256.swift; path = Source/HMAC256.swift; sourceTree = "<group>"; };
+		225A46821EB37E76004EE389 /* Release Notes.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; name = "Release Notes.rtf"; path = "Documentation/Release Notes.rtf"; sourceTree = "<group>"; };
+		225F3D9B1E6326FE00BEFA0D /* NSError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NSError.swift; path = Source/NSError.swift; sourceTree = "<group>"; };
+		226F1EE41E64B7EC0079AA8C /* CFString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CFString.swift; path = Source/CFString.swift; sourceTree = "<group>"; };
+		226F1EE71E64C0040079AA8C /* Security.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Security.swift; path = Source/Security.swift; sourceTree = "<group>"; };
+		22E0AD4D1E33938500540BAB /* SHA256.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; name = SHA256.swift; path = Source/SHA256.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		221156381E2E73C800B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2243DEAD1E87FB5200A188FD /* MedKitCore.framework in Frameworks */,
+				221157A31E2E836600B5D239 /* CommonCrypto.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156411E2E73C800B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221156451E2E73C800B5D239 /* MedKitSecurity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156541E2E73E200B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2243DEAE1E87FB5800A188FD /* MedKitCore.framework in Frameworks */,
+				221157C51E2E870900B5D239 /* CommonCrypto.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2211565D1E2E73E300B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221156611E2E73E300B5D239 /* MedKitSecurity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156771E2E758E00B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156801E2E758E00B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221156841E2E758E00B5D239 /* CommonCrypto.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157A51E2E85AF00B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157AE1E2E85AF00B5D239 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221157B21E2E85AF00B5D239 /* CommonCrypto.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		220EB09B1EA39DE100CF87A9 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				220EB09E1EA39DF800CF87A9 /* Initialize.swift */,
+			);
+			name = Main;
+			sourceTree = "<group>";
+		};
+		221156131E2E738800B5D239 = {
+			isa = PBXGroup;
+			children = (
+				2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */,
+				225A467F1EB37E64004EE389 /* Documentation */,
+				2211566F1E2E745700B5D239 /* Source */,
+				2211563D1E2E73C800B5D239 /* MedKitSecurity iOS */,
+				221156481E2E73C800B5D239 /* MedKitSecurity iOSTests */,
+				221156591E2E73E300B5D239 /* MedKitSecurity macOS */,
+				221156641E2E73E300B5D239 /* MedKitSecurity macOSTests */,
+				2211567C1E2E758E00B5D239 /* CommonCrypto iOS */,
+				221156871E2E758E00B5D239 /* CommonCrypto iOSTests */,
+				221157AA1E2E85AF00B5D239 /* CommonCrypto macOS */,
+				221157B51E2E85AF00B5D239 /* CommonCrypto macOSTests */,
+				2211561E1E2E738800B5D239 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2211561E1E2E738800B5D239 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2211563C1E2E73C800B5D239 /* MedKitSecurity.framework */,
+				221156441E2E73C800B5D239 /* MedKitSecurity iOSTests.xctest */,
+				221156581E2E73E200B5D239 /* MedKitSecurity.framework */,
+				221156601E2E73E300B5D239 /* MedKitSecurity macOSTests.xctest */,
+				2211567B1E2E758E00B5D239 /* CommonCrypto.framework */,
+				221156831E2E758E00B5D239 /* CommonCrypto iOSTests.xctest */,
+				221157A91E2E85AF00B5D239 /* CommonCrypto.framework */,
+				221157B11E2E85AF00B5D239 /* CommonCrypto macOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2211563D1E2E73C800B5D239 /* MedKitSecurity iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2211563E1E2E73C800B5D239 /* MedKitSecurity.h */,
+				2211563F1E2E73C800B5D239 /* Info.plist */,
+			);
+			path = "MedKitSecurity iOS";
+			sourceTree = "<group>";
+		};
+		221156481E2E73C800B5D239 /* MedKitSecurity iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				221156491E2E73C800B5D239 /* MedKitSecurity_iOSTests.swift */,
+				2211564B1E2E73C800B5D239 /* Info.plist */,
+			);
+			path = "MedKitSecurity iOSTests";
+			sourceTree = "<group>";
+		};
+		221156591E2E73E300B5D239 /* MedKitSecurity macOS */ = {
+			isa = PBXGroup;
+			children = (
+				2211565A1E2E73E300B5D239 /* MedKitSecurity.h */,
+				2211565B1E2E73E300B5D239 /* Info.plist */,
+			);
+			path = "MedKitSecurity macOS";
+			sourceTree = "<group>";
+		};
+		221156641E2E73E300B5D239 /* MedKitSecurity macOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				221156651E2E73E300B5D239 /* MedKitSecurity_macOSTests.swift */,
+				221156671E2E73E300B5D239 /* Info.plist */,
+			);
+			path = "MedKitSecurity macOSTests";
+			sourceTree = "<group>";
+		};
+		2211566F1E2E745700B5D239 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				220EB09B1EA39DE100CF87A9 /* Main */,
+				229781FC1E4DE53100721215 /* Digests */,
+				229781FD1E4DE54000721215 /* HMAC */,
+				221BDB011E620CBD00AA99FD /* Manager */,
+				225F3D9A1E6326EC00BEFA0D /* Extensions */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		2211567C1E2E758E00B5D239 /* CommonCrypto iOS */ = {
+			isa = PBXGroup;
+			children = (
+				221156921E2E75D500B5D239 /* CommonCrypto iOS.xcconfig */,
+				2211567E1E2E758E00B5D239 /* Info.plist */,
+			);
+			name = "CommonCrypto iOS";
+			path = CommonCrypto;
+			sourceTree = "<group>";
+		};
+		221156871E2E758E00B5D239 /* CommonCrypto iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				221156881E2E758E00B5D239 /* CommonCryptoTests.swift */,
+				2211568A1E2E758E00B5D239 /* Info.plist */,
+			);
+			name = "CommonCrypto iOSTests";
+			path = CommonCryptoTests;
+			sourceTree = "<group>";
+		};
+		221157AA1E2E85AF00B5D239 /* CommonCrypto macOS */ = {
+			isa = PBXGroup;
+			children = (
+				221157C01E2E865700B5D239 /* CommonCrypto macOS.xcconfig */,
+				221157AC1E2E85AF00B5D239 /* Info.plist */,
+			);
+			path = "CommonCrypto macOS";
+			sourceTree = "<group>";
+		};
+		221157B51E2E85AF00B5D239 /* CommonCrypto macOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				221157B61E2E85AF00B5D239 /* CommonCrypto_macOSTests.swift */,
+				221157B81E2E85AF00B5D239 /* Info.plist */,
+			);
+			path = "CommonCrypto macOSTests";
+			sourceTree = "<group>";
+		};
+		221BDB011E620CBD00AA99FD /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				221BDAFE1E620BC400AA99FD /* SecurityManager.swift */,
+			);
+			name = Manager;
+			sourceTree = "<group>";
+		};
+		2243DE9F1E87FB3700A188FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2243DEA61E87FB3700A188FD /* MedKitCore.framework */,
+				2243DEA81E87FB3700A188FD /* MedKitCore iOSTests.xctest */,
+				2243DEAA1E87FB3700A188FD /* MedKitCore.framework */,
+				2243DEAC1E87FB3700A188FD /* MedKitCore macOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		225A467F1EB37E64004EE389 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				220A34421EBF41980024DF9E /* README.md */,
+				220A342C1EBE17640024DF9E /* LICENSE.txt */,
+				225A46821EB37E76004EE389 /* Release Notes.rtf */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+		225F3D9A1E6326EC00BEFA0D /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				225F3D9B1E6326FE00BEFA0D /* NSError.swift */,
+				226F1EE41E64B7EC0079AA8C /* CFString.swift */,
+				226F1EE71E64C0040079AA8C /* Security.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
+		229781FC1E4DE53100721215 /* Digests */ = {
+			isa = PBXGroup;
+			children = (
+				221156721E2E746200B5D239 /* SHA1.swift */,
+				22E0AD4D1E33938500540BAB /* SHA256.swift */,
+			);
+			name = Digests;
+			sourceTree = "<group>";
+		};
+		229781FD1E4DE54000721215 /* HMAC */ = {
+			isa = PBXGroup;
+			children = (
+				224DDE9B1E3D3BB500FF0AEB /* HMAC256.swift */,
+			);
+			name = HMAC;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		221156391E2E73C800B5D239 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2211564C1E2E73C800B5D239 /* MedKitSecurity.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156551E2E73E200B5D239 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221156681E2E73E300B5D239 /* MedKitSecurity.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156781E2E758E00B5D239 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157A61E2E85AF00B5D239 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		2211563B1E2E73C800B5D239 /* MedKitSecurity iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2211564D1E2E73C800B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity iOS" */;
+			buildPhases = (
+				221156371E2E73C800B5D239 /* Sources */,
+				221156381E2E73C800B5D239 /* Frameworks */,
+				221156391E2E73C800B5D239 /* Headers */,
+				2211563A1E2E73C800B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2243DEB21E87FBE400A188FD /* PBXTargetDependency */,
+				221156951E2E768800B5D239 /* PBXTargetDependency */,
+			);
+			name = "MedKitSecurity iOS";
+			productName = "MedKitSecurity iOS";
+			productReference = 2211563C1E2E73C800B5D239 /* MedKitSecurity.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		221156431E2E73C800B5D239 /* MedKitSecurity iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 221156501E2E73C800B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity iOSTests" */;
+			buildPhases = (
+				221156401E2E73C800B5D239 /* Sources */,
+				221156411E2E73C800B5D239 /* Frameworks */,
+				221156421E2E73C800B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				221156471E2E73C800B5D239 /* PBXTargetDependency */,
+			);
+			name = "MedKitSecurity iOSTests";
+			productName = "MedKitSecurity iOSTests";
+			productReference = 221156441E2E73C800B5D239 /* MedKitSecurity iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		221156571E2E73E200B5D239 /* MedKitSecurity macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 221156691E2E73E300B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity macOS" */;
+			buildPhases = (
+				221156531E2E73E200B5D239 /* Sources */,
+				221156541E2E73E200B5D239 /* Frameworks */,
+				221156551E2E73E200B5D239 /* Headers */,
+				221156561E2E73E200B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2243DEB01E87FBDD00A188FD /* PBXTargetDependency */,
+				221157C41E2E870000B5D239 /* PBXTargetDependency */,
+			);
+			name = "MedKitSecurity macOS";
+			productName = "MedKitSecurity macOS";
+			productReference = 221156581E2E73E200B5D239 /* MedKitSecurity.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		2211565F1E2E73E300B5D239 /* MedKitSecurity macOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2211566C1E2E73E300B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity macOSTests" */;
+			buildPhases = (
+				2211565C1E2E73E300B5D239 /* Sources */,
+				2211565D1E2E73E300B5D239 /* Frameworks */,
+				2211565E1E2E73E300B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				221156631E2E73E300B5D239 /* PBXTargetDependency */,
+			);
+			name = "MedKitSecurity macOSTests";
+			productName = "MedKitSecurity macOSTests";
+			productReference = 221156601E2E73E300B5D239 /* MedKitSecurity macOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		2211567A1E2E758E00B5D239 /* CommonCrypto iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2211568C1E2E758E00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto iOS" */;
+			buildPhases = (
+				221156761E2E758E00B5D239 /* Sources */,
+				221156771E2E758E00B5D239 /* Frameworks */,
+				221156781E2E758E00B5D239 /* Headers */,
+				221156791E2E758E00B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CommonCrypto iOS";
+			productName = CommonCrypto;
+			productReference = 2211567B1E2E758E00B5D239 /* CommonCrypto.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		221156821E2E758E00B5D239 /* CommonCrypto iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2211568F1E2E758E00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto iOSTests" */;
+			buildPhases = (
+				2211567F1E2E758E00B5D239 /* Sources */,
+				221156801E2E758E00B5D239 /* Frameworks */,
+				221156811E2E758E00B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				221156861E2E758E00B5D239 /* PBXTargetDependency */,
+			);
+			name = "CommonCrypto iOSTests";
+			productName = CommonCryptoTests;
+			productReference = 221156831E2E758E00B5D239 /* CommonCrypto iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		221157A81E2E85AF00B5D239 /* CommonCrypto macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 221157BE1E2E85AF00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto macOS" */;
+			buildPhases = (
+				221157A41E2E85AF00B5D239 /* Sources */,
+				221157A51E2E85AF00B5D239 /* Frameworks */,
+				221157A61E2E85AF00B5D239 /* Headers */,
+				221157A71E2E85AF00B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CommonCrypto macOS";
+			productName = "CommonCrypto macOS";
+			productReference = 221157A91E2E85AF00B5D239 /* CommonCrypto.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		221157B01E2E85AF00B5D239 /* CommonCrypto macOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 221157BF1E2E85AF00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto macOSTests" */;
+			buildPhases = (
+				221157AD1E2E85AF00B5D239 /* Sources */,
+				221157AE1E2E85AF00B5D239 /* Frameworks */,
+				221157AF1E2E85AF00B5D239 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				221157B41E2E85AF00B5D239 /* PBXTargetDependency */,
+			);
+			name = "CommonCrypto macOSTests";
+			productName = "CommonCrypto macOSTests";
+			productReference = 221157B11E2E85AF00B5D239 /* CommonCrypto macOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		221156141E2E738800B5D239 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0830;
+				ORGANIZATIONNAME = "Jon Griffeth";
+				TargetAttributes = {
+					2211563B1E2E73C800B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0820;
+						ProvisioningStyle = Automatic;
+					};
+					221156431E2E73C800B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					221156571E2E73E200B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					2211565F1E2E73E300B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					2211567A1E2E758E00B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					221156821E2E758E00B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					221157A81E2E85AF00B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+					221157B01E2E85AF00B5D239 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 221156171E2E738800B5D239 /* Build configuration list for PBXProject "MedKitSecurity" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 221156131E2E738800B5D239;
+			productRefGroup = 2211561E1E2E738800B5D239 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 2243DE9F1E87FB3700A188FD /* Products */;
+					ProjectRef = 2243DE9E1E87FB3700A188FD /* MedKitCore.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				2211563B1E2E73C800B5D239 /* MedKitSecurity iOS */,
+				221156431E2E73C800B5D239 /* MedKitSecurity iOSTests */,
+				221156571E2E73E200B5D239 /* MedKitSecurity macOS */,
+				2211565F1E2E73E300B5D239 /* MedKitSecurity macOSTests */,
+				2211567A1E2E758E00B5D239 /* CommonCrypto iOS */,
+				221156821E2E758E00B5D239 /* CommonCrypto iOSTests */,
+				221157A81E2E85AF00B5D239 /* CommonCrypto macOS */,
+				221157B01E2E85AF00B5D239 /* CommonCrypto macOSTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		2243DEA61E87FB3700A188FD /* MedKitCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MedKitCore.framework;
+			remoteRef = 2243DEA51E87FB3700A188FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2243DEA81E87FB3700A188FD /* MedKitCore iOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MedKitCore iOSTests.xctest";
+			remoteRef = 2243DEA71E87FB3700A188FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2243DEAA1E87FB3700A188FD /* MedKitCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MedKitCore.framework;
+			remoteRef = 2243DEA91E87FB3700A188FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2243DEAC1E87FB3700A188FD /* MedKitCore macOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MedKitCore macOSTests.xctest";
+			remoteRef = 2243DEAB1E87FB3700A188FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2211563A1E2E73C800B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				220A342D1EBE17640024DF9E /* LICENSE.txt in Resources */,
+				225A46831EB37E76004EE389 /* Release Notes.rtf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156421E2E73C800B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156561E2E73E200B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				220A34691EBF466C0024DF9E /* LICENSE.txt in Resources */,
+				220A346A1EBF466F0024DF9E /* Release Notes.rtf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2211565E1E2E73E300B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156791E2E758E00B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156811E2E758E00B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157A71E2E85AF00B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157AF1E2E85AF00B5D239 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		221156371E2E73C800B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				220EB09F1EA39DF800CF87A9 /* Initialize.swift in Sources */,
+				22E0AD4E1E33938500540BAB /* SHA256.swift in Sources */,
+				226F1EE51E64B7EC0079AA8C /* CFString.swift in Sources */,
+				224DDE9C1E3D3BB500FF0AEB /* HMAC256.swift in Sources */,
+				221156751E2E746200B5D239 /* SHA1.swift in Sources */,
+				221BDAFF1E620BC400AA99FD /* SecurityManager.swift in Sources */,
+				220A34431EBF41980024DF9E /* README.md in Sources */,
+				225F3D9C1E6326FE00BEFA0D /* NSError.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156401E2E73C800B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2211564A1E2E73C800B5D239 /* MedKitSecurity_iOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156531E2E73E200B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22E0AD501E33939300540BAB /* SHA256.swift in Sources */,
+				226F1EE61E64B8BE0079AA8C /* CFString.swift in Sources */,
+				224DDE9D1E3D3EA600FF0AEB /* HMAC256.swift in Sources */,
+				221157921E2E818900B5D239 /* SHA1.swift in Sources */,
+				221BDB001E620BD500AA99FD /* SecurityManager.swift in Sources */,
+				220EB0A01EA39E1300CF87A9 /* Initialize.swift in Sources */,
+				220A34661EBF46660024DF9E /* README.md in Sources */,
+				225F3D9D1E63273F00BEFA0D /* NSError.swift in Sources */,
+				226F1EE91E64C04F0079AA8C /* Security.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2211565C1E2E73E300B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221156661E2E73E300B5D239 /* MedKitSecurity_macOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221156761E2E758E00B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2211567F1E2E758E00B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221156891E2E758E00B5D239 /* CommonCryptoTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157A41E2E85AF00B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		221157AD1E2E85AF00B5D239 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				221157B71E2E85AF00B5D239 /* CommonCrypto_macOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		221156471E2E73C800B5D239 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2211563B1E2E73C800B5D239 /* MedKitSecurity iOS */;
+			targetProxy = 221156461E2E73C800B5D239 /* PBXContainerItemProxy */;
+		};
+		221156631E2E73E300B5D239 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 221156571E2E73E200B5D239 /* MedKitSecurity macOS */;
+			targetProxy = 221156621E2E73E300B5D239 /* PBXContainerItemProxy */;
+		};
+		221156861E2E758E00B5D239 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2211567A1E2E758E00B5D239 /* CommonCrypto iOS */;
+			targetProxy = 221156851E2E758E00B5D239 /* PBXContainerItemProxy */;
+		};
+		221156951E2E768800B5D239 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2211567A1E2E758E00B5D239 /* CommonCrypto iOS */;
+			targetProxy = 221156941E2E768800B5D239 /* PBXContainerItemProxy */;
+		};
+		221157B41E2E85AF00B5D239 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 221157A81E2E85AF00B5D239 /* CommonCrypto macOS */;
+			targetProxy = 221157B31E2E85AF00B5D239 /* PBXContainerItemProxy */;
+		};
+		221157C41E2E870000B5D239 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 221157A81E2E85AF00B5D239 /* CommonCrypto macOS */;
+			targetProxy = 221157C31E2E870000B5D239 /* PBXContainerItemProxy */;
+		};
+		2243DEB01E87FBDD00A188FD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MedKitCore macOS";
+			targetProxy = 2243DEAF1E87FBDD00A188FD /* PBXContainerItemProxy */;
+		};
+		2243DEB21E87FBE400A188FD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MedKitCore iOS";
+			targetProxy = 2243DEB11E87FBE400A188FD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2211562F1E2E738800B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 23;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		221156301E2E738800B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 23;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		2211564E1E2E73C800B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 23;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "MedKitSecurity iOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Private.MedKitSecurity;
+				PRODUCT_NAME = MedKitSecurity;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		2211564F1E2E73C800B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 23;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "MedKitSecurity iOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Private.MedKitSecurity;
+				PRODUCT_NAME = MedKitSecurity;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		221156511E2E73C800B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "MedKitSecurity iOSTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "Private.MedKitSecurity-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		221156521E2E73C800B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "MedKitSecurity iOSTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "Private.MedKitSecurity-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		2211566A1E2E73E300B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 23;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "MedKitSecurity macOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = Private.MedKitSecurity;
+				PRODUCT_NAME = MedKitSecurity;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		2211566B1E2E73E300B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 23;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "MedKitSecurity macOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = Private.MedKitSecurity;
+				PRODUCT_NAME = MedKitSecurity;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		2211566D1E2E73E300B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "MedKitSecurity macOSTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = "Private.MedKitSecurity-macOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		2211566E1E2E73E300B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "MedKitSecurity macOSTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = "Private.MedKitSecurity-macOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		2211568D1E2E758E00B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 221156921E2E75D500B5D239 /* CommonCrypto iOS.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CommonCrypto/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Private.CommonCrypto;
+				PRODUCT_NAME = CommonCrypto;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		2211568E1E2E758E00B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 221156921E2E75D500B5D239 /* CommonCrypto iOS.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CommonCrypto/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Private.CommonCrypto;
+				PRODUCT_NAME = CommonCrypto;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		221156901E2E758E00B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = CommonCryptoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Private.CommonCryptoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		221156911E2E758E00B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = CommonCryptoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Private.CommonCryptoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		221157BA1E2E85AF00B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 221157C01E2E865700B5D239 /* CommonCrypto macOS.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "CommonCrypto macOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = Private.CommonCrypto;
+				PRODUCT_NAME = CommonCrypto;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		221157BB1E2E85AF00B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 221157C01E2E865700B5D239 /* CommonCrypto macOS.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 23;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "CommonCrypto macOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = Private.CommonCrypto;
+				PRODUCT_NAME = CommonCrypto;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		221157BC1E2E85AF00B5D239 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "CommonCrypto macOSTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = "Private.CommonCrypto-macOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		221157BD1E2E85AF00B5D239 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "CommonCrypto macOSTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = "Private.CommonCrypto-macOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		221156171E2E738800B5D239 /* Build configuration list for PBXProject "MedKitSecurity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2211562F1E2E738800B5D239 /* Debug */,
+				221156301E2E738800B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2211564D1E2E73C800B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2211564E1E2E73C800B5D239 /* Debug */,
+				2211564F1E2E73C800B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		221156501E2E73C800B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				221156511E2E73C800B5D239 /* Debug */,
+				221156521E2E73C800B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		221156691E2E73E300B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2211566A1E2E73E300B5D239 /* Debug */,
+				2211566B1E2E73E300B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2211566C1E2E73E300B5D239 /* Build configuration list for PBXNativeTarget "MedKitSecurity macOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2211566D1E2E73E300B5D239 /* Debug */,
+				2211566E1E2E73E300B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2211568C1E2E758E00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2211568D1E2E758E00B5D239 /* Debug */,
+				2211568E1E2E758E00B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2211568F1E2E758E00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				221156901E2E758E00B5D239 /* Debug */,
+				221156911E2E758E00B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		221157BE1E2E85AF00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				221157BA1E2E85AF00B5D239 /* Debug */,
+				221157BB1E2E85AF00B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		221157BF1E2E85AF00B5D239 /* Build configuration list for PBXNativeTarget "CommonCrypto macOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				221157BC1E2E85AF00B5D239 /* Debug */,
+				221157BD1E2E85AF00B5D239 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 221156141E2E738800B5D239 /* Project object */;
+}
