@@ -65,7 +65,7 @@ class SecurityManagerKeychain: SecurityManager {
         
         switch type {
         case .Null :
-            credentials = NullCredentials.instance;
+            credentials = NullCredentials.shared;
             
         case .SharedSecret :
             credentials = SharedSecret(for: identity);
