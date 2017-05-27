@@ -1,9 +1,13 @@
 
 ## Synopsis
 
-MedKit is the concept for a client API, facilitating bi-directional communication with medical devices.
+MedKit is an open source framework facilitating secure, bi-directional
+communication with medical devices.
 
-MedKitSecurity implements the MedKit SecurityManager protocol for iOS and macOS, utilizing Apple's CommonCrypto and Keychain services.
+MedKitSecurity is one of a number of MedKit modules which include: MedKit,
+MedKitCore, MedKitDomain and MedKitMIP.  MedKitSecurity implements the MedKit
+SecurityManager protocol for iOS and macOS, utilizing Apple's CommonCrypto and
+Keychain services.
 
 ## Dependencies
 
