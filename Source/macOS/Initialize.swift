@@ -19,28 +19,22 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
+import MedKitCore;
+
+
+private let KeychainURL = Bundle.main.url(forResource: "medkit", withExtension: "keychain");
 
 
 /**
- HMAC
+ Initialize instance.
+ 
+ - Parameters:
+    - service: Identifies the keychain service.
  */
-class HMAC256 {
-    
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
-    
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
-    {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
-    }
-
+public func initialize(service: String)
+{
+    SecurityManagerShared.initializeMain(SecurityManagerKeychain(service: service));
 }
 
 

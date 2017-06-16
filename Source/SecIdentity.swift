@@ -18,29 +18,30 @@
  -----------------------------------------------------------------------------
  */
 
-
-import CommonCrypto;
 import Foundation;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+extension SecIdentity {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    var certificate : SecCertificate? { return getCertificate(); }
+    var privateKey  : SecKey?         { return getPrivateKey();  }
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    private func getCertificate() -> SecCertificate?
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
+        var certificate: SecCertificate?;
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
+        let status = SecIdentityCopyCertificate(self, &certificate);
+        return (status == errSecSuccess) ? certificate : nil;
     }
+    
+    private func getPrivateKey() -> SecKey?
+    {
+        var privateKey: SecKey?;
 
+        let status = SecIdentityCopyPrivateKey(self, &privateKey);
+        return (status == errSecSuccess) ? privateKey : nil;
+    }
+    
 }
 
 

@@ -19,28 +19,29 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+extension SecKey {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
-    
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    /**
+     */
+    func sign(bytes: [UInt8]) -> [UInt8]?
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
+        var signature    = [UInt8](repeating: 0, count: SecKeyGetBlockSize(self));
+        var signatureLen = signature.count;
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
+        let status = SecKeyRawSign(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, &signature, &signatureLen);
+        return (status == errSecSuccess) ? signature : nil;
     }
-
+    
+    /**
+     */
+    func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
+    {
+        let status = SecKeyRawVerify(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count);
+        return status == errSecSuccess;
+    }
 }
 
 

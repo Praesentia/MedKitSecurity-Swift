@@ -31,12 +31,15 @@ import MedKitCore;
  */
 class SecurityManagerKeychain: SecurityManager {
 
-    public var identities : [Identity] { return loadIdentities(); }
+    // MARK: - Properties
+    public var identities : [Identity] { return keychain.identities; }
     
-    // MARK: - Private
-    private let service   : String;                                  //: Service string.
-    private let serviceTag: Data;                                    //: Byte representation of the service string.
+    // MARK: - Private Properties
+    private let keySize   = 2048;
     private let queue     = DispatchQueue(label: "SecurityManager"); //: Dispatch queue for internal processing.
+    private let keychain  : Keychain;
+    
+    // MARK: - Initializers
     
     /**
      Initialize instance.
@@ -46,35 +49,146 @@ class SecurityManagerKeychain: SecurityManager {
      */
     internal init(service: String)
     {
-        self.service    = service;
-        self.serviceTag = service.data(using: .utf8)!;
+        keychain = Keychain(service: service);
     }
     
     // MARK: - Credentials
     
     /**
+     Generate a new certificate for the identity.
+     
+     - Parameters:
+     - identity:
+     - completion:
+     */
+    func createCredentials(for identity: Identity, completionHandler completion: @escaping (Error?, Credentials?) -> Void)
+    {
+        queue.async() {
+            var error       : Error?
+            var certificate : SecCertificate?;
+            var credentials : Credentials?;
+            
+            (error, certificate) = self.keychain.createCertificate(for: identity, role: SecKeyAuthentication);
+            
+            if error == nil {
+                credentials = PublicKeyCredentials(with: X509(using: certificate!));
+            }
+ 
+            DispatchQueue.main.async() { completion(error, credentials); }
+        }
+    }
+    
+    /**
+     Generate a new certificate for the identity.
+     
+     - Parameters:
+        - identity:
+     */
+    func createCredentials(for identity: Identity) -> Credentials?
+    {
+        var error      : Error?
+        var certificate: SecCertificate?;
+        
+        (error, certificate) = self.keychain.createCertificate(for: identity, role: SecKeyAuthentication);
+        
+        if error == nil {
+            return PublicKeyCredentials(with: X509(using: certificate!));
+        }
+        return nil;
+    }
+    
+    func createSharedSecretCredentials(for identity: Identity, with secret: [UInt8], completionHandler completion: @escaping (Error?, Credentials?) -> Void)
+    {
+        internSharedKey(for: identity, with: secret) { error, key in
+            var credentials: Credentials?;
+            
+            if error == nil, let key = key {
+                credentials = SharedSecretCredentials(for: identity, with: key);
+            }
+            
+            completion(error, credentials);
+        }
+    }
+    
+    /**
      Get credentials for identity.
      
      - Parameters:
-        - identity: Identity of the principal.
-        - type:     The credentials type.
+     - identity: Identity of the principal.
+     - type:     The credentials type.
      */
     public func getCredentials(for identity: Identity, using type: CredentialsType) -> Credentials?
     {
-        var credentials: Credentials?;
-        
         switch type {
         case .Null :
-            credentials = NullCredentials.shared;
+            return NullCredentials.shared;
             
         case .SharedSecret :
-            credentials = SharedSecret(for: identity);
+            return loadSharedSecretCredentials(for: identity);
             
         case .PublicKey :
-            break;
+            return loadPublicCredentials(for: identity);
+        }
+    }
+    
+    /**
+     Create credentials from profile.
+     */
+    public func getCredentials(for identity: Identity, from profile: JSON) -> Credentials?
+    {
+        if let string = profile[KeyType].string, let type = CredentialsType(string: string) {
+            switch type {
+            case .Null :
+                return NullCredentials.shared;
+                
+            case .SharedSecret :
+                return SharedSecretCredentialsFactory.shared.instantiate(from: profile, for: identity);
+                
+            case .PublicKey :
+                return PublicKeyCredentialsFactory.shared.instantiate(from: profile, for: identity);
+            }
+        }
+        
+        return nil;
+    }
+    
+    func loadSharedSecretCredentials(for identity: Identity) -> Credentials?
+    {
+        if let key = loadSharedKey(for: identity) {
+            return SharedSecretCredentials(for: identity, with: key);
+        }
+        return nil;
+    }
+    
+    func loadPublicCredentials(for identity: Identity) -> Credentials?
+    {
+        var credentials: Credentials?;
+        
+        if let identity = keychain.loadIdentity(for: identity, role: SecKeyAuthentication) {
+            credentials = PublicKeyCredentials(with: identity);
         }
         
         return credentials;
+    }
+    
+    func loadPublicCredentials(for identity: Identity, from data: Data) -> Credentials?
+    {
+        if let certificate = loadCertificate(from: data) {
+            return PublicKeyCredentials(with: certificate);
+        }
+        return nil;
+    }
+    
+    func loadCredentials(fromPKCS12 data: Data, with password: String) -> Credentials?
+    {
+        if let identity = keychain.loadIdentity(from: data, with: password) {
+            let certificate = identity.certificate!;
+            let privateKey  = identity.privateKey!;
+            
+            return PublicKeyCredentials(with: X509(using: certificate), privateKey: PrivateKey(privateKey));
+        }
+        
+        return nil;
     }
     
     // MARK: - Digest
@@ -113,17 +227,73 @@ class SecurityManagerKeychain: SecurityManager {
         var result : Int32;
         
         result = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes);
-        if result != 0 { // TODO: Under what circumstances would this occur?
+        if result != errSecSuccess { // TODO: Under what circumstances would this occur?
             fatalError("Unexpected error.");
         }
         
         return bytes;
     }
     
-    // MARK: - Shared Secret
+    // MARK: - Public Key
     
     /**
-     Intern shared secret.
+     Generate a new key pair for the identity.
+     
+     - Parameters:
+        - identity:
+        - completion:
+     */
+    func generateKeyPair(for identity: Identity, role: SecKeyType, completionHandler completion: @escaping (Error?) -> Void)
+    {
+        queue.async() {
+            //let error = self.keychain.createKeyPair(for: identity, role: role);
+            DispatchQueue.main.async() { completion(nil); }
+        }
+    }
+    
+    // MARK: - Certificates
+    
+    /**
+     Generate a new certificate for the identity.
+     
+     - Parameters:
+        - identity:
+        - completion:
+     */
+    func generateCertificate(for identity: Identity, role: SecKeyType, completionHandler completion: @escaping (Error?) -> Void)
+    {
+        queue.async() {
+            var error      : Error?;
+            var certificate: SecCertificate?;
+            
+            (error, certificate) = self.keychain.createCertificate(for: identity, role: role);
+            
+            DispatchQueue.main.async() { completion(error); }
+        }
+    }
+    
+    public func getCertificate(for identity: Identity, role: SecKeyType) -> Certificate?
+    {
+        if let certificate = keychain.loadCertificate(for: identity, role: role) {
+            return X509(using: certificate);
+        }
+        return nil;
+    }
+    
+    private func createCertificate(for identity: Identity) -> SecCertificate?
+    {
+        return nil;
+    }
+    
+    func loadCertificate(from data: Data) -> Certificate?
+    {
+        return X509(from: data);
+    }
+    
+    // MARK: - Shared Keys
+    
+    /**
+     Intern shared key.
      
      Interns a shared secret within the security enclave for the specified
      identity.  Any existing shared secret associated with identity will be
@@ -135,23 +305,26 @@ class SecurityManagerKeychain: SecurityManager {
         - completion A completion handler that will be invoked with the result
                      of the operation.
      */
-    public func internSecret(_ secret: [UInt8], for identity: Identity, completionHandler completion: @escaping (Error?) -> Void)
+    public func internSharedKey(for identity: Identity, with secret: [UInt8], completionHandler completion: @escaping (Error?, Key?) -> Void)
     {
         queue.async() {
-            let query : [CFString : Any] = [
-                kSecClass       : kSecClassGenericPassword,
-                kSecAttrService : self.service,
-                kSecAttrAccount : identity.name,
-                kSecValueData   : Data(secret)
-            ];
-        
-            var status: OSStatus;
+            let error = self.keychain.internSecret(secret, for: identity);
+            var key   : Key?;
             
-            status = SecItemDelete(query as CFDictionary);
-            status = SecItemAdd(query as CFDictionary, nil);
+            if error == nil {
+                key = SharedKey(with: secret);
+            }
             
-            DispatchQueue.main.async() { completion(NSError(osstatus: status)); }
+            DispatchQueue.main.async() { completion(error, key); }
         }
+    }
+    
+    func loadSharedKey(for identity: Identity) -> Key?
+    {
+        if let secret = keychain.loadSecret(for: identity) {
+            return SharedKey(with: secret);
+        }
+        return nil;
     }
     
     /**
@@ -165,190 +338,12 @@ class SecurityManagerKeychain: SecurityManager {
         - completion: A completion handler that will be invoked will the result
                       of the operation.
      */
-    public func removeSecret(for identity: Identity, completionHandler completion: @escaping (Error?) -> Void)
+    public func removeSharedKey(for identity: Identity, completionHandler completion: @escaping (Error?) -> Void)
     {
         queue.async() {
-            let query : [CFString : Any] = [
-                kSecClass       : kSecClassGenericPassword,
-                kSecAttrService : self.service,
-                kSecAttrAccount : identity.name
-            ];
-        
-            let status = SecItemDelete(query as CFDictionary);
-        
-            DispatchQueue.main.async() { completion(NSError(osstatus: status)); }
+            let error = self.keychain.removeSecret(for: identity);
+            DispatchQueue.main.async() { completion(error); }
         }
-    }
-
-    // MARK: - Public Key
-    
-    public func getCertificate(for identity: Identity) -> Certificate?
-    {
-        return nil;
-    }
-    
-    public func verify(certificate: Certificate, for identity: Identity) -> Bool
-    {
-        return false; // TODO
-    }
-    
-    public func verifySignature(_ signature: [UInt8], for certificate: Certificate, bytes: [UInt8]) -> Bool
-    {
-        return false; // TODO
-    }
-    
-    // MARK: - Signing and Verification
-    
-    /**
-     Generate signature for identity.
-     */
-    public func signBytes(_ bytes: [UInt8], for identity: Identity, using type: CredentialsType) -> [UInt8]?
-    {
-        var signature: [UInt8]?;
-        
-        switch type {
-        case .Null :
-            return nil;
-            
-        case .SharedSecret :
-            if let secret = loadSecret(for: identity) {
-                signature = signBytes(bytes, using: secret);
-            }
-            
-        case .PublicKey :
-            break;
-        }
-        
-        return signature;
-    }
-    
-    /**
-     Verify signature for identity.
-     
-     Verifies the signature using the credentials associated with identity.
-     
-     - Parameters:
-        - signature: The signature to be verified.
-        - identity:  The identity used to verify the signature.
-        - bytes:     The byte sequence used to generate the signature.
-     
-     - Returns:
-        Returns true if the signature is successfully verified, false otherwise.
-     */
-    public func verifySignature(_ signature: [UInt8], for identity: Identity, bytes: [UInt8], using type: CredentialsType) -> Bool
-    {
-        var verified = false;
-        
-        switch type {
-        case .Null :
-            return false;
-            
-        case .SharedSecret :
-            if let secret = loadSecret(for: identity) {
-                verified = verifySignature(signature, using: secret, bytes: bytes);
-            }
-            
-        case .PublicKey :
-            break;
-        }
-        
-        return verified;
-    }
-    
-    /**
-     Generate a new key pair for the identity.
-     
-     - Parameters:
-        - identity:
-        - completion:
-     */
-    func generateKeyPair(for identity: Identity, completionHandler completion: @escaping (Error?) -> Void)
-    {
-        DispatchQueue.main.async() { completion(MedKitError.NotSupported); }
-    }
-    
-    /**
-     Load identities.
-     */
-    private func loadIdentities() -> [Identity]
-    {
-        let query : [CFString : Any] = [
-            kSecClass           : kSecClassGenericPassword,
-            kSecAttrService     : service,
-            kSecReturnAttributes: kCFBooleanTrue,
-            kSecMatchLimit      : 1000 // TODO
-        ];
-        
-        var identities = [Identity]();
-        var result     : AnyObject?;
-        var status     : OSStatus;
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result);
-        if status == noErr, let accounts = result as? [AnyObject] {
-            for account in accounts {
-                if let attributes = account as? [CFString : AnyObject] {
-                    if let acct = attributes[kSecAttrAccount] as? String {
-                        identities.append(Identity(named: acct, type: .User));
-                    }
-                }
-            }
-        }
-        
-        return identities;
-    }
-    
-    /**
-     Load secret.
-     */
-    private func loadSecret(for identity: Identity) -> [UInt8]?
-    {
-        let query : [CFString : Any] = [
-            kSecClass       : kSecClassGenericPassword,
-            kSecAttrService : service,
-            kSecAttrAccount : identity.name,
-            kSecReturnData  : kCFBooleanTrue,
-            kSecMatchLimit  : kSecMatchLimitOne
-        ];
-        
-        var result : AnyObject?;
-        var secret : [UInt8]?;
-        var status : OSStatus;
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result);
-        if status == noErr, let data = result as? Data {
-            secret = [UInt8](data);
-        }
-        
-        return secret;
-    }
-    
-    /**
-     Generate signature using shared secret.
-     
-     Uses SHA256 HMAC to generate a signature.
-     
-     - Parameters:
-        - bytes:
-        - secret:
-     */
-    private func signBytes(_ bytes: [UInt8], using secret: [UInt8]) -> [UInt8]?
-    {
-        let hmac = HMAC256();
-      
-        return hmac.signBytes(bytes: bytes, using: secret);
-    }
-    
-    /**
-     Verify signature using shared secret.
-     
-     - Parameters:
-        - signature:
-     */
-    private func verifySignature(_ signature: [UInt8], using secret: [UInt8], bytes: [UInt8]) -> Bool
-    {
-        let hmac = HMAC256();
-        
-        return signature == hmac.signBytes(bytes: bytes, using: secret);
     }
     
 }

@@ -19,28 +19,19 @@
  */
 
 
-import CommonCrypto;
-import Foundation;
+import Foundation
 
 
-/**
- HMAC
- */
-class HMAC256 {
+class X509Name {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    var commonName           : String?;
+    var locality             : String?;
+    var state                : String?;
+    var country              : String?;
+    var organization         : String?;
+    var organizationUnit     : String?;
+    var email                : String?;
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
-    {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
-    }
-
 }
 
 

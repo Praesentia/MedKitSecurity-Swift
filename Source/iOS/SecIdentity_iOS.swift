@@ -19,28 +19,37 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
+import MedKitCore;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+extension SecIdentity {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
-    
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    /**
+     Load certificate.
+     */
+    static func find(for id: Identity, role: SecKeyType, label: String) -> SecIdentity?
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
+        let query: [CFString : Any] = [
+            kSecClass      : kSecClassIdentity,
+            kSecAttrLabel  : label,
+            kSecReturnRef  : kCFBooleanTrue,
+            kSecMatchLimit : kSecMatchLimitOne
+        ];
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
+        var identity : SecIdentity?;
+        var result   : AnyObject?;
+        var status   : OSStatus;
         
-        return output;
+        status = SecItemCopyMatching(query as CFDictionary, &result);
+        if status == errSecSuccess {
+            identity = result as! SecIdentity?;
+            print(identity!.certificate!.commonName!);
+        }
+        
+        return identity;
     }
-
+    
 }
 
 

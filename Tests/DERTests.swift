@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of MedKitCore.
  
  Copyright 2017 Jon Griffeth
  
@@ -19,28 +19,29 @@
  */
 
 
-import CommonCrypto;
-import Foundation;
+import XCTest
+import MedKitCore;
+@testable import MedKitSecurity;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+class DEREncoderTests: XCTestCase {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    let encoder = DER();
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    func testObjectIdentifier()
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
+        let oid = encoder.encodeObjectIdentifier(components: [ 2, 5, 4, 3 ]);
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
+        XCTAssertEqual(oid, [ 0x06, 0x03, 0x55, 0x04, 0x03 ]);
     }
-
+    
+    func testSequence()
+    {
+        let sequence = encoder.encodeSequence(bytes: [ 1, 2, 3 ]);
+        
+        XCTAssertEqual(sequence, [ 0x30, 0x03, 0x01, 0x02, 0x03 ]);
+    }
+    
 }
 
 

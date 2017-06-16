@@ -19,28 +19,28 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
+import MedKitCore;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+extension SecCertificate {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    var commonName: String?      { return getCommonName(); }
+    var validity  : Range<Date>? { return getValidity() }
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    private func getCommonName() -> String?
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
+        var commonName: CFString?;
+    
+        let status = SecCertificateCopyCommonName(self, &commonName);
+        return (status == errSecSuccess) ? commonName as String? : nil;
     }
-
+    
+    private func getValidity() -> Range<Date>?
+    {
+        return nil // TODO
+    }
+    
 }
 
 

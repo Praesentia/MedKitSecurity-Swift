@@ -19,28 +19,15 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+func SecCertificateCopyPublicKey(_ certificate: SecCertificate) -> SecKey?
+{
+    var key: SecKey?;
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
-    
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
-    {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
-    }
-
+    SecCertificateCopyPublicKey(certificate, &key);
+    return key;
 }
 
 

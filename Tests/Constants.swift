@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of MedKitCore.
  
  Copyright 2017 Jon Griffeth
  
@@ -19,29 +19,12 @@
  */
 
 
-import CommonCrypto;
-import Foundation;
+import MedKitCore;
+import XCTest;
 
 
-/**
- HMAC
- */
-class HMAC256 {
-    
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
-    
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
-    {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
-    }
-
-}
+let SecurityManagerService = "MedKit Tests";
+let TestIdentity           = Identity(named: "TestUser", type: .User);
 
 
 // End of File

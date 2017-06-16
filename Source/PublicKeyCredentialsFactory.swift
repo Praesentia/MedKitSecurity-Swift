@@ -19,28 +19,34 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
+import MedKitCore;
 
 
 /**
- HMAC
+ PublicKeyCredentials factory.
  */
-class HMAC256 {
+public class PublicKeyCredentialsFactory: CredentialsFactory {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    // MARK: - Class Properties
+    static let shared = PublicKeyCredentialsFactory();
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
+    // MARK: - Instantiation
     
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    /**
+     Create credentials from profile.
+     */
+    public func instantiate(from profile: JSON, for identity: Identity) -> Credentials?
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
+        if let string = profile[KeyCertificateChain].string {
+            if let data = Data(base64Encoded: string) {
+                return SecurityManagerShared.main.loadPublicCredentials(for: identity, from: data);
+            }
+        }
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
+        return nil;
     }
-
+    
 }
 
 

@@ -19,28 +19,17 @@
  */
 
 
-import CommonCrypto;
 import Foundation;
+import MedKitCore;
 
 
-/**
- HMAC
- */
-class HMAC256 {
+protocol CredentialsFactory: class {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    // MARK: - Instantiation
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
+    //func instantiate(for identity: Identity) -> Credentials;
+    func instantiate(from profile: JSON, for identity: Identity) -> Credentials?;
     
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
-    {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
-    }
-
 }
 
 

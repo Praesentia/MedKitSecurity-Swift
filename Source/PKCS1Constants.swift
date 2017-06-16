@@ -19,29 +19,16 @@
  */
 
 
-import CommonCrypto;
-import Foundation;
+import Foundation
 
 
-/**
- HMAC
- */
-class HMAC256 {
-    
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
-    
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
-    
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
-    {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
-        
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
-        
-        return output;
-    }
-
-}
+let PKCS1RSAEncryption           : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  1 ];
+let PKCS1MD2WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  2 ];
+let PKCS1MD5WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  4 ];
+let PKCS1SHA1WithRSAEncryption   : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  5 ];
+let PKCS1SHA256WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 11 ];
+let PKCS1SHA384WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 12 ];
+let PKCS1SHA512WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 13 ];
 
 
 // End of File
