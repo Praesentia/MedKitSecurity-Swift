@@ -19,29 +19,32 @@
  */
 
 
-import Foundation;
+import Foundation
 
 
 extension SecKey {
+    
+    var data: Data? { return SecKeyCopyExternalRepresentation(self, nil) as Data? }
     
     /**
      */
     func sign(bytes: [UInt8]) -> [UInt8]?
     {
-        var signature    = [UInt8](repeating: 0, count: SecKeyGetBlockSize(self));
-        var signatureLen = signature.count;
+        var signature    = [UInt8](repeating: 0, count: SecKeyGetBlockSize(self))
+        var signatureLen = signature.count
         
-        let status = SecKeyRawSign(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, &signature, &signatureLen);
-        return (status == errSecSuccess) ? signature : nil;
+        let status = SecKeyRawSign(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, &signature, &signatureLen)
+        return (status == errSecSuccess) ? signature : nil
     }
     
     /**
      */
     func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
     {
-        let status = SecKeyRawVerify(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count);
-        return status == errSecSuccess;
+        let status = SecKeyRawVerify(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count)
+        return status == errSecSuccess
     }
+    
 }
 
 

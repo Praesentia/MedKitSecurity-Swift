@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -18,31 +18,20 @@
  -----------------------------------------------------------------------------
  */
 
-
-import XCTest
-import MedKitCore;
-@testable import MedKitSecurity;
+import Foundation
 
 
-class DEREncoderTests: XCTestCase {
+extension DispatchQueue {
     
-    let encoder = DER();
+    private static let queueIdentifier = "SecurityManager"
     
-    func testObjectIdentifier()
-    {
-        let oid = encoder.encodeObjectIdentifier(components: [ 2, 5, 4, 3 ]);
-        
-        XCTAssertEqual(oid, [ 0x06, 0x03, 0x55, 0x04, 0x03 ]);
-    }
-    
-    func testSequence()
-    {
-        let sequence = encoder.encodeSequence(bytes: [ 1, 2, 3 ]);
-        
-        XCTAssertEqual(sequence, [ 0x30, 0x03, 0x01, 0x02, 0x03 ]);
-    }
+    /**
+     Main module dispatch queue.
+     */
+    static let module = DispatchQueue(label: queueIdentifier, attributes: .concurrent)
     
 }
 
 
 // End of File
+

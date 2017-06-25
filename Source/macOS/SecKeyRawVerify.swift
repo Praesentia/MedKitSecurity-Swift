@@ -19,7 +19,7 @@
  */
 
 
-import Foundation;
+import Foundation
 
 
 func SecKeyRawVerify(_ key: SecKey,
@@ -29,28 +29,28 @@ func SecKeyRawVerify(_ key: SecKey,
                      _ sig: UnsafePointer<UInt8>,
                      _ sigLen: Int) -> OSStatus
 {
-    var error     : Unmanaged<CFError>?;
-    let signature = CFDataCreate(nil, sig, sigLen)!;
+    var error     : Unmanaged<CFError>?
+    let signature = CFDataCreate(nil, sig, sigLen)!
     
     if let transform = SecVerifyTransformCreate(key, signature, &error) {
-        let data   = CFDataCreate(nil, signedData, signedDataLen)!;
+        let data   = CFDataCreate(nil, signedData, signedDataLen)!
         
-        let status = SecKeySetPadding(transform, padding);
+        let status = SecKeySetPadding(transform, padding)
         guard(status == errSecSuccess) else { return status }
         
-        SecTransformSetAttribute(transform, kSecTransformInputAttributeName, data, &error);
+        SecTransformSetAttribute(transform, kSecTransformInputAttributeName, data, &error)
         guard(error == nil) else { return errSSLCrypto }
         
         SecTransformSetAttribute(transform, kSecInputIsAttributeName, kSecInputIsDigest, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        let result = SecTransformExecute(transform, &error);
+        let result = SecTransformExecute(transform, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        return ((result as! CFBoolean) == kCFBooleanTrue) ? 0 : errSSLCrypto;
+        return ((result as! CFBoolean) == kCFBooleanTrue) ? 0 : errSSLCrypto
     }
     
-    return errSSLCrypto;
+    return errSSLCrypto
 }
 
 

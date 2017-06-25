@@ -20,39 +20,41 @@
 
 
 import XCTest
-import MedKitCore;
-@testable import MedKitSecurity;
+import MedKitCore
+@testable import MedKitSecurity
 
 
 class CertificateTests: XCTestCase {
     
-    let keychain = Keychain(service: SecurityManagerService);
+    let keychain = Keychain(service: SecurityManagerService, keychain: SecKeychain.testKeychain)
     
     override func setUp()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity, role: SecKeyAuthentication);
+        _ = keychain.removeKeyPair(for: TestIdentity)
     }
     
     override func tearDown()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity, role: SecKeyAuthentication);
+        _ = keychain.removeKeyPair(for: TestIdentity)
     }
     
     func testCreateCertificate()
     {
-        var error      : Error?;
-        var certificate: SecCertificate?;
+        let expect = expectation(description: "GenerateKeyPair")
         
-        (error, certificate) = keychain.createCertificate(for: TestIdentity, role: SecKeyAuthentication);
+        keychain.createSelfSignedCertificate(for: TestIdentity) { certificate, error in
         
-        XCTAssertNil(error);
-        XCTAssertNotNil(certificate);
-    
-        certificate = keychain.loadCertificate(for: TestIdentity, role: SecKeyAuthentication);
+            XCTAssertNil(error)
+            XCTAssertNotNil(certificate)
+         
+            expect.fulfill()
+        }
         
-        XCTAssertNotNil(certificate);
+        waitForExpectations(timeout: 60) { error in
+            
+        }
     }
-        
+
 }
 
 

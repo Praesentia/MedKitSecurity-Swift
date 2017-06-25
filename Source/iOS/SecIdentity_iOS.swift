@@ -19,35 +19,34 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 extension SecIdentity {
     
     /**
-     Load certificate.
+     Load identity.
      */
-    static func find(for id: Identity, role: SecKeyType, label: String) -> SecIdentity?
+    static func find(for identity: Identity) -> SecIdentity?
     {
         let query: [CFString : Any] = [
             kSecClass      : kSecClassIdentity,
-            kSecAttrLabel  : label,
+            kSecAttrLabel  : identity.string,
             kSecReturnRef  : kCFBooleanTrue,
             kSecMatchLimit : kSecMatchLimitOne
-        ];
+        ]
         
-        var identity : SecIdentity?;
-        var result   : AnyObject?;
-        var status   : OSStatus;
+        var identity : SecIdentity?
+        var result   : AnyObject?
+        var status   : OSStatus
         
-        status = SecItemCopyMatching(query as CFDictionary, &result);
+        status = SecItemCopyMatching(query as CFDictionary, &result)
         if status == errSecSuccess {
-            identity = result as! SecIdentity?;
-            print(identity!.certificate!.commonName!);
+            identity = result as! SecIdentity?
         }
         
-        return identity;
+        return identity
     }
     
 }

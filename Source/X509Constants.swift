@@ -23,21 +23,21 @@ import Foundation
 
 
 // Names
-let X520IDAT                   : [UInt]  = [ 2, 5, 4 ];
-let X520CommonName             : [UInt]  = X520IDAT + [  3 ];
-let X520CountryName            : [UInt]  = X520IDAT + [  6 ];
-let X520LocalityName           : [UInt]  = X520IDAT + [  7 ];
-let X520StateOrProvinceName    : [UInt]  = X520IDAT + [  8 ];
-let X520OrganizationName       : [UInt]  = X520IDAT + [ 10 ];
-let X520OrganizationUnitName   : [UInt]  = X520IDAT + [ 11 ];
+let X520IDAT                   : [UInt]  = [ 2, 5, 4 ]
+let X520CommonName             : [UInt]  = X520IDAT + [  3 ]
+let X520CountryName            : [UInt]  = X520IDAT + [  6 ]
+let X520LocalityName           : [UInt]  = X520IDAT + [  7 ]
+let X520StateOrProvinceName    : [UInt]  = X520IDAT + [  8 ]
+let X520OrganizationName       : [UInt]  = X520IDAT + [ 10 ]
+let X520OrganizationUnitName   : [UInt]  = X520IDAT + [ 11 ]
 
 // Extensions
-let X509IDCE                   : [UInt]  = [ 2, 5, 29 ];
-let X509SubjectKeyIdentifier   : [UInt]  = X509IDCE + [ 14 ];
-let X509KeyUsage               : [UInt]  = X509IDCE + [ 15 ];
-let X509BasicConstraints       : [UInt]  = X509IDCE + [ 19 ];
-let X509AuthorityKeyIdentifier : [UInt]  = X509IDCE + [ 35 ];
-let X509ExtendedKeyUsage       : [UInt]  = X509IDCE + [ 37 ];
+let X509IDCE                       : [UInt]  = [ 2, 5, 29 ]
+let X509ExtnSubjectKeyIdentifier   : [UInt]  = X509IDCE + [ 14 ]
+let X509ExtnKeyUsage               : [UInt]  = X509IDCE + [ 15 ]
+let X509ExtnBasicConstraints       : [UInt]  = X509IDCE + [ 19 ]
+let X509ExtnAuthorityKeyIdentifier : [UInt]  = X509IDCE + [ 35 ]
+let X509ExtnExtendedKeyUsage       : [UInt]  = X509IDCE + [ 37 ]
 
 
 // End of File

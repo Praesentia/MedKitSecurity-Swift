@@ -18,7 +18,7 @@
  -----------------------------------------------------------------------------
  */
 
-import Foundation;
+import Foundation
 
 
 extension NSError {
@@ -26,10 +26,10 @@ extension NSError {
     convenience init?(osstatus: OSStatus)
     {
         if osstatus != noErr {
-            self.init(domain: NSOSStatusErrorDomain, code: Int(osstatus), userInfo: nil);
+            self.init(domain: NSOSStatusErrorDomain, code: Int(osstatus), userInfo: nil)
         }
         else {
-            return nil;
+            return nil
         }
     }
     

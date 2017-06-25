@@ -19,8 +19,14 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
+
+
+private let Minute = TimeInterval(60)
+private let Hour   = TimeInterval(60 * Minute)
+private let Day    = TimeInterval(24 * Hour)
+private let Year   = TimeInterval(365 * Day)
 
 
 /**
@@ -32,35 +38,99 @@ import MedKitCore;
 class PublicKeyCredentials: Credentials {
     
     // MARK: - Properties
-    public var              identity   : Identity?       { return certificate.identity; }
-    public var              profile    : JSON            { return getProfile(); }
-    public var              publicKey  : Key             { return certificate.publicKey }
+    public var              identity   : Identity?          { return certificate.identity }
+    public var              profile    : JSON               { return getProfile() }
+    public var              publicKey  : Key                { return certificate.publicKey }
     public private(set) var privateKey : Key?
-    public var              trusted    : Bool            { return certificate.trusted }
-    public var              type       : CredentialsType { return .PublicKey }
-    public var              validity   : Range<Date>?    { return nil; } // TODO
+    public var              type       : CredentialsType    { return .publicKey }
+    public var              validity   : ClosedRange<Date>? { return certificate.validity }
     
     // MARK: - Private Properties
-    private var certificate : Certificate;
+    private var certificate : X509    // leaf certificate
+    private var chain       : [X509]  // chain
 
     // MARK: - Initializers
     
     /**
      Initialize instance.
      */
-    init(with identity: SecIdentity)
+    init(with certificate: SecCertificate, privateKey: Key? = nil)
     {
-        self.certificate = X509(using: identity.certificate!);
-        self.privateKey  = PrivateKey(identity.privateKey);
+        self.certificate = X509(using: certificate)
+        self.chain       = []
+        self.privateKey  = privateKey
     }
     
     /**
      Initialize instance.
      */
-    init(with certificate: Certificate, privateKey: Key? = nil)
+    init(with identity: SecIdentity)
     {
-        self.certificate = certificate;
-        self.privateKey  = privateKey;
+        self.certificate = X509(using: identity.certificate!)
+        self.chain       = []
+        self.privateKey  = PrivateKey(identity.privateKey)
+    }
+    
+    /**
+     Initialize instance.
+     */
+    init(with certificate: X509, privateKey: Key? = nil)
+    {
+        self.certificate = certificate
+        self.chain       = []
+        self.privateKey  = privateKey
+    }
+    
+    /**
+     Initialize instance.
+     */
+    init(with certificate: X509, chain: [X509], privateKey: Key? = nil)
+    {
+        self.certificate = certificate
+        self.chain       = chain
+        self.privateKey  = privateKey
+    }
+    
+    // MARK: - Authentication
+
+    /**
+     Verify trust.
+     */
+    func verifyTrust(completionHandler completion: @escaping (Error?) -> Void)
+    {
+        X509Trust.main.verify(leaf: certificate, with: chain, completionHandler: completion)
+    }
+    
+    /**
+     Certify request.
+     */
+    public func certify(certificationRequestInfo: CertificationRequestInfo, completionHandler completion: @escaping (X509Certificate?, Error?) -> Void)
+    {
+        if let privateKey = self.privateKey {
+            
+            let from           = Date()
+            let to             = from.addingTimeInterval(Year)
+            let validity       = from ... to
+            let algorithm      = X509Algorithm.sha256WithRSAEncryption
+            let issuer         = self.certificate.subject
+            let tbsCertificate = X509TBSCertificate(algorithm: algorithm,
+                                        issuer: issuer, validity: validity,
+                                        subject: certificationRequestInfo.subject, publicKey: certificationRequestInfo.subjectPublicKeyInfo)
+
+            
+            let data   = DEREncoder().encode(tbsCertificate)
+            let digest = SHA256()
+            
+            digest.update(bytes: data)
+            
+            let signature      = privateKey.sign(bytes: digest.final())
+            let certificate    = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
+            
+            completion(certificate, nil)
+        }
+        else {
+            completion(nil, MedKitError.failed)
+        }
     }
     
     // MARK: - Signing
@@ -74,7 +144,7 @@ class PublicKeyCredentials: Credentials {
      */
     public func sign(bytes: [UInt8]) -> [UInt8]?
     {
-        return privateKey?.sign(bytes: bytes);
+        return privateKey?.sign(bytes: bytes)
     }
     
     /**
@@ -86,7 +156,7 @@ class PublicKeyCredentials: Credentials {
      */
     public func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
     {
-        return certificate.publicKey.verify(signature: signature, for: bytes);
+        return certificate.publicKey.verify(signature: signature, for: bytes)
     }
     
     // MARK: - Profile
@@ -101,12 +171,13 @@ class PublicKeyCredentials: Credentials {
      */
     private func getProfile() -> JSON
     {
-        let profile = JSON();
+        let profile = JSON()
         
-        profile[KeyType]             = type.string;
-        profile[KeyCertificateChain] = certificate.profile;
+        profile[KeyType]             = type.string
+        profile[KeyCertificate]      = certificate.profile
+        profile[KeyCertificateChain] = chain.map { $0.profile }
         
-        return profile;
+        return profile
     }
     
 }

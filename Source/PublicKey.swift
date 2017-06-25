@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,28 +29,37 @@ import MedKitCore;
 class PublicKey: Key {
     
     // MARK: - Properties
-    public var blockSize: Int { return SecKeyGetBlockSize(key); }
+    public var blockSize: Int { return SecKeyGetBlockSize(key) }
     
     // MARK: Private Properties
-    private let key: SecKey;
+    private let key: SecKey
     
     // MARK: - Initializers
     
     init(_ key: SecKey)
     {
-        self.key = key;
+        self.key = key
     }
     
     // MARK: - Signing
     
     func sign(bytes: [UInt8]) -> [UInt8]
     {
-        return key.sign(bytes: bytes)!;
+        return key.sign(bytes: bytes)!
     }
     
     func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
     {
-        return key.verify(signature: signature, for: bytes);
+        return key.verify(signature: signature, for: bytes)
+    }
+    
+    func verify(signature: [UInt8], using digestType: DigestType, for data: Data) -> Bool
+    {
+        let digest = instantiateDigest(ofType: digestType)
+        
+        digest.update(data: data)
+        
+        return key.verify(signature: signature, for: digest.final())
     }
     
 }

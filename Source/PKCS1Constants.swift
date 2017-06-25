@@ -20,15 +20,25 @@
 
 
 import Foundation
+import MedKitCore
 
 
-let PKCS1RSAEncryption           : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  1 ];
-let PKCS1MD2WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  2 ];
-let PKCS1MD5WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  4 ];
-let PKCS1SHA1WithRSAEncryption   : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  5 ];
-let PKCS1SHA256WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 11 ];
-let PKCS1SHA384WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 12 ];
-let PKCS1SHA512WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 13 ];
+let PKCS1RSAEncryption           : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  1 ]
+let PKCS1MD2WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  2 ]
+let PKCS1MD5WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  4 ]
+let PKCS1SHA1WithRSAEncryption   : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  5 ]
+let PKCS1SHA256WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 11 ]
+let PKCS1SHA384WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 12 ]
+let PKCS1SHA512WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 13 ]
+
+/*
+let mapPKCS1AlgorithmToDigest : [ [UInt] : DigestType ] = [
+    PKCS1MD2WithRSAEncryption    : .md2,
+    PKCS1MD5WithRSAEncryption    : .md5,
+    PKCS1SHA1WithRSAEncryption   : .sha1,
+    PKCS1SHA256WithRSAEncryption : .sha256
+]
+ */
 
 
 // End of File

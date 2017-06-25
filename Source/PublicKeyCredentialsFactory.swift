@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,22 +29,49 @@ import MedKitCore;
 public class PublicKeyCredentialsFactory: CredentialsFactory {
     
     // MARK: - Class Properties
-    static let shared = PublicKeyCredentialsFactory();
+    static let shared = PublicKeyCredentialsFactory()
     
     // MARK: - Instantiation
     
     /**
      Create credentials from profile.
      */
-    public func instantiate(from profile: JSON, for identity: Identity) -> Credentials?
+    public func instantiate(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
-        if let string = profile[KeyCertificateChain].string {
-            if let data = Data(base64Encoded: string) {
-                return SecurityManagerShared.main.loadPublicCredentials(for: identity, from: data);
+        if let data = decodeCertificate(profile[KeyCertificate]), let chain = decodeCertificateChain(profile[KeyCertificateChain]) {
+            SecurityManagerShared.main.instantiatePublicKeyCredentials(for: identity, from: data, chain: chain, completionHandler: completion)
+        }
+        else {
+            completion(nil, MedKitError.failed)
+        }
+    }
+    
+    private func decodeCertificate(_ certificate: JSON?) -> Data?
+    {
+        if let string = certificate?.string {
+            return Data(base64Encoded: string)
+        }
+        return nil
+    }
+    
+    private func decodeCertificateChain(_ chain: JSON?) -> [Data]?
+    {
+        if let array = chain?.array {
+            var certificateChain = [Data]()
+        
+            for certificate in array {
+                if let string = certificate.string, let data = Data(base64Encoded: string) {
+                    certificateChain.append(data)
+                }
+                else {
+                    return nil
+                }
             }
+            
+            return certificateChain
         }
         
-        return nil;
+        return nil
     }
     
 }

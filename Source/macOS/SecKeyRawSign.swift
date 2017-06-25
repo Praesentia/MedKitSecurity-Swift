@@ -19,7 +19,7 @@
  */
 
 
-import Foundation;
+import Foundation
 
 
 func SecKeyRawSign(
@@ -30,59 +30,59 @@ func SecKeyRawSign(
         _ sig: UnsafeMutablePointer<UInt8>,
         _ sigLen: UnsafeMutablePointer<Int>) -> OSStatus
 {
-    var error: Unmanaged<CFError>?;
+    var error: Unmanaged<CFError>?
     
     if let transform = SecSignTransformCreate(key, &error) {
-        let data = CFDataCreate(nil, dataToSign, dataToSignLen)!;
+        let data = CFDataCreate(nil, dataToSign, dataToSignLen)!
         
-        let status = SecKeySetPadding(transform, padding);
+        let status = SecKeySetPadding(transform, padding)
         guard(status == errSecSuccess) else { return status }
         
-        SecTransformSetAttribute(transform, kSecTransformInputAttributeName, data, &error);
+        SecTransformSetAttribute(transform, kSecTransformInputAttributeName, data, &error)
         guard(error == nil) else { return errSSLCrypto }
         
         SecTransformSetAttribute(transform, kSecInputIsAttributeName, kSecInputIsDigest, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        let result = SecTransformExecute(transform, &error);
+        let result = SecTransformExecute(transform, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        let signature    = result as! CFData;
-        let signatureLen = CFDataGetLength(signature);
+        let signature    = result as! CFData
+        let signatureLen = CFDataGetLength(signature)
         
-        CFDataGetBytes(signature, CFRangeMake(0, signatureLen), sig);
+        CFDataGetBytes(signature, CFRangeMake(0, signatureLen), sig)
         
-        return errSecSuccess;
+        return errSecSuccess
     }
 
-    return errSSLCrypto;
+    return errSSLCrypto
 }
 
 func SecKeySetPadding(_ transform: SecTransform, _ padding: SecPadding) -> OSStatus
 {
-    var error: Unmanaged<CFError>?;
+    var error: Unmanaged<CFError>?
     
     switch padding {
     case SecPadding.PKCS1 :
-        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error);
+        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        return errSecSuccess;
+        return errSecSuccess
         
     case SecPadding.PKCS1SHA256 :
-        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error);
+        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestSHA2, &error);
+        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestSHA2, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 256 as CFNumber, &error);
+        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 256 as CFNumber, &error)
         guard(error == nil) else { return errSSLCrypto }
         
-        return errSecSuccess;
+        return errSecSuccess
         
     default :
-        return errSSLCrypto;
+        return errSSLCrypto
     }
 }
 

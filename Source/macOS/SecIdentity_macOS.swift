@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 extension SecIdentity {
@@ -28,31 +28,31 @@ extension SecIdentity {
     /**
      Load certificate.
      */
-    static func find(for id: Identity, role: SecKeyType, label: String) -> SecIdentity?
+    static func find(for id: Identity) -> SecIdentity?
     {
         let query: [CFString : Any] = [
             kSecClass      : kSecClassIdentity,
             kSecReturnRef  : kCFBooleanTrue,
             kSecMatchLimit : kSecMatchLimitAll
-        ];
+        ]
         
-        var result: AnyObject?;
-        var status: OSStatus;
+        var result: AnyObject?
+        var status: OSStatus
         
-        status = SecItemCopyMatching(query as CFDictionary, &result);
+        status = SecItemCopyMatching(query as CFDictionary, &result)
         if status != errSecSuccess {
-            return nil;
+            return nil
         }
         
         if let array = result as? [SecIdentity] {
             for identity in array {
                 if identity.certificate?.commonName == id.string {
-                    return identity;
+                    return identity
                 }
             }
         }
         
-        return nil;
+        return nil
     }
     
 }

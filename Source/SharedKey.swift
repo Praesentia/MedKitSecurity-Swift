@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,30 +29,36 @@ import MedKitCore;
 class SharedKey: Key {
     
     // MARK: - Properties
-    public var blockSize: Int { return HMAC256.size; }
+    public var blockSize: Int { return HMAC256.size }
     
     // MARK: Private Properties
-    private let secret: [UInt8];
+    private let secret: [UInt8]
     
     // MARK: - Initializers
     
     init(with secret: [UInt8])
     {
-        self.secret = secret;
+        self.secret = secret
     }
     
     // MARK: - Signing
     
     func sign(bytes: [UInt8]) -> [UInt8]
     {
-        let hmac = HMAC256();
-        return hmac.signBytes(bytes: bytes, using: secret);
+        let hmac = HMAC256()
+        return hmac.sign(bytes: bytes, using: secret)
     }
     
     func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
     {
-        let hmac = HMAC256();
-        return signature == hmac.signBytes(bytes: bytes, using: secret);
+        let hmac = HMAC256()
+        return signature == hmac.sign(bytes: bytes, using: secret)
+    }
+    
+    func verify(signature: [UInt8], using digestType: DigestType, for data: Data) -> Bool
+    {
+        let hmac = instantiateHMAC(using: digestType)
+        return signature == hmac.sign(bytes: [UInt8](data), using: secret)
     }
     
 }

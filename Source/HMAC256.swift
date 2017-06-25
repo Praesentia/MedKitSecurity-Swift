@@ -19,26 +19,29 @@
  */
 
 
-import CommonCrypto;
-import Foundation;
+import CommonCrypto
+import Foundation
+import MedKitCore
 
 
 /**
  HMAC
  */
-class HMAC256 {
+class HMAC256: HMAC {
     
-    static let size = Int(CC_SHA256_DIGEST_LENGTH);
+    // MARK: - Private Properties
+    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
+            static let size      = Int(CC_SHA256_DIGEST_LENGTH)
     
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256);
+    // MARK: -
     
-    func signBytes(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    func sign(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size);
+        var output = [UInt8](repeating: 0, count: HMAC256.size)
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output);
+        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output)
         
-        return output;
+        return output
     }
 
 }

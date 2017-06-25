@@ -19,11 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
-
-
-private let KeychainURL = Bundle.main.url(forResource: "medkit", withExtension: "keychain");
+import Foundation
+import MedKitCore
 
 
 /**
@@ -32,9 +29,10 @@ private let KeychainURL = Bundle.main.url(forResource: "medkit", withExtension: 
  - Parameters:
     - service: Identifies the keychain service.
  */
-public func initialize(service: String)
+public func initialize(service: String, keychain: SecKeychain?)
 {
-    SecurityManagerShared.initializeMain(SecurityManagerKeychain(service: service));
+    Keychain.initializeMain(service: service, keychain: keychain)
+    SecurityManagerShared.initializeMain(SecurityManagerAOS())
 }
 
 

@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,16 +29,16 @@ import MedKitCore;
 class SharedSecretCredentialsFactory: CredentialsFactory {
     
     // MARK: - Class Properties
-    static let shared = SharedSecretCredentialsFactory();
+    static let shared = SharedSecretCredentialsFactory()
     
     // MARK: - Instantiation
     
     /**
      Create credentials from profile.
      */
-    func instantiate(from profile: JSON, for identity: Identity) -> Credentials?
+    func instantiate(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
-        return SecurityManagerShared.main.loadSharedSecretCredentials(for: identity);
+        SecurityManagerShared.main.loadSharedSecretCredentials(for: identity, completionHandler: completion)
     }
     
 }

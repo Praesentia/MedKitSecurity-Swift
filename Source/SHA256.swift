@@ -20,8 +20,8 @@
 
 
 import CommonCrypto
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,31 +29,36 @@ import MedKitCore;
  */
 class SHA256: Digest {
     
-    private var context = CC_SHA256_CTX();
+    // MARK: - Private Properties
+    private var context = CC_SHA256_CTX()
+    
+    // MARK: - Initializers
     
     public init()
     {
-        CC_SHA256_Init(&context);
+        CC_SHA256_Init(&context)
     }
+    
+    // MARK: -
     
     public func reset()
     {
-        CC_SHA256_Init(&context);
+        CC_SHA256_Init(&context)
     }
     
     public func final() -> [UInt8]
     {
-        var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH));
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
         
-        CC_SHA256_Final(&digest, &context);
-        CC_SHA256_Init(&context);
+        CC_SHA256_Final(&digest, &context)
+        CC_SHA256_Init(&context)
         
-        return digest;
+        return digest
     }
     
     public func update(bytes: [UInt8])
     {
-        CC_SHA256_Update(&context, bytes, CC_LONG(bytes.count));
+        CC_SHA256_Update(&context, bytes, CC_LONG(bytes.count))
     }
     
 }

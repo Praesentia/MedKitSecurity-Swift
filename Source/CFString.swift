@@ -18,19 +18,20 @@
  -----------------------------------------------------------------------------
  */
 
-import Foundation;
+import Foundation
 
 
 extension CFString: Hashable {
     
-    public var hashValue: Int { return (self as String).hashValue; }
+    public var hashValue: Int { return (self as String).hashValue }
 
     static public func==(lhs: CFString, rhs: CFString) -> Bool
     {
-        return (lhs as String) == (rhs as String);
+        return (lhs as String) == (rhs as String)
     }
     
 }
 
 
 // End of File
+ 

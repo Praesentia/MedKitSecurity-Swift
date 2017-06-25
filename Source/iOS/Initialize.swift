@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -31,7 +31,8 @@ import MedKitCore;
  */
 public func initialize(service: String)
 {
-    SecurityManagerShared.initializeMain(SecurityManagerKeychain(service: service));
+    Keychain.initializeMain(service: service, keychain: nil)
+    SecurityManagerShared.initializeMain(SecurityManagerAOS())
 }
 
 

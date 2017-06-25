@@ -19,16 +19,16 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 protocol CredentialsFactory: class {
     
     // MARK: - Instantiation
     
-    //func instantiate(for identity: Identity) -> Credentials;
-    func instantiate(from profile: JSON, for identity: Identity) -> Credentials?;
+    //func instantiate(for identity: Identity) -> Credentials
+    func instantiate(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     
 }
 

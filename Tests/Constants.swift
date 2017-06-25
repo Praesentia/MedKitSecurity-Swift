@@ -19,12 +19,12 @@
  */
 
 
-import MedKitCore;
-import XCTest;
+import MedKitCore
+import XCTest
 
 
-let SecurityManagerService = "MedKit Tests";
-let TestIdentity           = Identity(named: "TestUser", type: .User);
+let SecurityManagerService = "MedKit Tests"
+let TestIdentity           = Identity(named: "TestUser", type: .user)
 
 
 // End of File

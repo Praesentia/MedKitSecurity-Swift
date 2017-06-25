@@ -19,24 +19,58 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
+ X509 certificate.
  */
 public class X509: Certificate {
     
     // MARK: - Properties
-    public let                   chain     : [Data]
-    public private(set) lazy var identity  : Identity?    = self.getIdentity()
-    public var                   profile   : JSON         { return getProfile() }
-    public private(set) lazy var publicKey : Key          = self.getPublicKey()
-    public private(set) lazy var trusted   : Bool         = self.verifyTrust()
-    public private(set) lazy var validity  : Range<Date>? = self.certificate.validity
     
-    // MARK: Private Properties
-    private var certificate : SecCertificate
+    /**
+     X509 data in DER form.
+     */
+    public var data: Data { return certificate.data }
+    
+    /**
+     Identity derived from the CN subject field.
+     */
+    public private(set) lazy var identity: Identity? = self.getIdentity()
+    
+    /**
+     JSON profile.
+     */
+    public var profile: JSON { return getProfile() }
+    
+    /**
+     Public key.
+     */
+    public private(set) lazy var publicKey: Key = PublicKey(self.certificate.publicKey!)
+    
+    /**
+     Validity date range.
+     */
+    public var validity: ClosedRange<Date> { return decoded.tbsCertificate.validity.range }
+    
+    // MARK: - Internal Properties
+    
+    var certificate      : SecCertificate
+    
+    var tbsData          : Data                   { return decoded.tbsCertificate.cache }
+    var algorithm        : X509Algorithm          { return decoded.algorithm }
+    var issuer           : X509Name               { return decoded.tbsCertificate.issuer }
+    var signature        : [UInt8]                { return decoded.signature }
+    var subject          : X509Name               { return decoded.tbsCertificate.subject }
+
+    var basicConstraints : X509BasicConstraints?  { return decoded.tbsCertificate.basicConstraints }
+    var keyUsage         : X509KeyUsage?          { return decoded.tbsCertificate.keyUsage }
+    var extendedKeyUsage : X509ExtendedKeyUsage?  { return decoded.tbsCertificate.extendedKeyUsage }
+    
+    // MARK: - Private Properties
+    private var decoded: X509Certificate
     
     // MARK: - Initializers
     
@@ -44,12 +78,12 @@ public class X509: Certificate {
      Initialize instance.
      
      - Parameters:
-     - chain: The certificate chain.
+        - certificate: The certificate chain.
      */
     public init(using certificate: SecCertificate)
     {
-        self.chain       = [];
-        self.certificate = certificate;
+        self.certificate = certificate
+        self.decoded     = try! X509Certificate(from: certificate.data)
     }
     
     /**
@@ -61,58 +95,39 @@ public class X509: Certificate {
     public convenience init?(from data: Data)
     {
         if let certificate = SecCertificateCreateWithData(nil, data as CFData) {
-            self.init(using: certificate);
+            self.init(using: certificate)
         }
         else {
-            return nil;
+            return nil
         }
     }
     
-    // MARK: - Identity
-    
-    /**
-     Verify certificate is for identity.
-     
-     - Parameters:
-        - identity: An identity.
-     */
-    public func verify(for identity: Identity) -> Bool
+    func verifySelfSigned() -> Bool
     {
-        return false;
+        return publicKey.verify(signature: signature, using: .sha256, for: tbsData)
     }
+    
+    // MARK: - Private
     
     private func getIdentity() -> Identity?
     {
         if let commonName = certificate.commonName {
-            return Identity(from: commonName);
+            return Identity(from: commonName)
         }
-        return nil;
+        return nil
     }
     
-    // MARK: - Signature Verification
-    
-    private func getPublicKey() -> Key
+    private func decode() -> X509Certificate?
     {
-        return PublicKey(SecCertificateCopyPublicKey(certificate)!);
+        return try? X509Certificate(from: data)
     }
-
-    /**
-     Get profile.
-     */
-    private func verifyTrust() -> Bool
-    {
-        return true; // TODO
-    }
-    
-    // MARK: - Profile
     
     /**
      Get profile.
      */
     private func getProfile() -> JSON
     {
-        let data = SecCertificateCopyData(certificate) as Data;
-        return JSON(data.base64EncodedString());
+        return JSON(certificate.data.base64EncodedString())
     }
     
 }

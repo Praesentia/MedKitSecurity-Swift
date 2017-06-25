@@ -6,8 +6,8 @@ communication with medical devices.
 
 MedKitSecurity is one of a number of MedKit modules which include: MedKit,
 MedKitCore, MedKitDomain and MedKitMIP.  MedKitSecurity implements the MedKit
-SecurityManager protocol for iOS and macOS, utilizing Apple's CommonCrypto and
-Keychain services.
+SecurityManager protocol for Apple Operating Systems (AOS), including iOS and
+macOS.
 
 ## Dependencies
 

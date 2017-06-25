@@ -19,15 +19,15 @@
  */
 
 
-import Foundation;
+import Foundation
 
 
 func SecCertificateCopyPublicKey(_ certificate: SecCertificate) -> SecKey?
 {
-    var key: SecKey?;
+    var key: SecKey?
     
-    SecCertificateCopyPublicKey(certificate, &key);
-    return key;
+    SecCertificateCopyPublicKey(certificate, &key)
+    return key
 }
 
 

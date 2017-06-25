@@ -19,26 +19,22 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 extension SecCertificate {
     
-    var commonName: String?      { return getCommonName(); }
-    var validity  : Range<Date>? { return getValidity() }
+    var commonName: String? { return getCommonName() }
+    var data      : Data    { return SecCertificateCopyData(self) as Data }
+    var publicKey : SecKey? { return SecCertificateCopyPublicKey(self) }
     
     private func getCommonName() -> String?
     {
-        var commonName: CFString?;
+        var commonName: CFString?
     
-        let status = SecCertificateCopyCommonName(self, &commonName);
-        return (status == errSecSuccess) ? commonName as String? : nil;
-    }
-    
-    private func getValidity() -> Range<Date>?
-    {
-        return nil // TODO
+        let status = SecCertificateCopyCommonName(self, &commonName)
+        return (status == errSecSuccess) ? commonName as String? : nil
     }
     
 }

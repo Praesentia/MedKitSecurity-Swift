@@ -19,22 +19,35 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
+
+
+private let Minute = TimeInterval(60)
+private let Hour   = TimeInterval(60 * Minute)
+private let Day    = TimeInterval(24 * Hour)
+private let Year   = TimeInterval(365 * Day)
 
 
 /**
- Friendlier keychain interface.
+ Keychain interface.
  */
 class Keychain {
     
-    // MARK: - Properties
-    public var identities : [Identity] { return loadIdentities(); }
+    // MARK: - Class Properties
+    static var main: Keychain!
     
     // MARK: - Private Properties
-    private let keySize   = 2048;
-    private let service   : String;                                  //: Service string.
-    private let queue     = DispatchQueue(label: "SecurityManager"); //: Dispatch queue for internal processing.
+    private let keySize   = 2048 // TODO: temporary
+    private let service   : String
+    private var keychain  : SecKeychain? = nil
+    
+    // MARK: - Initialize
+    
+    static func initializeMain(service: String, keychain: SecKeychain?)
+    {
+        main = Keychain(service: service, keychain: keychain)
+    }
     
     // MARK: - Initializers
     
@@ -42,206 +55,379 @@ class Keychain {
      Initialize instance.
      
      - Parameters:
-     - service: Identifies the keychain service.
+        - service: Identifies the keychain service.
+        - keychain:
      */
-    internal init(service: String)
+    init(service: String, keychain: SecKeychain?)
     {
-        self.service = service;
-    }
-    
-    /**
-     Load identities.
-     */
-    private func loadIdentities() -> [Identity]
-    {
-        let query : [CFString : Any] = [
-            kSecClass           : kSecClassGenericPassword,
-            kSecAttrService     : service,
-            kSecReturnAttributes: kCFBooleanTrue,
-            kSecMatchLimit      : 1000 // TODO
-        ];
-        
-        var identities = [Identity]();
-        var result     : AnyObject?;
-        var status     : OSStatus;
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result);
-        if status == errSecSuccess, let accounts = result as? [AnyObject] {
-            for account in accounts {
-                if let attributes = account as? [CFString : AnyObject] {
-                    if let acct = attributes[kSecAttrAccount] as? String {
-                        identities.append(Identity(named: acct, type: .User));
-                    }
-                }
-            }
-        }
-        
-        return identities;
+        self.service  = service
+        self.keychain = keychain
     }
     
     // MARK: - Public Key
     
     /**
-     Create self-signed certificate.
+     Get trusted root certificates.
      */
-    func createCertificate(for identity: Identity, role: SecKeyType) -> (Error?, SecCertificate?)
+    func getTrustedCertificates() -> [SecCertificate]
     {
-        let (publicKey, privateKey) = createKeyPair(for: identity, role: role);
+        var query : [CFString : Any] = [
+            kSecClass            : kSecClassCertificate,
+            kSecReturnRef        : kCFBooleanTrue,
+            kSecMatchLimit       : kSecMatchLimitAll
+        ]
         
-        if publicKey != nil && privateKey != nil {
-            let label   = makeCertificateLabel(for: identity, role: role);
-            let name    = X509Name();
-            let certGen = X509Encoder();
-            
-            name.commonName = identity.string;
-            
-            let bytes = certGen.generateCertificate(issuer: name, subject: name, publicKey: publicKey!, privateKey: privateKey!);
-            return internCertificate(with: label, from: bytes);
+        if let keychain = keychain {
+            query[kSecMatchSearchList]  = [keychain]
+            query[kSecMatchTrustedOnly] = true
         }
         
-        return (NSError(osstatus: -1), nil);
-    }
-    
-    func createCertificate(from bytes: [UInt8]) -> SecCertificate?
-    {
-        return createCertificate(from: Data(bytes: bytes));
-    }
-    
-    func createCertificate(from data: Data) -> SecCertificate?
-    {
-        return SecCertificateCreateWithData(nil, data as CFData)
-    }
-    
-    /**
-     Intern certificate.
-     
-     Interns a certificate into the keychain.
-     */
-    func internCertificate(with label: String, from bytes: [UInt8]) -> (Error?, SecCertificate?)
-    {
-        return internCertificate(with: label, from: Data(bytes: bytes));
+        var result: AnyObject?
+        var status: OSStatus
+        
+        status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecSuccess, let certificates = result as? [SecCertificate] {
+            return certificates
+        }
+        
+        return []
     }
     
     /**
-     Intern certificate.
+     Create self-signed certificate.
      
-     Interns a certificate into the keychain.
+     - Parameters:
+        - identity:
      */
-    func internCertificate(with label: String, from data: Data) -> (Error?, SecCertificate?)
+    func createSelfSignedCertificate(for identity: Identity, completionHandler completion: @escaping (SecCertificate?, Error?) -> Void)
+    {
+        createKeyPair(for: identity) { keyPair, error in
+            if error == nil, let (publicKey, privateKey) = keyPair {
+                let from     = Date()
+                let to       = from.addingTimeInterval(Year)
+                let validity = from ... to
+                
+                let name           = X509Name(from: identity)
+                let algorithm      = X509Algorithm.sha256WithRSAEncryption
+                let publicKeyInfo  = X509SubjectPublicKeyInfo(subjectPublicKey: publicKey)
+                let tbsCertificate = X509TBSCertificate(algorithm: algorithm, issuer: name, validity: validity, subject: name, publicKey: publicKeyInfo)
+                
+                let tbsData = DEREncoder().encode(tbsCertificate)
+                let digest  = SHA256()
+                digest.update(bytes: tbsData)
+                
+                let signature      = privateKey.sign(bytes: digest.final())!
+                let certificate    = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
+                let bytes          = DEREncoder().encode(certificate)
+                
+                self.importCertificate(from: Data(bytes: bytes)) { certificate, error in
+                    completion(certificate, error)
+                }
+            }
+            else {
+                completion(nil, error)
+            }
+        }
+    }
+    
+    /**
+     Create public key credentials.
+     
+     - Parameters:
+     - identity:
+     - issuer:
+     */
+    func createCertificate(for identity: Identity, issuer: Identity, completionHandler completion: @escaping (SecCertificate?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+            
+            var certificate: SecCertificate?
+            let sync       = Sync(MedKitError.failed)
+            
+            if let i = self.loadIdentity(for: issuer) {
+                let issuer = PublicKeyCredentials(with: i)
+                
+                sync.incr()
+                self.createRequest(for: identity) { certificationRequestInfo, error in
+                    
+                    if error == nil, let certificationRequestInfo = certificationRequestInfo {
+                        
+                        sync.incr()
+                        issuer.certify(certificationRequestInfo: certificationRequestInfo) { cert, error in
+                            
+                            if error == nil, let cert = cert {
+                                let data = Data(DEREncoder().encode(cert))
+                                
+                                sync.incr()
+                                self.importCertificate(from: data) { cert, error in
+                                    
+                                    if error == nil, let cert = cert {
+                                        certificate = cert
+                                        sync.clear()
+                                    }
+                                    
+                                    sync.decr(error)
+                                }
+                            }
+                            
+                            sync.decr(error)
+                        }
+                    }
+                    
+                    sync.decr(error)
+                }
+            }
+            
+            sync.close() { error in
+                completion(certificate, error)
+            }
+            
+        }
+    }
+    
+    /**
+     Create certificate.
+     */
+    func createRequest(for identity: Identity, completionHandler completion: @escaping (CertificationRequestInfo?, Error?) -> Void)
+    {
+        createKeyPair(for: identity) { pair, error in
+            var certificationRequestInfo: CertificationRequestInfo?
+            
+            if error == nil, let (publicKey, _) = pair {
+                let subject              = X509Name(from: identity)
+                let subjectPublicKeyInfo = X509SubjectPublicKeyInfo(subjectPublicKey: publicKey)
+                
+                certificationRequestInfo = CertificationRequestInfo(subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
+            }
+            
+            completion(certificationRequestInfo, error)
+        }
+    }
+    
+    /**
+     Create certificate from data.
+     */
+    func createCertificate(from data: Data) -> (SecCertificate?, Error?)
     {
         if let certificate = SecCertificateCreateWithData(nil, data as CFData) {
-            let error = internCertificate(with: label, from: certificate);
-            if error == nil {
-                return (nil, certificate);
-            }
-            return (error, nil);
+            return (certificate, nil)
         }
-        return (NSError(osstatus: -1), nil); // for invalid DER format
+        return (nil, NSError(osstatus: -1))
     }
     
     /**
-     Intern certificate.
+     Import certificate from data.
      
-     Interns a certificate into the keychain.
+     Imports a certificate into the keychain.
      */
-    func internCertificate(with label: String, from certificate: SecCertificate) -> Error?
+    func importCertificate(from data: Data) -> (SecCertificate?, Error?)
     {
-        let attributes : [CFString : Any] = [
-            kSecClass     : kSecClassCertificate,
-            kSecAttrLabel : label,
-            kSecValueRef  : certificate
-        ];
+        var certificate: SecCertificate?
+        var error      : Error?
         
-        let status = SecItemAdd(attributes as CFDictionary, nil);
-        return NSError(osstatus: status);
+        (certificate, error) = createCertificate(from: data)
+        
+        if error == nil {
+            error = importCertificate(from: certificate!)
+            if error != nil {
+                certificate = nil
+            }
+        }
+        
+        return (certificate, error)
+    }
+    
+    /**
+     Import certificate from data.
+     
+     Imports a certificate into the keychain.
+     */
+    func importCertificate(from data: Data, completionHandler completion: @escaping (SecCertificate?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+            
+            var certificate: SecCertificate?
+            var error      : Error?
+            
+            (certificate, error) = self.createCertificate(from: data)
+            if error == nil, let certificate = certificate {
+                error = self.importCertificate(from: certificate)
+            }
+            
+            if error == nil {
+                completion(certificate, nil)
+            }
+            else {
+                completion(nil, error)
+            }
+            
+        }
+    }
+    
+    /**
+     Import certificate.
+     
+     Imports a certificate into the keychain.
+     */
+    func importCertificate(from certificate: SecCertificate) -> Error?
+    {
+        var attributes : [CFString : Any] = [
+            kSecClass    : kSecClassCertificate,
+            kSecValueRef : certificate
+        ]
+        
+        if let keychain = self.keychain {
+            attributes[kSecUseKeychain] = keychain
+        }
+        
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        return NSError(osstatus: status)
     }
     
     /**
      Load certificate.
      */
-    func loadCertificate(for identity: Identity, role: SecKeyType) -> SecCertificate?
+    func loadCertificate(for identity: Identity) -> SecCertificate?
     {
-        let label = makeCertificateLabel(for: identity, role: role);
-        
-        return SecCertificate.find(for: identity, role: role, label: label);
+        return SecCertificate.find(keychain, for: identity)
     }
     
     /**
      Create key pair for identity and role.
      */
-    func createKeyPair(for identity: Identity, role: SecKeyType) -> (SecKey?, SecKey?)
+    func createKeyPair(for identity: Identity) -> (SecKey?, SecKey?)
     {
-        let label      = makeLabel(for: identity, role: role);
-        let tagPublic  = makePublicKeyTag(for: identity, role: role);
-        let tagPrivate = makePrivateKeyTag(for: identity, role: role);
+        let label      = identity.string
+        let tagPublic  = makePublicKeyTag(for: identity)
+        let tagPrivate = makePrivateKeyTag(for: identity)
         
         let privateKeyAttr: [CFString : Any] = [
             kSecAttrLabel          : label,     // keychain "name" of private key
             kSecAttrIsPermanent    : true,
             kSecAttrApplicationTag : tagPrivate
-        ];
-        
+        ]
+
         let publicKeyAttr: [CFString : Any] = [
             kSecAttrLabel          : label,     // keychain "name" of public key
             kSecAttrIsPermanent    : true,
             kSecAttrApplicationTag : tagPublic
-        ];
+        ]
         
-        let parameters: [CFString : Any] = [
+        var parameters: [CFString : Any] = [
             kSecAttrKeyType       : kSecAttrKeyTypeRSA,
             kSecAttrKeySizeInBits : keySize,
             kSecPrivateKeyAttrs   : privateKeyAttr,
             kSecPublicKeyAttrs    : publicKeyAttr
-        ];
+        ]
         
-        var publicKey  : SecKey?;
-        var privateKey : SecKey?;
-        
-        let status = SecKeyGeneratePair(parameters as CFDictionary, &publicKey, &privateKey);
-        if status != errSecSuccess {
-            return (nil, nil);
+        if let keychain = self.keychain {
+            parameters[kSecUseKeychain] = keychain
         }
         
-        return (publicKey, privateKey);
+        var publicKey  : SecKey?
+        var privateKey : SecKey?
+        
+        let status = SecKeyGeneratePair(parameters as CFDictionary, &publicKey, &privateKey)
+        if status != errSecSuccess {
+            return (nil, nil)
+        }
+        
+        return (publicKey, privateKey)
     }
     
-    func removeKeyPair(for identity: Identity, role: SecKeyType) -> Error?
+    /**
+     Create key pair for identity.
+     */
+    func createKeyPair(for identity: Identity, completionHandler completion: @escaping ((SecKey, SecKey)?, Error?) -> Void)
     {
-        let tagPublic  = makePublicKeyTag(for: identity, role: role);
-        let tagPrivate = makePrivateKeyTag(for: identity, role: role);
-        var status     : OSStatus;
+        DispatchQueue.module.async {
+            
+            let label      = identity.string
+            let tagPublic  = self.makePublicKeyTag(for: identity)
+            let tagPrivate = self.makePrivateKeyTag(for: identity)
+            
+            let privateKeyAttr: [CFString : Any] = [
+                kSecAttrLabel          : label,     // keychain "name" of private key
+                kSecAttrIsPermanent    : true,
+                kSecAttrApplicationTag : tagPrivate
+            ]
+            
+            let publicKeyAttr: [CFString : Any] = [
+                kSecAttrLabel          : label,     // keychain "name" of public key
+                kSecAttrIsPermanent    : true,
+                kSecAttrApplicationTag : tagPublic
+            ]
+            
+            var parameters: [CFString : Any] = [
+                kSecAttrKeyType       : kSecAttrKeyTypeRSA,
+                kSecAttrKeySizeInBits : self.keySize,
+                kSecPrivateKeyAttrs   : privateKeyAttr,
+                kSecPublicKeyAttrs    : publicKeyAttr
+            ]
+            
+            if let keychain = self.keychain {
+                parameters[kSecUseKeychain] = keychain
+            }
+            
+            var publicKey  : SecKey?
+            var privateKey : SecKey?
+            
+            let status = SecKeyGeneratePair(parameters as CFDictionary, &publicKey, &privateKey)
+            if status != errSecSuccess {
+                completion(nil, NSError(osstatus: status))
+            }
+            else {
+                completion((publicKey!, privateKey!), nil)
+            }
+            
+        }
+    }
+    
+    func removeKeyPair(for identity: Identity) -> Error?
+    {
+        let tagPublic  = makePublicKeyTag(for: identity)
+        let tagPrivate = makePrivateKeyTag(for: identity)
+        var status     : OSStatus
 
-        let queryPublic : [CFString : Any] = [
+        var queryPublic : [CFString : Any] = [
             kSecClass              : kSecClassKey,
             kSecAttrKeyType        : kSecAttrKeyTypeRSA,
             kSecAttrApplicationTag : tagPublic
-        ];
+        ]
         
-        let queryPrivate : [CFString : Any] = [
+        if let keychain = self.keychain {
+            queryPublic[kSecMatchSearchList] = [keychain]
+        }
+        
+        var queryPrivate : [CFString : Any] = [
             kSecClass              : kSecClassKey,
             kSecAttrKeyType        : kSecAttrKeyTypeRSA,
             kSecAttrApplicationTag : tagPrivate
-        ];
+        ]
         
-        status = SecItemDelete(queryPublic as CFDictionary);
-        if status != errSecSuccess {
-            return NSError(osstatus: status);
+        if let keychain = self.keychain {
+            queryPrivate[kSecMatchSearchList] = [keychain]
         }
         
-        status = SecItemDelete(queryPrivate as CFDictionary);
-        return NSError(osstatus: status);
+        status = SecItemDelete(queryPublic as CFDictionary)
+        if status != errSecSuccess {
+            return NSError(osstatus: status)
+        }
+        
+        status = SecItemDelete(queryPrivate as CFDictionary)
+        return NSError(osstatus: status)
     }
     
     
     /**
      Load public key.
      */
-    func loadPublicKey(for identity: Identity, role: SecKeyType) -> SecKey?
+    func loadPublicKey(for identity: Identity) -> SecKey?
     {
-        let label = makeLabel(for: identity, role: role);
-        let tag   = makePublicKeyTag(for: identity, role: role);
+        let label = identity.string
+        let tag   = makePublicKeyTag(for: identity)
         
-        let query : [CFString : Any] = [
+        var query : [CFString : Any] = [
             kSecClass              : kSecClassKey,
             kSecAttrKeyClass       : kSecAttrKeyClassPublic,
             kSecAttrKeyType        : kSecAttrKeyTypeRSA,
@@ -249,29 +435,33 @@ class Keychain {
             kSecAttrApplicationTag : tag,
             kSecReturnRef          : kCFBooleanTrue,
             kSecMatchLimit         : kSecMatchLimitOne
-        ];
+        ]
         
-        var result : AnyObject?;
-        var key    : SecKey?;
-        var status : OSStatus;
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result);
-        if status == errSecSuccess {
-            key = result as! SecKey?;
+        if let keychain = self.keychain {
+            query[kSecMatchSearchList] = [keychain]
         }
         
-        return key;
+        var result : AnyObject?
+        var key    : SecKey?
+        var status : OSStatus
+        
+        status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecSuccess {
+            key = result as! SecKey?
+        }
+        
+        return key
     }
     
     /**
      Load private key.
      */
-    func loadPrivateKey(for identity: Identity, role: SecKeyType) -> SecKey?
+    func loadPrivateKey(for identity: Identity) -> SecKey?
     {
-        let label = makeLabel(for: identity, role: role);
-        let tag   = makePrivateKeyTag(for: identity, role: role);
+        let label = identity.string
+        let tag   = makePrivateKeyTag(for: identity)
         
-        let query : [CFString : Any] = [
+        var query : [CFString : Any] = [
             kSecClass              : kSecClassKey,
             kSecAttrKeyClass       : kSecAttrKeyClassPrivate,
             kSecAttrKeyType        : kSecAttrKeyTypeRSA,
@@ -279,54 +469,101 @@ class Keychain {
             kSecAttrApplicationTag : tag,
             kSecReturnRef          : kCFBooleanTrue,
             kSecMatchLimit         : kSecMatchLimitOne
-        ];
+        ]
         
-        var result : AnyObject?;
-        var key    : SecKey?;
-        var status : OSStatus;
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result);
-        if status == errSecSuccess {
-            key = result as! SecKey?;
+        if let keychain = self.keychain {
+            query[kSecMatchSearchList] = [keychain]
         }
         
-        return key;
+        var result : AnyObject?
+        var key    : SecKey?
+        var status : OSStatus
+        
+        status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecSuccess {
+            key = result as! SecKey?
+        }
+        
+        return key
     }
     
     // MARK: - Shared Secret
     
     /**
-     Intern shared secret.
+     Import shared key.
      
-     Interns a shared secret within the security enclave for the specified
+     Import a shared secret into the security enclave for the specified
      identity.  Any existing shared secret associated with identity will be
      destroyed.
      
      - Parameters:
-        - secret:    The secret to be interned within the security enclave.
         - identity:  The identity to which the shared secret will be associated.
+        - secret:    The secret to be interned within the security enclave.
         - completion A completion handler that will be invoked with the result
                      of the operation.
      */
-    func internSecret(_ secret: [UInt8], for identity: Identity) -> Error?
+    func importSharedKey(for identity: Identity, with secret: [UInt8], completionHandler completion: @escaping (Error?) -> Void)
     {
-        let attributes : [CFString : Any] = [
-            kSecClass       : kSecClassGenericPassword,
-            kSecAttrService : self.service,
-            kSecAttrAccount : identity.name,
-            kSecValueData   : Data(secret)
-        ];
-        
-        var status: OSStatus;
-        
-        status = SecItemDelete(attributes as CFDictionary);
-        
-        status = SecItemAdd(attributes as CFDictionary, nil);
-        return NSError(osstatus: status);
+        DispatchQueue.module.async {
+            
+            var attributes : [CFString : Any] = [
+                kSecClass       : kSecClassGenericPassword,
+                kSecAttrService : self.service,
+                kSecAttrAccount : identity.string,
+                kSecValueData   : Data(secret)
+            ]
+
+            if let keychain = self.keychain {
+                attributes[kSecUseKeychain] = keychain
+            }
+            
+            var status: OSStatus
+            
+            status = SecItemDelete(attributes as CFDictionary)
+            
+            status = SecItemAdd(attributes as CFDictionary, nil)
+            
+            completion(NSError(osstatus: status))
+            
+        }
     }
     
     /**
-     Remove shared secret.
+     Load shared key.
+     */
+    func loadSharedKey(for identity: Identity, completionHandler completion: @escaping ([UInt8]?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+            
+            var query : [CFString : Any] = [
+                kSecClass       : kSecClassGenericPassword,
+                kSecAttrService : self.service,
+                kSecAttrAccount : identity.string,
+                kSecReturnData  : kCFBooleanTrue,
+                kSecMatchLimit  : kSecMatchLimitOne
+            ]
+            
+            if let keychain = self.keychain {
+                query[kSecMatchSearchList] = [keychain]
+            }
+            
+            var result : AnyObject?
+            var error  : Error?
+            var secret : [UInt8]?
+            
+            let status = SecItemCopyMatching(query as CFDictionary, &result)
+            error = NSError(osstatus: status)
+            
+            if error == nil, let data = result as? Data {
+                secret = [UInt8](data)
+            }
+            
+            completion(secret, error)
+        }
+    }
+    
+    /**
+     Remove shared key.
      
      Removes a shared secret from the security enclave that was previously
      interned for identity.
@@ -336,127 +573,126 @@ class Keychain {
         - completion: A completion handler that will be invoked will the result
                       of the operation.
      */
-    func removeSecret(for identity: Identity) -> Error?
+    func removeSharedKey(for identity: Identity, completionHandler completion: @escaping (Error?) -> Void)
     {
-        let query : [CFString : Any] = [
-            kSecClass       : kSecClassGenericPassword,
-            kSecAttrService : self.service,
-            kSecAttrAccount : identity.name
-        ];
-        
-        let status = SecItemDelete(query as CFDictionary);
-        return NSError(osstatus: status);
-    }
-    
-    /**
-     Load secret.
-     */
-    func loadSecret(for identity: Identity) -> [UInt8]?
-    {
-        let query : [CFString : Any] = [
-            kSecClass       : kSecClassGenericPassword,
-            kSecAttrService : service,
-            kSecAttrAccount : identity.name,
-            kSecReturnData  : kCFBooleanTrue,
-            kSecMatchLimit  : kSecMatchLimitOne
-        ];
-        
-        var result : AnyObject?;
-        var secret : [UInt8]?;
-        var status : OSStatus;
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result);
-        if status == errSecSuccess, let data = result as? Data {
-            secret = [UInt8](data);
-        }
-        
-        return secret;
-    }
-    
-    /**
-     Load identity.
-     
-     Load identity from PKCS12 data.
-     
-     - Parameters:
-        - data:     PKCS12 encoded data.
-        - password: Password needed to access PKCS12 data.
-     */
-    func loadIdentity(from data: Data, with password: String) -> SecIdentity?
-    {
-        let options: [CFString : Any] = [
-            kSecImportExportPassphrase: password
-        ];
-        var result: CFArray?;
-        
-        let status = SecPKCS12Import(data as CFData, options as CFDictionary, &result);
-        if status == errSecSuccess, let array = result as? [[CFString : Any]] {
-            if array.count > 0 {
-                let identity = array[0][kSecImportItemIdentity] as! SecIdentity;
-                return internIdentity(identity) ? identity : nil;
+        DispatchQueue.module.async {
+            
+            var query : [CFString : Any] = [
+                kSecClass       : kSecClassGenericPassword,
+                kSecAttrService : self.service,
+                kSecAttrAccount : identity.string
+            ]
+            
+            if let keychain = self.keychain {
+                query[kSecMatchSearchList] = [keychain]
             }
+            
+            let status = SecItemDelete(query as CFDictionary)
+            
+            completion(NSError(osstatus: status))
+            
         }
-    
-        return nil;
     }
     
     // MARK: - Identity
     
     /**
-     Load identity.
+     Import identity.
      
-     Load identity from PKCS12 data.
+     Imprt identity from PKCS12 data.
      
      - Parameters:
-        - identity: Identity to be interned within the keychain.
+        - data:     PKCS12 encoded data.
+        - password: Password needed to access PKCS12 data.
      */
-    func internIdentity(_ identity: SecIdentity) -> Bool
+    func importIdentity(from data: Data, with password: String, completionHandler completion: @escaping (SecIdentity?, Error?) -> Void)
     {
-        let id    = Identity(from: identity.certificate!.commonName!);
-        let label = makeCertificateLabel(for: id!, role: SecKeyAuthentication);
-        
-        let attributes: [CFString : Any] = [
-            kSecAttrLabel : label,
-            kSecValueRef  : identity
-        ];
-        
-        let status = SecItemAdd(attributes as CFDictionary, nil);
-        return status == errSecSuccess;
+        DispatchQueue.module.async {
+            
+            let options: [CFString : Any] = [
+                kSecImportExportPassphrase: password
+            ]
+            
+            var result  : CFArray?
+            var error   : Error?
+            var identity: SecIdentity?
+            
+            let status = SecPKCS12Import(data as CFData, options as CFDictionary, &result)
+            error = NSError(osstatus: status)
+            
+            if error == nil, let array = result as? [[CFString : Any]] {
+                if array.count > 0 {
+                    let id = array[0][kSecImportItemIdentity] as! SecIdentity
+                    
+                    error = self.importIdentity(id)
+                    if error == nil {
+                        identity = id
+                    }
+                }
+            }
+            
+            completion(identity, error)
+            
+        }
     }
     
     /**
-     Load certificate.
+     Import identity.
+     
+     - Parameters:
+        - identity: Identity to be imported into the keychain.
      */
-    func loadIdentity(for identity: Identity, role: SecKeyType) -> SecIdentity?
+    func importIdentity(_ identity: SecIdentity) -> Error?
     {
-        let label = makeCertificateLabel(for: identity, role: role);
+        var attributes: [CFString : Any] = [
+            kSecValueRef: identity
+        ]
         
-        return SecIdentity.find(for: identity, role: role, label: label);
-    }
-    
-    // MARK: - Labels & Tags
-    
-    private func makeLabel(for identity: Identity, role: UUID) -> String
-    {
-        return "\(service), \(identity.string), \(role.uuidstring)";
-    }
-    
-    private func makeCertificateLabel(for identity: Identity, role: UUID) -> String
-    {
-        return makeLabel(for: identity, role: role);
-    }
-    
-    private func makePublicKeyTag(for identity: Identity, role: UUID) -> Data
-    {
-        let label = makeLabel(for: identity, role: role);
-        return (label + ", Public").data(using: .utf8)!;
-    }
-    
-    private func makePrivateKeyTag(for identity: Identity, role: UUID) -> Data
-    {
-        let label = makeLabel(for: identity, role: role);
+        if let keychain = self.keychain {
+            attributes[kSecUseKeychain] = keychain
+        }
         
-        return (label + ", Private").data(using: .utf8)!;
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        return NSError(osstatus: status)
+    }
+    
+    /**
+     Load identity.
+     */
+    func loadIdentity(for identity: Identity, completionHandler completion: @escaping (SecIdentity?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+
+            var error    : Error?
+            let identity = SecIdentity.find(for: identity)
+            
+            if identity == nil {
+                error = MedKitError.notFound
+            }
+            
+            completion(identity, error)
+            
+        }
+    }
+    
+    /**
+     Load identity.
+     */
+    func loadIdentity(for identity: Identity) -> SecIdentity?
+    {
+        return SecIdentity.find(for: identity)
+    }
+    
+    // MARK: - Labels & Tags}
+    
+    private func makePublicKeyTag(for identity: Identity) -> Data
+    {
+        return (identity.string + ", Public").data(using: .utf8)!
+    }
+    
+    private func makePrivateKeyTag(for identity: Identity) -> Data
+    {
+        return (identity.string + ", Private").data(using: .utf8)!
     }
     
 }

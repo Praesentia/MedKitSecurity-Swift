@@ -18,28 +18,28 @@
  -----------------------------------------------------------------------------
  */
 
-import Foundation;
+import Foundation
 
 
 extension SecIdentity {
     
-    var certificate : SecCertificate? { return getCertificate(); }
-    var privateKey  : SecKey?         { return getPrivateKey();  }
+    var certificate : SecCertificate? { return getCertificate() }
+    var privateKey  : SecKey?         { return getPrivateKey()  }
     
     private func getCertificate() -> SecCertificate?
     {
-        var certificate: SecCertificate?;
+        var certificate: SecCertificate?
         
-        let status = SecIdentityCopyCertificate(self, &certificate);
-        return (status == errSecSuccess) ? certificate : nil;
+        let status = SecIdentityCopyCertificate(self, &certificate)
+        return (status == errSecSuccess) ? certificate : nil
     }
     
     private func getPrivateKey() -> SecKey?
     {
-        var privateKey: SecKey?;
+        var privateKey: SecKey?
 
-        let status = SecIdentityCopyPrivateKey(self, &privateKey);
-        return (status == errSecSuccess) ? privateKey : nil;
+        let status = SecIdentityCopyPrivateKey(self, &privateKey)
+        return (status == errSecSuccess) ? privateKey : nil
     }
     
 }

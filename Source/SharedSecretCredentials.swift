@@ -19,8 +19,8 @@
  */
 
 
-import Foundation;
-import MedKitCore;
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,15 +29,13 @@ import MedKitCore;
 class SharedSecretCredentials: Credentials {
     
     // MARK: - Properties
-
-    public let identity : Identity?;
-    public var profile  : JSON            { return getProfile(); }
-    public var trusted  : Bool            { return true; }
-    public var type     : CredentialsType { return .SharedSecret; }
-    public var validity : Range<Date>?    { return nil; } // TODO
+    public let identity : Identity?
+    public var profile  : JSON               { return getProfile() }
+    public var type     : CredentialsType    { return .sharedSecret }
+    public var validity : ClosedRange<Date>? { return nil } // TODO
     
     // MARK: - Private Properties
-    private let key: Key?;
+    private let key: Key
     
     // MARK: - Initializers
     
@@ -46,8 +44,15 @@ class SharedSecretCredentials: Credentials {
      */
     init(for identity: Identity, with key: Key)
     {
-        self.identity = identity;
-        self.key      = key;
+        self.identity = identity
+        self.key      = key
+    }
+    
+    // MARK: - Authentication
+    
+    public func verifyTrust(completionHandler completion: @escaping (Error?) -> Void)
+    {
+        completion(nil)
     }
     
     // MARK: - Signing
@@ -61,7 +66,7 @@ class SharedSecretCredentials: Credentials {
      */
     public func sign(bytes: [UInt8]) -> [UInt8]?
     {
-        return key?.sign(bytes: bytes);
+        return key.sign(bytes: bytes)
     }
     
     /**
@@ -73,7 +78,7 @@ class SharedSecretCredentials: Credentials {
      */
     public func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
     {
-        return key?.verify(signature: signature, for: bytes) ?? false;
+        return key.verify(signature: signature, for: bytes)
     }
     
     /**
@@ -88,12 +93,12 @@ class SharedSecretCredentials: Credentials {
      */
     private func getProfile() -> JSON
     {
-        let profile = JSON();
+        let profile = JSON()
         
-        profile[KeyType]     = type.string;
-        profile[KeyIdentity] = identity?.string;
+        profile[KeyType]     = type.string
+        profile[KeyIdentity] = identity?.string
         
-        return profile;
+        return profile
     }
     
 }

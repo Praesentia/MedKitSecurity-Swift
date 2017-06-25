@@ -19,9 +19,9 @@
  */
 
 
-import CommonCrypto;
-import Foundation;
-import MedKitCore;
+import CommonCrypto
+import Foundation
+import MedKitCore
 
 
 /**
@@ -29,30 +29,35 @@ import MedKitCore;
  */
 class SHA1: Digest {
     
-    private var context = CC_SHA1_CTX();
+    // MARK: - Private Properties
+    private var context = CC_SHA1_CTX()
 
+    // MARK: - Initializers
+    
     public init()
     {
-        CC_SHA1_Init(&context);
+        CC_SHA1_Init(&context)
     }
+    
+    // MARK: -
     
     public func reset()
     {
-        CC_SHA1_Init(&context);
+        CC_SHA1_Init(&context)
     }
     
     public func final() -> [UInt8]
     {
-        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH));
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
         
-        CC_SHA1_Final(&digest, &context);
-        return digest;
+        CC_SHA1_Final(&digest, &context)
+        return digest
     }
     
     
     public func update(bytes: [UInt8])
     {
-        CC_SHA1_Update(&context, bytes, CC_LONG(bytes.count));
+        CC_SHA1_Update(&context, bytes, CC_LONG(bytes.count))
     }
 
 }
