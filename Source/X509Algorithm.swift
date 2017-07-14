@@ -20,31 +20,20 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-struct X509Algorithm: DERCodable {
-    
-    // MARK: - Class Properties
-    static let rsaEncryption           = X509Algorithm(oid: PKCS1RSAEncryption)
-    static let sha256WithRSAEncryption = X509Algorithm(oid: PKCS1SHA256WithRSAEncryption)
-
-    // MARK: - Properties
-    var oid     : [UInt]
-    var options : [UInt8]?
+extension X509Algorithm: DERCodable {
     
     // MARK: - Initializers
     
-    init(oid: [UInt])
-    {
-        self.oid = oid
-    }
-    
     init(decoder: DERDecoder) throws
     {
-        oid     = try decoder.decodeObjectIdentifier()
-        options = try decoder.decodeNull()
+        let oid        = try OID(decoder: decoder)
+        let parameters = try decoder.decodeNull()
         try decoder.assertAtEnd()
+        
+        self.init(oid: oid, parameters: parameters)
     }
     
     // MARK: - DERCodable
@@ -53,7 +42,7 @@ struct X509Algorithm: DERCodable {
     {
         var bytes = [UInt8]()
         
-        bytes += encoder.encodeObjectIdentifier(components: oid)
+        bytes += encoder.encode(oid)
         bytes += encoder.encodeNull()
         
         return encoder.encodeSequence(bytes: bytes)

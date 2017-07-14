@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,28 +28,9 @@ import MedKitCore
  
  - Requirement: RFC-5280
  */
-struct X509String: DERCodable, Equatable {
-    
-    enum StringType {
-        case ia5
-        case printable
-        case utf8
-    }
-    
-    // MARK: - Properties
-    var type   : StringType
-    var string : String
+extension X509String: DERCodable {
     
     // MARK: - Initializers
-    
-    /**
-     Initialize instance from extension.
-     */
-    init(string: String)
-    {
-        self.type   = .printable
-        self.string = string
-    }
     
     /**
      Initialize instance from decoder.
@@ -60,19 +41,19 @@ struct X509String: DERCodable, Equatable {
     {
         switch try decoder.peekTag() {
         case DERCoder.TagIA5String :
-            type   = .ia5
-            string = try decoder.decodeIA5String()
+            let bytes: [UInt8] = try decoder.decodeIA5String()
+            self.init(bytes: bytes, encoding: .ia5)
         
         case DERCoder.TagPrintableString :
-            type   = .printable
-            string = try decoder.decodePrintableString()
+            let bytes: [UInt8] = try decoder.decodePrintableString()
+            self.init(bytes: bytes, encoding: .printable)
             
         case DERCoder.TagUTF8String :
-            type   = .utf8
-            string = try decoder.decodeUTF8String()
+            let bytes: [UInt8] = try decoder.decodeUTF8String()
+            self.init(bytes: bytes, encoding: .utf8)
             
         default :
-            throw MedKitError.failed
+            throw SecurityKitError.failed
         }
     }
     
@@ -80,23 +61,18 @@ struct X509String: DERCodable, Equatable {
     
     func encode(encoder: DEREncoder) -> [UInt8]
     {
-        switch type {
+        switch encoding {
         case .ia5 :
-            return encoder.encodeIA5String(string)
+            return encoder.encodeIA5String(encoded)
         
         case .printable :
-            return encoder.encodePrintableString(string)
+            return encoder.encodePrintableString(encoded)
             
         case .utf8 :
-            return encoder.encodeUTF8String(string)
+            return encoder.encodeUTF8String(encoded)
         }
     }
     
-}
-
-func ==(lhs: X509String, rhs: X509String) -> Bool
-{
-    return lhs.string == rhs.string
 }
 
 

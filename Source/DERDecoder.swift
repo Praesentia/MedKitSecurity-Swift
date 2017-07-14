@@ -20,18 +20,25 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
+/**
+ ASN.1 Distinguished Encoding Rules (DER) decoder.
+ */
 class DERDecoder: DERCoder {
     
+    // MARK: - Properties
     var bytes   : [UInt8] { return Array(slice) }
     var more    : Bool    { return index < slice.endIndex }
     var atEnd   : Bool    { return index == slice.endIndex }
     var nextTag : UInt8?  { return (index < slice.endIndex) ? slice[index] : nil }
     
+    // MARK: - Private Properties
     private var slice: ArraySlice<UInt8>
     private var index: Int
+    
+    // MARK: - Initializers
     
     init(bytes: ArraySlice<UInt8>, index: Int = 0)
     {
@@ -44,12 +51,21 @@ class DERDecoder: DERCoder {
         self.init(bytes: ArraySlice(bytes), index: index)
     }
     
-    func assertAtEnd() throws
+    // MARK: - Assertions
+    
+    func assert(_ value: Bool) throws
     {
-        if !atEnd {
-            throw MedKitError.failed
+        if !value {
+            throw SecurityKitError.failed
         }
     }
+    
+    func assertAtEnd() throws
+    {
+        try assert(atEnd)
+    }
+    
+    // MARK: - Peek Primitives
     
     func peekTag() throws -> UInt8
     {
@@ -65,6 +81,8 @@ class DERDecoder: DERCoder {
         
         return false
     }
+    
+    // MARK: - Decoding Primitives
     
     func decode(with: UInt8) throws -> [UInt8]
     {
@@ -93,6 +111,16 @@ class DERDecoder: DERCoder {
     func decodeInteger() throws -> [UInt8]
     {
         return try decode(with: DERCoder.TagInteger)
+    }
+    
+    func decodeUnsignedInteger() throws -> [UInt8]
+    {
+        let bytes = try decode(with: DERCoder.TagInteger)
+        
+        if bytes[0] == 0x00 {
+            return Array(bytes[1..<bytes.count])
+        }
+        return bytes
     }
     
     func decodeNull() throws -> [UInt8]
@@ -148,7 +176,12 @@ class DERDecoder: DERCoder {
             return string
         }
         
-        throw MedKitError.failed
+        throw SecurityKitError.failed
+    }
+    
+    func decodePrintableString() throws -> [UInt8]
+    {
+        return try decode(with: DERCoder.TagPrintableString)
     }
     
     func decoderFromOctetString() throws -> DERDecoder
@@ -195,12 +228,25 @@ class DERDecoder: DERCoder {
         let bytes = try decode(with: DERCoder.TagUTCTime)
         
         if let string = String(bytes: bytes, encoding: .ascii) {
-            if let date = DERCoder.dateFormatter.date(from: string) {
+            if let date = DERCoder.dateFormatterUTC.date(from: string) {
                 return date
             }
         }
         
-        throw MedKitError.failed
+        throw SecurityKitError.failed
+    }
+    
+    func decodeUniversalTime() throws -> Date
+    {
+        let bytes = try decode(with: DERCoder.TagUTCTime)
+        
+        if let string = String(bytes: bytes, encoding: .ascii) {
+            if let date = DERCoder.dateFormatterUniversal.date(from: string) {
+                return date
+            }
+        }
+        
+        throw SecurityKitError.failed
     }
     
     func decodeUTF8String() throws -> String
@@ -211,7 +257,12 @@ class DERDecoder: DERCoder {
             return string
         }
 
-        throw MedKitError.failed
+        throw SecurityKitError.failed
+    }
+    
+    func decodeUTF8String() throws -> [UInt8]
+    {
+        return try decode(with: DERCoder.TagUTF8String)
     }
     
     func decodeIA5String() throws -> String
@@ -222,7 +273,12 @@ class DERDecoder: DERCoder {
             return string
         }
         
-        throw MedKitError.failed
+        throw SecurityKitError.failed
+    }
+    
+    func decodeIA5String() throws -> [UInt8]
+    {
+        return try decode(with: DERCoder.TagIA5String)
     }
     
     // MARK: - Private
@@ -254,7 +310,7 @@ class DERDecoder: DERCoder {
             return length
         }
         
-        throw MedKitError.failed
+        throw SecurityKitError.failed
     }
     
     private func getByte() throws -> UInt8
@@ -266,7 +322,7 @@ class DERDecoder: DERCoder {
             return byte
         }
         
-        throw MedKitError.failed
+        throw SecurityKitError.failed
     }
     
     private func advance(count: Int) throws
@@ -289,7 +345,7 @@ class DERDecoder: DERCoder {
             return content
         }
         
-        throw MedKitError.failed
+        throw SecurityKitError.failed
     }
     
 }

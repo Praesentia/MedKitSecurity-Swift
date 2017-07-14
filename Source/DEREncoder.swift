@@ -22,6 +22,9 @@
 import Foundation
 
 
+/**
+ ASN.1 Distinguished Encoding Rules (DER) encoder.
+ */
 class DEREncoder: DERCoder {
     
     // MARK: - Encoders
@@ -65,7 +68,18 @@ class DEREncoder: DERCoder {
         return nil
     }
     
-    func encodeInteger(_ value: UInt) -> [UInt8]
+    func encodeInteger(bytes: [UInt8]) -> [UInt8]
+    {
+        var data = [UInt8]()
+        
+        data += DERCoder.TagInteger
+        data += encodeLength(bytes.count)
+        data += bytes
+        
+        return data
+    }
+    
+    func encodeUnsignedInteger(_ value: UInt) -> [UInt8]
     {
         var bytes = [UInt8]()
         var n     = value
@@ -77,18 +91,15 @@ class DEREncoder: DERCoder {
             bytes.append(UInt8(n & 0xff))
         }
         
-        return encodeInteger(bytes: bytes)
+        return encodeUnsignedInteger(bytes: bytes.reversed())
     }
     
-    func encodeInteger(bytes: [UInt8]) -> [UInt8]
+    func encodeUnsignedInteger(bytes: [UInt8]) -> [UInt8]
     {
-        var data = [UInt8]()
-        
-        data += DERCoder.TagInteger
-        data += encodeLength(bytes.count)
-        data += bytes
-        
-        return data
+        if (bytes[0] & 0x80) == 0x80 {
+            return encodeInteger(bytes: [0] + bytes)
+        }
+        return encodeInteger(bytes: bytes)
     }
     
     func encodeKeyValue(key: [UInt8], value: String) -> [UInt8]
@@ -208,6 +219,17 @@ class DEREncoder: DERCoder {
         return data
     }
     
+    func encodeIA5String(_ value: [UInt8]) -> [UInt8]
+    {
+        var data = [UInt8]()
+        
+        data += DERCoder.TagIA5String
+        data += encodeLength(value.count)
+        data += value
+        
+        return data
+    }
+    
     func encodePrintableString(_ value: String) -> [UInt8]
     {
         var data       = [UInt8]()
@@ -220,10 +242,34 @@ class DEREncoder: DERCoder {
         return data
     }
     
+    func encodePrintableString(_ value: [UInt8]) -> [UInt8]
+    {
+        var data = [UInt8]()
+        
+        data += DERCoder.TagPrintableString
+        data += encodeLength(value.count)
+        data += value
+        
+        return data
+    }
+    
     func encodeUTCTime(_ date: Date) -> [UInt8]
     {
         var data      = [UInt8]()
-        let utcString = DERCoder.dateFormatter.string(from: date)
+        let utcString = DERCoder.dateFormatterUTC.string(from: date)
+        let utc       = utcString.unicodeScalars.map { UInt8($0.value) }
+        
+        data += DERCoder.TagUTCTime
+        data += encodeLength(utc.count)
+        data += utc
+        
+        return data
+    }
+    
+    func encodeUniversalTime(_ date: Date) -> [UInt8]
+    {
+        var data      = [UInt8]()
+        let utcString = DERCoder.dateFormatterUniversal.string(from: date)
         let utc       = utcString.unicodeScalars.map { UInt8($0.value) }
         
         data += DERCoder.TagUTCTime
@@ -244,7 +290,18 @@ class DEREncoder: DERCoder {
         
         return data
     }
-
+    
+    func encodeUTF8String(_ value: [UInt8]) -> [UInt8]
+    {
+        var data = [UInt8]()
+        
+        data += DERCoder.TagUTF8String
+        data += encodeLength(value.count)
+        data += value
+        
+        return data
+    }
+    
 }
 
 

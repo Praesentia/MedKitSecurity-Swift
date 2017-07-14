@@ -20,26 +20,16 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-struct X509AttributeValueType: DERCodable {
-    
-    // MARK: - Properties
-    var oid   : [UInt]
-    var value : X509String
+extension X509AttributeValueType: DERCodable {
     
     // MARK: - Initializers
     
-    init(oid: [UInt], value: X509String)
-    {
-        self.oid   = oid
-        self.value = value
-    }
-    
     init(decoder: DERDecoder) throws
     {
-        oid   = try decoder.decodeObjectIdentifier()
+        oid   = try OID(decoder: decoder)
         value = try X509String(decoder: decoder)
         
         try decoder.assertAtEnd()
@@ -51,7 +41,7 @@ struct X509AttributeValueType: DERCodable {
     {
         var bytes = [UInt8]()
         
-        bytes += encoder.encodeObjectIdentifier(components: oid)
+        bytes += encoder.encode(oid)
         bytes += encoder.encode(value)
         
         return encoder.encodeSet(bytes: encoder.encodeSequence(bytes: bytes))

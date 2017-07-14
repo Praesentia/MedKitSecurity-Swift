@@ -28,20 +28,20 @@ extension SecKey {
     
     /**
      */
-    func sign(bytes: [UInt8]) -> [UInt8]?
+    func sign(bytes: [UInt8], padding: SecPadding) -> [UInt8]?
     {
         var signature    = [UInt8](repeating: 0, count: SecKeyGetBlockSize(self))
         var signatureLen = signature.count
         
-        let status = SecKeyRawSign(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, &signature, &signatureLen)
+        let status = SecKeyRawSign(self, padding, UnsafePointer(bytes), bytes.count, &signature, &signatureLen)
         return (status == errSecSuccess) ? signature : nil
     }
     
     /**
      */
-    func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
+    func verify(signature: [UInt8], padding: SecPadding, for bytes: [UInt8]) -> Bool
     {
-        let status = SecKeyRawVerify(self, .PKCS1SHA256, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count)
+        let status = SecKeyRawVerify(self, padding, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count)
         return status == errSecSuccess
     }
     

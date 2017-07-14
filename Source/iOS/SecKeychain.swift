@@ -23,7 +23,8 @@ import Foundation
 
 
 // Dummy
-let kSecUseKeychain = "Dummy" as CFString
+let kSecUseKeychain          = "Dummy" as CFString
+let kSecImportExportKeychain = "Dummy" as CFString
 
 // Dummy
 class SecKeychain {

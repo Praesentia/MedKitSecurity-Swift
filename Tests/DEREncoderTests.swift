@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,7 +20,7 @@
 
 
 import XCTest
-import MedKitCore
+import SecurityKit
 @testable import MedKitSecurity
 
 

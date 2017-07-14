@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 func instantiateDigest(ofType type: DigestType) -> Digest
@@ -32,14 +32,17 @@ func instantiateDigest(ofType type: DigestType) -> Digest
     case .sha1 :
         return SHA1()
         
+    case .sha224 :
+        return SHA224()
+        
     case .sha256 :
         return SHA256()
         
+    case .sha384 :
+        return SHA384()
+        
     case .sha512 :
         return SHA512()
-        
-    default :
-        fatalError("")
     }
 }
 

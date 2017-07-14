@@ -20,17 +20,29 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 func instantiateHMAC(using digestType: DigestType) -> HMAC
 {
     switch digestType {
-    case .sha256 :
-        return HMAC256()
+    case .md5 :
+        return HMACMD5()
+    
+    case .sha1 :
+        return HMACSHA1()
         
-    default :
-        fatalError("")
+    case .sha224 :
+        return HMACSHA224()
+        
+    case .sha256 :
+        return HMACSHA256()
+        
+    case .sha384 :
+        return HMACSHA384()
+        
+    case .sha512 :
+        return HMACSHA512()
     }
 }
 

@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -36,31 +36,31 @@ public class PublicKeyCredentialsFactory: CredentialsFactory {
     /**
      Create credentials from profile.
      */
-    public func instantiate(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    public func instantiate(for identity: Identity, from profile: Any, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
-        if let data = decodeCertificate(profile[KeyCertificate]), let chain = decodeCertificateChain(profile[KeyCertificateChain]) {
+        if let profile = profile as? [String : Any], let data = decodeCertificate(profile[KeyCertificate]), let chain = decodeCertificateChain(profile[KeyCertificateChain]) {
             SecurityManagerShared.main.instantiatePublicKeyCredentials(for: identity, from: data, chain: chain, completionHandler: completion)
         }
         else {
-            completion(nil, MedKitError.failed)
+            completion(nil, SecurityKitError.failed)
         }
     }
     
-    private func decodeCertificate(_ certificate: JSON?) -> Data?
+    private func decodeCertificate(_ certificate: Any?) -> Data?
     {
-        if let string = certificate?.string {
+        if let string = certificate as? String {
             return Data(base64Encoded: string)
         }
         return nil
     }
     
-    private func decodeCertificateChain(_ chain: JSON?) -> [Data]?
+    private func decodeCertificateChain(_ chain: Any?) -> [Data]?
     {
-        if let array = chain?.array {
+        if let array = chain as? [String] {
             var certificateChain = [Data]()
         
-            for certificate in array {
-                if let string = certificate.string, let data = Data(base64Encoded: string) {
+            for string in array {
+                if let data = Data(base64Encoded: string) {
                     certificateChain.append(data)
                 }
                 else {

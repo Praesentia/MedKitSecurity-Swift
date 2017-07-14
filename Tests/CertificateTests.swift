@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,13 +20,13 @@
 
 
 import XCTest
-import MedKitCore
+import SecurityKit
 @testable import MedKitSecurity
 
 
 class CertificateTests: XCTestCase {
     
-    let keychain = Keychain(service: SecurityManagerService, keychain: SecKeychain.testKeychain)
+    let keychain = Keychain(keychain: SecKeychain.testKeychain)
     
     override func setUp()
     {

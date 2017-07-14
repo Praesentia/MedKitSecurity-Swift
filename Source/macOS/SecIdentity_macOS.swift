@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 extension SecIdentity {
@@ -28,13 +28,17 @@ extension SecIdentity {
     /**
      Load certificate.
      */
-    static func find(for id: Identity) -> SecIdentity?
+    static func find(for id: Identity, searchList: [SecKeychain]?) -> SecIdentity?
     {
-        let query: [CFString : Any] = [
+        var query: [CFString : Any] = [
             kSecClass      : kSecClassIdentity,
             kSecReturnRef  : kCFBooleanTrue,
             kSecMatchLimit : kSecMatchLimitAll
         ]
+        
+        if let searchList = searchList {
+            query[kSecMatchSearchList] = searchList
+        }
         
         var result: AnyObject?
         var status: OSStatus

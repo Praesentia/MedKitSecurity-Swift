@@ -20,13 +20,14 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-private let Minute = TimeInterval(60)
-private let Hour   = TimeInterval(60 * Minute)
-private let Day    = TimeInterval(24 * Hour)
-private let Year   = TimeInterval(365 * Day)
+private let Minute  = TimeInterval(60)
+private let Hour    = TimeInterval(60 * Minute)
+private let Day     = TimeInterval(24 * Hour)
+private let Year    = TimeInterval(365 * Day)
+private let OneYear = Year
 
 
 /**
@@ -38,15 +39,22 @@ class Keychain {
     static var main: Keychain!
     
     // MARK: - Private Properties
-    private let keySize   = 2048 // TODO: temporary
-    private let service   : String
-    private var keychain  : SecKeychain? = nil
+    private let service    : String = "MedKit"
+    private let keychain   : SecKeychain?
+    private let searchList : [SecKeychain]?
     
     // MARK: - Initialize
     
-    static func initializeMain(service: String, keychain: SecKeychain?)
+    /**
+     Initialize main keychain instance.
+     
+     - Parameters:
+        - service:  Service identifier.
+        - keychain: Keychain instance.
+     */
+    static func initialize(keychain: SecKeychain?)
     {
-        main = Keychain(service: service, keychain: keychain)
+        main = Keychain(keychain: keychain)
     }
     
     // MARK: - Initializers
@@ -58,13 +66,49 @@ class Keychain {
         - service: Identifies the keychain service.
         - keychain:
      */
-    init(service: String, keychain: SecKeychain?)
+    init(keychain: SecKeychain?)
     {
-        self.service  = service
-        self.keychain = keychain
+        if let keychain = keychain {
+            self.keychain   = keychain
+            self.searchList = [keychain]
+        }
+        else {
+            self.keychain   = nil
+            self.searchList = nil
+        }
     }
     
     // MARK: - Public Key
+    
+    func findRootCertificates(completionHandler completion: @escaping ([SecCertificate]?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+            
+            var query : [CFString : Any] = [
+                kSecClass      : kSecClassCertificate,
+                kSecReturnRef  : kCFBooleanTrue,
+                kSecMatchLimit : kSecMatchLimitAll
+            ]
+            
+            if let searchList = self.searchList {
+                query[kSecMatchSearchList] = searchList
+            }
+            
+            var result      : AnyObject?
+            var status      : OSStatus
+            var error       : Error?
+            var certificates: [SecCertificate]?
+            
+            status = SecItemCopyMatching(query as CFDictionary, &result)
+            error  = NSError(osstatus: status)
+            
+            if error == nil {
+                certificates = result as! [SecCertificate]?
+            }
+            
+            completion(certificates, error)
+        }
+    }
     
     /**
      Get trusted root certificates.
@@ -72,14 +116,14 @@ class Keychain {
     func getTrustedCertificates() -> [SecCertificate]
     {
         var query : [CFString : Any] = [
-            kSecClass            : kSecClassCertificate,
-            kSecReturnRef        : kCFBooleanTrue,
-            kSecMatchLimit       : kSecMatchLimitAll
+            kSecClass      : kSecClassCertificate,
+            kSecReturnRef  : kCFBooleanTrue,
+            kSecMatchLimit : kSecMatchLimitAll
         ]
         
-        if let keychain = keychain {
-            query[kSecMatchSearchList]  = [keychain]
-            query[kSecMatchTrustedOnly] = true
+        if let searchList = self.searchList {
+            query[kSecMatchSearchList]  = searchList
+            //query[kSecMatchTrustedOnly] = true
         }
         
         var result: AnyObject?
@@ -98,25 +142,26 @@ class Keychain {
      
      - Parameters:
         - identity:
+        - completion
      */
     func createSelfSignedCertificate(for identity: Identity, completionHandler completion: @escaping (SecCertificate?, Error?) -> Void)
     {
-        createKeyPair(for: identity) { keyPair, error in
+        createKeyPair(for: identity, keySize: 2048) { keyPair, error in
             if error == nil, let (publicKey, privateKey) = keyPair {
-                let from     = Date()
-                let to       = from.addingTimeInterval(Year)
-                let validity = from ... to
-                
+
+                let digestType     = DigestType.sha256
                 let name           = X509Name(from: identity)
+                let validity       = X509Validity(from: Date(), until: OneYear)
                 let algorithm      = X509Algorithm.sha256WithRSAEncryption
                 let publicKeyInfo  = X509SubjectPublicKeyInfo(subjectPublicKey: publicKey)
-                let tbsCertificate = X509TBSCertificate(algorithm: algorithm, issuer: name, validity: validity, subject: name, publicKey: publicKeyInfo)
+                let serialNumber   = X509TBSCertificate.generateSerialNumber()
+                let tbsCertificate = X509TBSCertificate(serialNumber: serialNumber, algorithm: algorithm, issuer: name, validity: validity, subject: name, publicKey: publicKeyInfo)
                 
                 let tbsData = DEREncoder().encode(tbsCertificate)
                 let digest  = SHA256()
                 digest.update(bytes: tbsData)
                 
-                let signature      = privateKey.sign(bytes: digest.final())!
+                let signature      = privateKey.sign(bytes: digest.final(), padding: digestType.padding)!
                 let certificate    = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
                 let bytes          = DEREncoder().encode(certificate)
                 
@@ -134,26 +179,26 @@ class Keychain {
      Create public key credentials.
      
      - Parameters:
-     - identity:
-     - issuer:
+        - identity:
+        - issuer:
+        - completion:
      */
     func createCertificate(for identity: Identity, issuer: Identity, completionHandler completion: @escaping (SecCertificate?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             
             var certificate: SecCertificate?
-            let sync       = Sync(MedKitError.failed)
+            let sync       = Sync2(SecurityKitError.failed)
             
-            if let i = self.loadIdentity(for: issuer) {
-                let issuer = PublicKeyCredentials(with: i)
-                
+            if let issuer = self.loadIdentity(for: issuer) {
+
                 sync.incr()
-                self.createRequest(for: identity) { certificationRequestInfo, error in
+                self.createRequest(for: identity, keySize: 2048) { certificationRequestInfo, error in
                     
                     if error == nil, let certificationRequestInfo = certificationRequestInfo {
                         
                         sync.incr()
-                        issuer.certify(certificationRequestInfo: certificationRequestInfo) { cert, error in
+                        self.certifyRequest(certificationRequestInfo: certificationRequestInfo, authority: issuer) { cert, error in
                             
                             if error == nil, let cert = cert {
                                 let data = Data(DEREncoder().encode(cert))
@@ -186,11 +231,17 @@ class Keychain {
     }
     
     /**
-     Create certificate.
+     Create certificate request.
+     
+     Generates a new key pair and associated CertificateRequestInfo structure.
+     
+     - Parameters:
+         - identity:
+         - keySize:
      */
-    func createRequest(for identity: Identity, completionHandler completion: @escaping (CertificationRequestInfo?, Error?) -> Void)
+    func createRequest(for identity: Identity, keySize: Int, completionHandler completion: @escaping (CertificationRequestInfo?, Error?) -> Void)
     {
-        createKeyPair(for: identity) { pair, error in
+        createKeyPair(for: identity, keySize: keySize) { pair, error in
             var certificationRequestInfo: CertificationRequestInfo?
             
             if error == nil, let (publicKey, _) = pair {
@@ -201,6 +252,46 @@ class Keychain {
             }
             
             completion(certificationRequestInfo, error)
+        }
+    }
+    
+    /**
+     Certify request.
+     */
+    public func certifyRequest(certificationRequestInfo: CertificationRequestInfo, authority: SecIdentity, completionHandler completion: @escaping (X509Certificate?, Error?) -> Void)
+    {
+        if let privateKey = authority.privateKey, let certificateData = authority.certificate?.data {
+            
+            let issuer    = try! X509Certificate(from: certificateData)
+            let algorithm = X509Algorithm.sha256WithRSAEncryption // TODO
+            
+            let from    = Date()
+            var expires = from.addingTimeInterval(OneYear)
+            if expires > issuer.tbsCertificate.validity.period.upperBound {
+                expires = issuer.tbsCertificate.validity.period.upperBound
+            }
+            
+            let validity       = X509Validity(period: from...expires)
+            let serialNumber   = X509TBSCertificate.generateSerialNumber()
+            
+            let tbsCertificate = X509TBSCertificate(serialNumber: serialNumber, algorithm: algorithm,
+                                    issuer: issuer.tbsCertificate.subject, validity: validity,
+                                    subject: certificationRequestInfo.subject, publicKey: certificationRequestInfo.subjectPublicKeyInfo)
+            
+            
+            let data       = DEREncoder().encode(tbsCertificate)
+            let digestType = DigestType.sha256
+            let digest     = SHA256()
+            
+            digest.update(bytes: data)
+            
+            let signature      = privateKey.sign(bytes: digest.final(), padding: digestType.padding)!
+            let certificate    = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
+            
+            completion(certificate, nil)
+        }
+        else {
+            completion(nil, SecurityKitError.failed)
         }
     }
     
@@ -250,17 +341,14 @@ class Keychain {
             var error      : Error?
             
             (certificate, error) = self.createCertificate(from: data)
-            if error == nil, let certificate = certificate {
-                error = self.importCertificate(from: certificate)
+            if error == nil, let cert = certificate {
+                error = self.importCertificate(from: cert)
+                if error != nil {
+                    certificate = nil
+                }
             }
             
-            if error == nil {
-                completion(certificate, nil)
-            }
-            else {
-                completion(nil, error)
-            }
-            
+            completion(certificate, error)
         }
     }
     
@@ -295,7 +383,7 @@ class Keychain {
     /**
      Create key pair for identity and role.
      */
-    func createKeyPair(for identity: Identity) -> (SecKey?, SecKey?)
+    func createKeyPair(for identity: Identity, keySize: Int) -> (SecKey?, SecKey?)
     {
         let label      = identity.string
         let tagPublic  = makePublicKeyTag(for: identity)
@@ -324,8 +412,8 @@ class Keychain {
             parameters[kSecUseKeychain] = keychain
         }
         
-        var publicKey  : SecKey?
-        var privateKey : SecKey?
+        var publicKey : SecKey?
+        var privateKey: SecKey?
         
         let status = SecKeyGeneratePair(parameters as CFDictionary, &publicKey, &privateKey)
         if status != errSecSuccess {
@@ -338,7 +426,7 @@ class Keychain {
     /**
      Create key pair for identity.
      */
-    func createKeyPair(for identity: Identity, completionHandler completion: @escaping ((SecKey, SecKey)?, Error?) -> Void)
+    func createKeyPair(for identity: Identity, keySize: Int, completionHandler completion: @escaping ((SecKey, SecKey)?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             
@@ -360,7 +448,7 @@ class Keychain {
             
             var parameters: [CFString : Any] = [
                 kSecAttrKeyType       : kSecAttrKeyTypeRSA,
-                kSecAttrKeySizeInBits : self.keySize,
+                kSecAttrKeySizeInBits : keySize,
                 kSecPrivateKeyAttrs   : privateKeyAttr,
                 kSecPublicKeyAttrs    : publicKeyAttr
             ]
@@ -383,42 +471,6 @@ class Keychain {
         }
     }
     
-    func removeKeyPair(for identity: Identity) -> Error?
-    {
-        let tagPublic  = makePublicKeyTag(for: identity)
-        let tagPrivate = makePrivateKeyTag(for: identity)
-        var status     : OSStatus
-
-        var queryPublic : [CFString : Any] = [
-            kSecClass              : kSecClassKey,
-            kSecAttrKeyType        : kSecAttrKeyTypeRSA,
-            kSecAttrApplicationTag : tagPublic
-        ]
-        
-        if let keychain = self.keychain {
-            queryPublic[kSecMatchSearchList] = [keychain]
-        }
-        
-        var queryPrivate : [CFString : Any] = [
-            kSecClass              : kSecClassKey,
-            kSecAttrKeyType        : kSecAttrKeyTypeRSA,
-            kSecAttrApplicationTag : tagPrivate
-        ]
-        
-        if let keychain = self.keychain {
-            queryPrivate[kSecMatchSearchList] = [keychain]
-        }
-        
-        status = SecItemDelete(queryPublic as CFDictionary)
-        if status != errSecSuccess {
-            return NSError(osstatus: status)
-        }
-        
-        status = SecItemDelete(queryPrivate as CFDictionary)
-        return NSError(osstatus: status)
-    }
-    
-    
     /**
      Load public key.
      */
@@ -437,8 +489,8 @@ class Keychain {
             kSecMatchLimit         : kSecMatchLimitOne
         ]
         
-        if let keychain = self.keychain {
-            query[kSecMatchSearchList] = [keychain]
+        if let searchList = self.searchList {
+            query[kSecMatchSearchList] = searchList
         }
         
         var result : AnyObject?
@@ -471,8 +523,8 @@ class Keychain {
             kSecMatchLimit         : kSecMatchLimitOne
         ]
         
-        if let keychain = self.keychain {
-            query[kSecMatchSearchList] = [keychain]
+        if let searchList = self.searchList {
+            query[kSecMatchSearchList] = searchList
         }
         
         var result : AnyObject?
@@ -485,6 +537,38 @@ class Keychain {
         }
         
         return key
+    }
+    
+    func removeKeyPair(for identity: Identity) -> Error?
+    {
+        let tagPublic  = makePublicKeyTag(for: identity)
+        let tagPrivate = makePrivateKeyTag(for: identity)
+        var status     : OSStatus
+        
+        var queryPublic : [CFString : Any] = [
+            kSecClass              : kSecClassKey,
+            kSecAttrKeyType        : kSecAttrKeyTypeRSA,
+            kSecAttrApplicationTag : tagPublic
+        ]
+        
+        var queryPrivate : [CFString : Any] = [
+            kSecClass              : kSecClassKey,
+            kSecAttrKeyType        : kSecAttrKeyTypeRSA,
+            kSecAttrApplicationTag : tagPrivate
+        ]
+        
+        if let searchList = self.searchList {
+            queryPublic[kSecMatchSearchList]  = searchList
+            queryPrivate[kSecMatchSearchList] = searchList
+        }
+        
+        status = SecItemDelete(queryPublic as CFDictionary)
+        if status != errSecSuccess {
+            return NSError(osstatus: status)
+        }
+        
+        status = SecItemDelete(queryPrivate as CFDictionary)
+        return NSError(osstatus: status)
     }
     
     // MARK: - Shared Secret
@@ -543,8 +627,8 @@ class Keychain {
                 kSecMatchLimit  : kSecMatchLimitOne
             ]
             
-            if let keychain = self.keychain {
-                query[kSecMatchSearchList] = [keychain]
+            if let searchList = self.searchList {
+                query[kSecMatchSearchList] = searchList
             }
             
             var result : AnyObject?
@@ -569,9 +653,9 @@ class Keychain {
      interned for identity.
      
      - Parameters:
-        - identity:   The identity to which the shared secret will be associated.
-        - completion: A completion handler that will be invoked will the result
-                      of the operation.
+         - identity:   The identity to which the shared secret will be associated.
+         - completion: A completion handler that will be invoked will the result
+                       of the operation.
      */
     func removeSharedKey(for identity: Identity, completionHandler completion: @escaping (Error?) -> Void)
     {
@@ -583,8 +667,8 @@ class Keychain {
                 kSecAttrAccount : identity.string
             ]
             
-            if let keychain = self.keychain {
-                query[kSecMatchSearchList] = [keychain]
+            if let searchList = self.searchList {
+                query[kSecMatchSearchList] = searchList
             }
             
             let status = SecItemDelete(query as CFDictionary)
@@ -599,19 +683,24 @@ class Keychain {
     /**
      Import identity.
      
-     Imprt identity from PKCS12 data.
+     Import identity from PKCS12 data.
      
      - Parameters:
-        - data:     PKCS12 encoded data.
-        - password: Password needed to access PKCS12 data.
+         - data:       PKCS12 encoded data.
+         - password:   Password needed to access PKCS12 data.
+         - completion: Completion handler.
      */
     func importIdentity(from data: Data, with password: String, completionHandler completion: @escaping (SecIdentity?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             
-            let options: [CFString : Any] = [
+            var options: [CFString : Any] = [
                 kSecImportExportPassphrase: password
             ]
+            
+            if let keychain = self.keychain {
+                options[kSecImportExportKeychain] = keychain
+            }
             
             var result  : CFArray?
             var error   : Error?
@@ -622,12 +711,13 @@ class Keychain {
             
             if error == nil, let array = result as? [[CFString : Any]] {
                 if array.count > 0 {
-                    let id = array[0][kSecImportItemIdentity] as! SecIdentity
+                    identity = array[0][kSecImportItemIdentity] as! SecIdentity?
                     
-                    error = self.importIdentity(id)
-                    if error == nil {
-                        identity = id
+                    #if os(iOS)
+                    if let identity = identity {
+                        error = self.importIdentity(identity)
                     }
+                    #endif
                 }
             }
             
@@ -640,7 +730,7 @@ class Keychain {
      Import identity.
      
      - Parameters:
-        - identity: Identity to be imported into the keychain.
+         - identity: Identity to be imported into the keychain.
      */
     func importIdentity(_ identity: SecIdentity) -> Error?
     {
@@ -664,10 +754,10 @@ class Keychain {
         DispatchQueue.module.async {
 
             var error    : Error?
-            let identity = SecIdentity.find(for: identity)
+            let identity = self.loadIdentity(for: identity)
             
             if identity == nil {
-                error = MedKitError.notFound
+                error = SecurityKitError.notFound
             }
             
             completion(identity, error)
@@ -680,10 +770,10 @@ class Keychain {
      */
     func loadIdentity(for identity: Identity) -> SecIdentity?
     {
-        return SecIdentity.find(for: identity)
+        return SecIdentity.find(for: identity, searchList: searchList)
     }
     
-    // MARK: - Labels & Tags}
+    // MARK: - Labels & Tags
     
     private func makePublicKeyTag(for identity: Identity) -> Data
     {

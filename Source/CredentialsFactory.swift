@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 protocol CredentialsFactory: class {
@@ -28,7 +28,7 @@ protocol CredentialsFactory: class {
     // MARK: - Instantiation
     
     //func instantiate(for identity: Identity) -> Credentials
-    func instantiate(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    func instantiate(for identity: Identity, from profile: Any, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     
 }
 

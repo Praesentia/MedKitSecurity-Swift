@@ -20,18 +20,18 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
- Initialize instance.
+ Initialize module.
  
  - Parameters:
-    - service: Identifies the keychain service.
+    - keychain: 
  */
-public func initialize(service: String, keychain: SecKeychain?)
+public func initialize(keychain: SecKeychain? = nil)
 {
-    Keychain.initializeMain(service: service, keychain: keychain)
+    Keychain.initialize(keychain: keychain)
     SecurityManagerShared.initializeMain(SecurityManagerAOS())
 }
 

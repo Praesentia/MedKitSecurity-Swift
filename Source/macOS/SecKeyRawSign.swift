@@ -63,8 +63,38 @@ func SecKeySetPadding(_ transform: SecTransform, _ padding: SecPadding) -> OSSta
     var error: Unmanaged<CFError>?
     
     switch padding {
-    case SecPadding.PKCS1 :
+    case SecPadding.PKCS1MD5 :
         SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestMD5, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 128 as CFNumber, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        return errSecSuccess
+    
+    case SecPadding.PKCS1SHA1 :
+        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestSHA1, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 160 as CFNumber, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        return errSecSuccess
+        
+    case SecPadding.PKCS1SHA224 :
+        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestSHA2, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 224 as CFNumber, &error)
         guard(error == nil) else { return errSSLCrypto }
         
         return errSecSuccess
@@ -77,6 +107,30 @@ func SecKeySetPadding(_ transform: SecTransform, _ padding: SecPadding) -> OSSta
         guard(error == nil) else { return errSSLCrypto }
         
         SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 256 as CFNumber, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        return errSecSuccess
+        
+    case SecPadding.PKCS1SHA384 :
+        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestSHA2, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 384 as CFNumber, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        return errSecSuccess
+        
+    case SecPadding.PKCS1SHA512 :
+        SecTransformSetAttribute(transform, kSecPaddingKey, kSecPaddingPKCS1Key, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestTypeAttribute, kSecDigestSHA2, &error)
+        guard(error == nil) else { return errSSLCrypto }
+        
+        SecTransformSetAttribute(transform, kSecDigestLengthAttribute, 512 as CFNumber, &error)
         guard(error == nil) else { return errSSLCrypto }
         
         return errSecSuccess

@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -43,14 +43,14 @@ class PublicKey: Key {
     
     // MARK: - Signing
     
-    func sign(bytes: [UInt8]) -> [UInt8]
+    func sign(bytes: [UInt8], padding digest: DigestType) -> [UInt8]
     {
-        return key.sign(bytes: bytes)!
+        return key.sign(bytes: bytes, padding: digest.padding)!
     }
     
-    func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
+    func verify(signature: [UInt8], padding digest: DigestType, for bytes: [UInt8]) -> Bool
     {
-        return key.verify(signature: signature, for: bytes)
+        return key.verify(signature: signature, padding: digest.padding, for: bytes)
     }
     
     func verify(signature: [UInt8], using digestType: DigestType, for data: Data) -> Bool
@@ -59,7 +59,7 @@ class PublicKey: Key {
         
         digest.update(data: data)
         
-        return key.verify(signature: signature, for: digest.final())
+        return key.verify(signature: signature, padding: digestType.padding, for: digest.final())
     }
     
 }

@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -72,15 +72,22 @@ class SecurityManagerAOS: SecurityManager {
      */
     public func randomBytes(count: Int) -> [UInt8]
     {
-        var bytes  = [UInt8](repeating: 0, count: count)
-        var result : Int32
-        
-        result = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        if result != errSecSuccess { // TODO: Under what circumstances would this occur?
-            fatalError("Unexpected error.")
+        return Random.bytes(count: count)
+    }
+    
+    // MARK: - Public Key Certificates
+    
+    func findRootCertificates(completionHandler completion: @escaping ([Certificate]?, Error?) -> Void)
+    {
+        keychain.findRootCertificates() { certs, error in
+            var certificates: [Certificate]?
+            
+            if error == nil, let certs = certs {
+                certificates = certs.map { X509(using: $0) }
+            }
+            
+            DispatchQueue.main.async { completion(certificates, error) }
         }
-        
-        return bytes
     }
     
     // MARK: - Credentials
@@ -109,9 +116,9 @@ class SecurityManagerAOS: SecurityManager {
     /**
      Create credentials from profile.
      */
-    public func instantiateCredentials(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    public func instantiateCredentials(for identity: Identity, from profile: Any, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
-        if let string = profile[KeyType].string, let type = CredentialsType(string: string) {
+        if let profile = profile as? [String : Any], let string = profile[KeyType] as? String, let type = CredentialsType(string: string) {
             switch type {
             case .null :
                 DispatchQueue.main.async { completion(NullCredentials.shared, nil) }
@@ -124,7 +131,7 @@ class SecurityManagerAOS: SecurityManager {
             }
         }
         else {
-            DispatchQueue.main.async { completion(nil, MedKitError.failed) }
+            DispatchQueue.main.async { completion(nil, SecurityKitError.failed) }
         }
     }
     
@@ -191,7 +198,7 @@ class SecurityManagerAOS: SecurityManager {
     }
     
     /**
-     Import public key credentials from PKCS12 data.
+     Import public key credentials from pkcs12 data.
      */
     func importPublicKeyCredentials(from data: Data, with password: String, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
@@ -220,7 +227,7 @@ class SecurityManagerAOS: SecurityManager {
                 credentials = PublicKeyCredentials(with: certificate, chain: chain)
             }
             else {
-                error = MedKitError.failed
+                error = SecurityKitError.failed
             }
             
             DispatchQueue.main.async { completion(credentials, error) }

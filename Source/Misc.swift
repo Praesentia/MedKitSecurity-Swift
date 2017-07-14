@@ -39,10 +39,5 @@ func +=(lhs: inout [UInt8], rhs: [UInt8]?)
     }
 }
 
-func ~=(lhs: [UInt], rhs: [UInt]) -> Bool
-{
-    return lhs == rhs
-}
-
 
 // End of File

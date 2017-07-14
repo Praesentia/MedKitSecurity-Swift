@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -36,7 +36,7 @@ class SharedSecretCredentialsFactory: CredentialsFactory {
     /**
      Create credentials from profile.
      */
-    func instantiate(for identity: Identity, from profile: JSON, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    func instantiate(for identity: Identity, from profile: Any, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
         SecurityManagerShared.main.loadSharedSecretCredentials(for: identity, completionHandler: completion)
     }

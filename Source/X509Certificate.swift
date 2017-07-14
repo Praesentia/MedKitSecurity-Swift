@@ -20,21 +20,12 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-struct X509Certificate: DERCodable {
+extension X509Certificate: DERCodable {
     
-    var tbsCertificate : X509TBSCertificate
-    var algorithm      : X509Algorithm
-    var signature      : [UInt8]
-    
-    init(tbsCertificate: X509TBSCertificate, algorithm: X509Algorithm, signature: [UInt8])
-    {
-        self.tbsCertificate = tbsCertificate
-        self.algorithm      = algorithm
-        self.signature      = signature
-    }
+    // MARK: - Initializers
     
     init(from data: Data) throws
     {
@@ -47,6 +38,7 @@ struct X509Certificate: DERCodable {
     
     init(decoder: DERDecoder) throws
     {
+        data           = Data(decoder.bytes)
         tbsCertificate = try X509TBSCertificate(decoder: try decoder.decoderFromSequence())
         algorithm      = try X509Algorithm(decoder: try decoder.decoderFromSequence())
         let s  = try decoder.decodeBitString()

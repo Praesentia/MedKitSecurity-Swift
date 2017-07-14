@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,13 +20,13 @@
 
 
 import XCTest
-import MedKitCore
+import SecurityKit
 @testable import MedKitSecurity
 
 
 class KeyPairTests: XCTestCase {
     
-    let keychain = Keychain(service: SecurityManagerService, keychain: SecKeychain.testKeychain)
+    let keychain = Keychain(keychain: SecKeychain.testKeychain)
     let timeout  = TimeInterval(10)
     var bytes    = [UInt8]()
     
@@ -53,14 +53,14 @@ class KeyPairTests: XCTestCase {
         var signature  : [UInt8]?
         var verified   : Bool = false
         
-        (publicKey, privateKey) = keychain.createKeyPair(for: TestIdentity)
+        (publicKey, privateKey) = keychain.createKeyPair(for: TestIdentity, keySize: 2048)
         XCTAssertNotNil(publicKey)
         XCTAssertNotNil(privateKey)
         
-        signature = privateKey?.sign(bytes: bytes)
+        signature = privateKey?.sign(bytes: bytes, padding: DigestType.sha256.padding)
         XCTAssertNotNil(signature)
         
-        verified = publicKey?.verify(signature: signature!, for: bytes) ?? false
+        verified = publicKey?.verify(signature: signature!, padding: DigestType.sha256.padding, for: bytes) ?? false
         XCTAssertTrue(verified)
         
         publicKey = keychain.loadPublicKey(for: TestIdentity)
@@ -69,10 +69,10 @@ class KeyPairTests: XCTestCase {
         privateKey = keychain.loadPrivateKey(for: TestIdentity)
         XCTAssertNotNil(privateKey)
         
-        signature = privateKey?.sign(bytes: bytes)
+        signature = privateKey?.sign(bytes: bytes, padding: DigestType.sha256.padding)
         XCTAssertNotNil(signature)
         
-        verified = publicKey?.verify(signature: signature!, for: bytes) ?? false
+        verified = publicKey?.verify(signature: signature!, padding: DigestType.sha256.padding, for: bytes) ?? false
         XCTAssertTrue(verified)
         
         error = keychain.removeKeyPair(for: TestIdentity)

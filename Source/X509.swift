@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -41,11 +41,6 @@ public class X509: Certificate {
     public private(set) lazy var identity: Identity? = self.getIdentity()
     
     /**
-     JSON profile.
-     */
-    public var profile: JSON { return getProfile() }
-    
-    /**
      Public key.
      */
     public private(set) lazy var publicKey: Key = PublicKey(self.certificate.publicKey!)
@@ -53,18 +48,23 @@ public class X509: Certificate {
     /**
      Validity date range.
      */
-    public var validity: ClosedRange<Date> { return decoded.tbsCertificate.validity.range }
+    public var validity: ClosedRange<Date> { return decoded.tbsCertificate.validity.period }
+    
+    /**
+     X509 structure.
+     */
+    public var x509: X509Certificate? { return decoded }
     
     // MARK: - Internal Properties
     
     var certificate      : SecCertificate
     
-    var tbsData          : Data                   { return decoded.tbsCertificate.cache }
     var algorithm        : X509Algorithm          { return decoded.algorithm }
     var issuer           : X509Name               { return decoded.tbsCertificate.issuer }
     var signature        : [UInt8]                { return decoded.signature }
     var subject          : X509Name               { return decoded.tbsCertificate.subject }
-
+    var tbsData          : Data                   { return decoded.tbsCertificate.data }
+    
     var basicConstraints : X509BasicConstraints?  { return decoded.tbsCertificate.basicConstraints }
     var keyUsage         : X509KeyUsage?          { return decoded.tbsCertificate.keyUsage }
     var extendedKeyUsage : X509ExtendedKeyUsage?  { return decoded.tbsCertificate.extendedKeyUsage }
@@ -120,14 +120,6 @@ public class X509: Certificate {
     private func decode() -> X509Certificate?
     {
         return try? X509Certificate(from: data)
-    }
-    
-    /**
-     Get profile.
-     */
-    private func getProfile() -> JSON
-    {
-        return JSON(certificate.data.base64EncodedString())
     }
     
 }

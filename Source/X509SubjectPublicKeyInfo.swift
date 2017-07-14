@@ -20,36 +20,23 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-struct X509SubjectPublicKeyInfo: DERCodable {
-    
-    // MARK: - Properties
-    var algorithm        : X509Algorithm
-    var subjectPublicKey : [UInt8]
+extension X509SubjectPublicKeyInfo: DERCodable {
     
     // MARK: - Initializers
     
     init(subjectPublicKey: SecKey)
     {
         self.algorithm        = X509Algorithm.rsaEncryption
-        self.subjectPublicKey = [UInt8](subjectPublicKey.data!)
-    }
-    
-    init(algorithm: X509Algorithm, subjectPublicKey: [UInt8])
-    {
-        self.algorithm        = algorithm
-        self.subjectPublicKey = subjectPublicKey
+        self.subjectPublicKey = X509PublicKey(data: subjectPublicKey.data!)
     }
     
     init(decoder: DERDecoder) throws
     {
-        algorithm = try X509Algorithm(decoder: decoder.decoderFromSequence())
-        
-        let bytes = try decoder.decodeBitString()
-        
-        subjectPublicKey = Array(bytes[1..<bytes.count])
+        algorithm        = try X509Algorithm(decoder: decoder.decoderFromSequence())
+        subjectPublicKey = try X509PublicKey(decoder: decoder)
     }
     
     // MARK: - DERCodable
@@ -59,7 +46,7 @@ struct X509SubjectPublicKeyInfo: DERCodable {
         var bytes = [UInt8]()
         
         bytes += encoder.encode(algorithm)
-        bytes += encoder.encodeBitString(bytes: [0] + subjectPublicKey)
+        bytes += encoder.encode(subjectPublicKey)
             
         return encoder.encodeSequence(bytes: bytes)
     }

@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -30,7 +30,7 @@ class SharedSecretCredentials: Credentials {
     
     // MARK: - Properties
     public let identity : Identity?
-    public var profile  : JSON               { return getProfile() }
+    public var profile  : Any                { return getProfile() }
     public var type     : CredentialsType    { return .sharedSecret }
     public var validity : ClosedRange<Date>? { return nil } // TODO
     
@@ -64,9 +64,9 @@ class SharedSecretCredentials: Credentials {
         - bytes: The bytes being signed.  This will typically be a hash value
             of the actual data.
      */
-    public func sign(bytes: [UInt8]) -> [UInt8]?
+    public func sign(bytes: [UInt8], padding digest: DigestType) -> [UInt8]?
     {
-        return key.sign(bytes: bytes)
+        return key.sign(bytes: bytes, padding: digest)
     }
     
     /**
@@ -76,9 +76,9 @@ class SharedSecretCredentials: Credentials {
         - bytes: The bytes that were originally signed.  This will typically be
         a hash value of the actual data.
      */
-    public func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
+    public func verify(signature: [UInt8], padding digest: DigestType, for bytes: [UInt8]) -> Bool
     {
-        return key.verify(signature: signature, for: bytes)
+        return key.verify(signature: signature, padding: digest, for: bytes)
     }
     
     /**
@@ -91,9 +91,9 @@ class SharedSecretCredentials: Credentials {
      - Returns:
         Returns the generated JSON profile.
      */
-    private func getProfile() -> JSON
+    private func getProfile() -> Any
     {
-        let profile = JSON()
+        var profile = [String : Any]()
         
         profile[KeyType]     = type.string
         profile[KeyIdentity] = identity?.string

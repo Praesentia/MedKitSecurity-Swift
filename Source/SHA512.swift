@@ -21,7 +21,7 @@
 
 import CommonCrypto
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**

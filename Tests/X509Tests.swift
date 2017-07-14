@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,26 +20,34 @@
 
 
 import XCTest
-import MedKitCore
+import SecurityKit
 @testable import MedKitSecurity
 
 
-class X509DecoderTests: XCTestCase {
+class X509VerificationTests: XCTestCase {
     
-    var certificateData: Data!
+    var root: X509!
+    var leaf: X509!
     
     override func setUp()
     {
-        let certificateURL = Bundle.tests.url(forResource: "TestCA", ofType: "cer")!
+        let rootURL  = Bundle.tests.url(forResource: "TestCA", ofType: "cer")!
+        let rootData = try! Data(contentsOf: rootURL)
+        let leafURL  = Bundle.tests.url(forResource: "TestUser", ofType: "cer")!
+        let leafData = try! Data(contentsOf: leafURL)
         
-        certificateData = try! Data(contentsOf: certificateURL)
+        root = X509(from: rootData)
+        leaf = X509(from: leafData)
     }
     
-    func testDecodeCertificate()
+    func testVerifyRootCertificate()
     {
-        let certificate = try? X509Certificate(from: certificateData)
-        
-        XCTAssertNotNil(certificate)
+        XCTAssertTrue(root.verifySelfSigned())
+    }
+    
+    func testVerifyLeafCertificate()
+    {
+        XCTAssertTrue(root.publicKey.verify(signature: leaf.signature, using: .sha256, for: leaf.tbsData))
     }
     
 }

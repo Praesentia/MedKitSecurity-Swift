@@ -20,9 +20,12 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
+/*
+ Certifciate request information structure.
+ */
 struct CertificationRequestInfo: DERCodable {
     
     // MARK: - Properties
@@ -30,6 +33,8 @@ struct CertificationRequestInfo: DERCodable {
     var subject              : X509Name
     var subjectPublicKeyInfo : X509SubjectPublicKeyInfo
     var attributes           : [UInt8]?
+    
+    // MARK: - Initializers
     
     init(subject: X509Name, subjectPublicKeyInfo: X509SubjectPublicKeyInfo)
     {

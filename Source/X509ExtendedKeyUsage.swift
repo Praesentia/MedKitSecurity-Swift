@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,10 +28,7 @@ import MedKitCore
  
  - Requirement: RFC-5280
  */
-struct X509ExtendedKeyUsage {
-    
-    // MARK: - Properties
-    var purposeIdentifiers = [[UInt]]()
+extension X509ExtendedKeyUsage {
     
     // MARK: - Initializers
     
@@ -42,8 +39,9 @@ struct X509ExtendedKeyUsage {
     {
         let decoder  = DERDecoder(bytes: extn.extnValue)
         let sequence = try decoder.decoderFromSequence()
-        
         try decoder.assertAtEnd()
+        
+        purposeIdentifiers = []
         
         repeat {
             let purposeIdentifier = try sequence.decodeObjectIdentifier()

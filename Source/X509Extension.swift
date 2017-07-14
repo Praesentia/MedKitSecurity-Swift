@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,13 +28,8 @@ import MedKitCore
  
  - Requirement: RFC-5280, 4.1
  */
-struct X509Extension {
-    
-    // MARK: - Properties
-    var extnID    : [UInt]
-    var critical  : Bool
-    var extnValue : [UInt8]
-    
+extension X509Extension {
+  
     // MARK: - Initializers
     
     /**
@@ -44,7 +39,7 @@ struct X509Extension {
      */
     init(decoder: DERDecoder) throws
     {
-        extnID    = try decoder.decodeObjectIdentifier()
+        extnID    = try OID(decoder: decoder)
         
         if try decoder.peekTag() == DERCoder.TagBoolean {
             critical = try decoder.decodeBoolean()

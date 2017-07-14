@@ -20,34 +20,23 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-struct X509Name: Equatable, DERCodable {
+extension X509Name: DERCodable {
     
-    var commonName           : X509String?
-    var localityName         : X509String?
-    var stateOrProvinceName  : X509String?
-    var countryName          : X509String?
-    var organizationName     : X509String?
-    var organizationUnitName : X509String?
-    var emailAddress         : X509String?
-    
-    // MARK: - Private Properties
-    var cache: [UInt8]?
-    
-    init()
-    {
-    }
-    
-    init(from identity: Identity)
-    {
-        commonName = X509String(string: identity.string)
-    }
+    // MARK: - Initializers
     
     init(decoder: DERDecoder) throws
     {
-        cache = decoder.bytes
+        commonName             = nil
+        countryName            = nil
+        localityName           = nil
+        stateOrProvinceName    = nil
+        organizationName       = nil
+        organizationalUnitName = nil
+        emailAddress           = nil
+        cache                  = decoder.bytes
         
         repeat {
             let set = try decoder.decoderFromSet()
@@ -56,34 +45,36 @@ struct X509Name: Equatable, DERCodable {
                 let attributeTypeValue = try X509AttributeValueType(decoder: try set.decoderFromSequence())
                 
                 switch attributeTypeValue.oid {
-                case X520CommonName :
+                case x520CommonName :
                     commonName = attributeTypeValue.value
                     
-                case X520CountryName :
+                case x520CountryName :
                     countryName = attributeTypeValue.value
                     
-                case X520LocalityName :
+                case x520LocalityName :
                     localityName = attributeTypeValue.value
                     
-                case X520StateOrProvinceName :
+                case x520StateOrProvinceName :
                     stateOrProvinceName = attributeTypeValue.value
                     
-                case X520OrganizationName :
+                case x520OrganizationName :
                     organizationName = attributeTypeValue.value
                     
-                case X520OrganizationUnitName :
-                    organizationUnitName = attributeTypeValue.value
+                case x520OrganizationalUnitName :
+                    organizationalUnitName = attributeTypeValue.value
                     
-                case PKCS9EmailAddress :
+                case pkcs9EmailAddress :
                     emailAddress = attributeTypeValue.value
                     
                 default :
-                    throw MedKitError.failed
+                    throw SecurityKitError.failed
                 }
                 
             } while set.more
         } while decoder.more
     }
+    
+    // MARK: - DERCodable
     
     func encode(encoder: DEREncoder) -> [UInt8]
     {
@@ -94,75 +85,36 @@ struct X509Name: Equatable, DERCodable {
         var bytes = [UInt8]()
         
         if let commonName = commonName {
-            bytes += encoder.encode(X509AttributeValueType(oid: X520CommonName, value: commonName))
+            bytes += encoder.encode(X509AttributeValueType(oid: x520CommonName, value: commonName))
         }
         
         if let countryName = countryName {
-            bytes += encoder.encode(X509AttributeValueType(oid: X520CountryName, value: countryName))
+            bytes += encoder.encode(X509AttributeValueType(oid: x520CountryName, value: countryName))
         }
         
         if let localityName = localityName {
-            bytes += encoder.encode(X509AttributeValueType(oid: X520LocalityName, value: localityName))
+            bytes += encoder.encode(X509AttributeValueType(oid: x520LocalityName, value: localityName))
         }
         
         if let stateOrProvinceName = stateOrProvinceName {
-            bytes += encoder.encode(X509AttributeValueType(oid: X520StateOrProvinceName, value: stateOrProvinceName))
+            bytes += encoder.encode(X509AttributeValueType(oid: x520StateOrProvinceName, value: stateOrProvinceName))
         }
         
         if let organizationName = organizationName {
-            bytes += encoder.encode(X509AttributeValueType(oid: X520OrganizationName, value: organizationName))
+            bytes += encoder.encode(X509AttributeValueType(oid: x520OrganizationName, value: organizationName))
         }
         
-        if let organizationUnitName = organizationUnitName {
-            bytes += encoder.encode(X509AttributeValueType(oid: X520OrganizationUnitName, value: organizationUnitName))
+        if let organizationalUnitName = organizationalUnitName {
+            bytes += encoder.encode(X509AttributeValueType(oid: x520OrganizationalUnitName, value: organizationalUnitName))
         }
         
         if let emailAddress = emailAddress {
-            bytes += encoder.encode(X509AttributeValueType(oid: PKCS9EmailAddress, value: emailAddress))
+            bytes += encoder.encode(X509AttributeValueType(oid: pkcs9EmailAddress, value: emailAddress))
         }
         
         return encoder.encodeSequence(bytes: bytes)
     }
     
-    // MARK: - Private
-    
-    private static func decodeAttributeTypeValue(decoder: DERDecoder) throws -> ([UInt], String)
-    {
-        let oid  = try decoder.decodeObjectIdentifier()
-        let tag  = try decoder.peekTag()
-        var value: String
-        
-        switch tag {
-        case DERCoder.TagPrintableString :
-            value = try decoder.decodePrintableString()
-            
-        case DERCoder.TagUTF8String :
-            value = try decoder.decodeUTF8String()
-            
-        case DERCoder.TagIA5String :
-            value = try decoder.decodeIA5String()
-            
-        default :
-            throw MedKitError.failed
-        }
-        
-        try decoder.assertAtEnd()
-        return (oid, value)
-    }
-    
-}
-
-// MARK: - Equatable
-
-func ==(lhs: X509Name, rhs: X509Name) -> Bool
-{
-    return lhs.commonName           == rhs.commonName           &&
-           lhs.localityName         == rhs.localityName         &&
-           lhs.stateOrProvinceName  == rhs.stateOrProvinceName  &&
-           lhs.countryName          == rhs.countryName          &&
-           lhs.organizationName     == rhs.organizationName     &&
-           lhs.organizationUnitName == rhs.organizationUnitName &&
-           lhs.emailAddress         == rhs.emailAddress
 }
 
 

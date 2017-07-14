@@ -20,9 +20,12 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
+/**
+ Certification request.
+ */
 struct CertificationRequest: DERCodable {
     
     // MARK: - Properties

@@ -28,7 +28,7 @@ extension DispatchQueue {
     /**
      Main module dispatch queue.
      
-     - Remarks:
+     - Remark:
         Apparently, the macOS security API is not entirely thread-safe.  Hence,
         the use of a serialized queue.
      */

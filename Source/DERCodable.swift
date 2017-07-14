@@ -37,20 +37,11 @@ protocol DERCodable {
     
 }
 
-extension String: DERCodable {
-    
-    func encode(encoder: DEREncoder) -> [UInt8]
-    {
-        return encoder.encodeUTF8String(self)
-    }
-    
-}
-
 extension UInt: DERCodable {
     
     func encode(encoder: DEREncoder) -> [UInt8]
     {
-        return encoder.encodeInteger(self)
+        return encoder.encodeUnsignedInteger(self)
     }
     
 }

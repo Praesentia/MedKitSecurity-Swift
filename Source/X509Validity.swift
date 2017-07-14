@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,20 +28,9 @@ import MedKitCore
  
  - Requirement: RFC-5280
  */
-struct X509Validity: DERCodable {
-    
-    // MARK: - Properties
-    var range: ClosedRange<Date>
+extension X509Validity: DERCodable {
     
     // MARK: - Initializers
-    
-    /**
-     Initialize instance from extension.
-     */
-    init(range: ClosedRange<Date>)
-    {
-        self.range = range
-    }
     
     /**
      Initialize instance from decoder.
@@ -50,13 +39,13 @@ struct X509Validity: DERCodable {
      */
     init(decoder: DERDecoder) throws
     {
-        let fromDate = try decoder.decodeUTCTime()
-        let toDate   = try decoder.decodeUTCTime()
+        let fromDate  = try decoder.decodeUTCTime()
+        let untilDate = try decoder.decodeUTCTime()
         
-        try decoder.assert(fromDate <= toDate)
+        try decoder.assert(fromDate <= untilDate)
         try decoder.assertAtEnd()
     
-        range = fromDate ... toDate
+        period = fromDate ... untilDate
     }
     
     // MARK: - DERCodable
@@ -65,8 +54,8 @@ struct X509Validity: DERCodable {
     {
         var bytes = [UInt8]()
         
-        bytes += encoder.encodeUTCTime(range.lowerBound)
-        bytes += encoder.encodeUTCTime(range.upperBound)
+        bytes += encoder.encodeUTCTime(period.lowerBound)
+        bytes += encoder.encodeUTCTime(period.upperBound)
         
         return encoder.encodeSequence(bytes: bytes)
     }

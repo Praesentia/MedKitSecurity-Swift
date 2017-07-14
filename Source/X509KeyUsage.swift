@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,33 +28,9 @@ import MedKitCore
  
  - Requirement: RFC 5280
  */
-struct X509KeyUsage: DERCodable {
-    
-    // MARK: - Properties
-    var digitalSignature : Bool
-    var nonRepudiation   : Bool
-    var keyEncipherment  : Bool
-    var dataEncipherment : Bool
-    var keyAgreement     : Bool
-    var keyCertSign      : Bool
-    var cRLSign          : Bool
-    var encipherOnly     : Bool
-    var decipherOnly     : Bool
+extension X509KeyUsage: DERCodable {
     
     // MARK: - Initializers
-    
-    init()
-    {
-        digitalSignature = false
-        nonRepudiation   = false
-        keyEncipherment  = false
-        dataEncipherment = false
-        keyAgreement     = false
-        keyCertSign      = false
-        cRLSign          = false
-        encipherOnly     = false
-        decipherOnly     = false
-    }
     
     /**
      Initialize instance from extension.

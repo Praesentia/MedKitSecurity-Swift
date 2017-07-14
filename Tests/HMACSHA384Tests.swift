@@ -19,11 +19,37 @@
  */
 
 
-import Foundation
+import XCTest
+@testable import MedKitSecurity
 
 
-let PKCS9             : [UInt] = [ 1, 2, 840, 113549, 1, 9 ]
-let PKCS9EmailAddress : [UInt] = PKCS9 + [ 1 ]
+/**
+ HMACSHA384 Tests
+ 
+ - See Also:
+    RFC 4231
+ */
+class HMACSHA384Tests: XCTestCase {
+    
+    let data   = [UInt8](hexString: "4869205468657265")! // "Hi There"
+    let key    = [UInt8](hexString: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")!
+    let value  = [UInt8](hexString: "afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6")!
+    
+    /**
+     - Remark:
+     Only confirms that the correct algorithm is being used.
+     */
+    func testCorrectAlgorithm()
+    {
+        let hmac      = HMACSHA384()
+        var signature : [UInt8]
+        
+        signature = hmac.sign(bytes: data, using: key)
+        
+        XCTAssert(signature == value)
+    }
+    
+}
 
 
 // End of File

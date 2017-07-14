@@ -21,7 +21,7 @@
 
 import CommonCrypto
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -48,7 +48,7 @@ class MD5: Digest {
     
     public func final() -> [UInt8]
     {
-        var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+        var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
         
         CC_MD5_Final(&digest, &context)
         CC_MD5_Init(&context)

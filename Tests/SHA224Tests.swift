@@ -19,31 +19,30 @@
  */
 
 
-import CommonCrypto
-import Foundation
-import MedKitCore
+import XCTest
+@testable import MedKitSecurity
 
 
 /**
- HMAC
+ SHA224 Tests
  */
-class HMAC256: HMAC {
+class SHA224Tests: XCTestCase {
     
-    // MARK: - Private Properties
-    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
-            static let size      = Int(CC_SHA256_DIGEST_LENGTH)
+    let value = [UInt8](hexString: "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f")!
     
-    // MARK: -
-    
-    func sign(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    /**
+     - Remark:
+        Only confirms that the correct algorithm is being used.
+     */
+    func testCorrectAlgorithm()
     {
-        var output = [UInt8](repeating: 0, count: HMAC256.size)
+        let digest = SHA224()
         
-        CCHmac(HMAC256.algorithm, secret, secret.count, bytes, bytes.count, &output)
+        digest.update(string: "")
         
-        return output
+        XCTAssert(digest.final() == value)
     }
-
+    
 }
 
 

@@ -20,26 +20,23 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-private let Minute = TimeInterval(60)
-private let Hour   = TimeInterval(60 * Minute)
-private let Day    = TimeInterval(24 * Hour)
-private let Year   = TimeInterval(365 * Day)
-
+private let Minute  = TimeInterval(60)
+private let Hour    = TimeInterval(60 * Minute)
+private let Day     = TimeInterval(24 * Hour)
+private let Year    = TimeInterval(365 * Day)
+private let OneYear = Year
 
 /**
  Public Key credentials.
- 
- - remark
-    - Placeholder (not implemented).
  */
 class PublicKeyCredentials: Credentials {
     
     // MARK: - Properties
     public var              identity   : Identity?          { return certificate.identity }
-    public var              profile    : JSON               { return getProfile() }
+    public var              profile    : Any                { return getProfile() }
     public var              publicKey  : Key                { return certificate.publicKey }
     public private(set) var privateKey : Key?
     public var              type       : CredentialsType    { return .publicKey }
@@ -48,11 +45,16 @@ class PublicKeyCredentials: Credentials {
     // MARK: - Private Properties
     private var certificate : X509    // leaf certificate
     private var chain       : [X509]  // chain
+    private let trust       : PublicKeyTrust = PublicKeyTrust.main
 
     // MARK: - Initializers
     
     /**
      Initialize instance.
+     
+     - Parameters:
+        - certificate: Certificate.
+        - privateKey:  Private key associated with the certificate.
      */
     init(with certificate: SecCertificate, privateKey: Key? = nil)
     {
@@ -63,6 +65,9 @@ class PublicKeyCredentials: Credentials {
     
     /**
      Initialize instance.
+     
+     - Parameters:
+        - identity: Identity.
      */
     init(with identity: SecIdentity)
     {
@@ -73,6 +78,10 @@ class PublicKeyCredentials: Credentials {
     
     /**
      Initialize instance.
+     
+     - Parameters:
+        - certificate: X509 certificate.
+        - privateKey:  Private key associated with the certificate.
      */
     init(with certificate: X509, privateKey: Key? = nil)
     {
@@ -83,6 +92,11 @@ class PublicKeyCredentials: Credentials {
     
     /**
      Initialize instance.
+     
+     - Parameters:
+        - certificate: X509 certificate.
+        - chain:       X509 certificate chain.
+        - privateKey:  Private key associated with the certificate.
      */
     init(with certificate: X509, chain: [X509], privateKey: Key? = nil)
     {
@@ -98,39 +112,7 @@ class PublicKeyCredentials: Credentials {
      */
     func verifyTrust(completionHandler completion: @escaping (Error?) -> Void)
     {
-        X509Trust.main.verify(leaf: certificate, with: chain, completionHandler: completion)
-    }
-    
-    /**
-     Certify request.
-     */
-    public func certify(certificationRequestInfo: CertificationRequestInfo, completionHandler completion: @escaping (X509Certificate?, Error?) -> Void)
-    {
-        if let privateKey = self.privateKey {
-            
-            let from           = Date()
-            let to             = from.addingTimeInterval(Year)
-            let validity       = from ... to
-            let algorithm      = X509Algorithm.sha256WithRSAEncryption
-            let issuer         = self.certificate.subject
-            let tbsCertificate = X509TBSCertificate(algorithm: algorithm,
-                                        issuer: issuer, validity: validity,
-                                        subject: certificationRequestInfo.subject, publicKey: certificationRequestInfo.subjectPublicKeyInfo)
-
-            
-            let data   = DEREncoder().encode(tbsCertificate)
-            let digest = SHA256()
-            
-            digest.update(bytes: data)
-            
-            let signature      = privateKey.sign(bytes: digest.final())
-            let certificate    = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
-            
-            completion(certificate, nil)
-        }
-        else {
-            completion(nil, MedKitError.failed)
-        }
+        trust.verify(certificate: certificate, with: chain, completionHandler: completion)
     }
     
     // MARK: - Signing
@@ -142,9 +124,9 @@ class PublicKeyCredentials: Credentials {
         - bytes: The bytes being signed.  This will typically be a hash value
             of the actual data.
      */
-    public func sign(bytes: [UInt8]) -> [UInt8]?
+    public func sign(bytes: [UInt8], padding digest: DigestType) -> [UInt8]?
     {
-        return privateKey?.sign(bytes: bytes)
+        return privateKey?.sign(bytes: bytes, padding: digest)
     }
     
     /**
@@ -154,9 +136,9 @@ class PublicKeyCredentials: Credentials {
         - bytes: The bytes that were originally signed.  This will typically be
             a hash value of the actual data.
      */
-    public func verify(signature: [UInt8], for bytes: [UInt8]) -> Bool
+    public func verify(signature: [UInt8], padding digest: DigestType, for bytes: [UInt8]) -> Bool
     {
-        return certificate.publicKey.verify(signature: signature, for: bytes)
+        return certificate.publicKey.verify(signature: signature, padding: digest, for: bytes)
     }
     
     // MARK: - Profile
@@ -164,18 +146,18 @@ class PublicKeyCredentials: Credentials {
     /**
      Get profile.
      
-     Generates a JSON profile representing the credentials.
+     Generates a JSON representation of the credentials.
      
      - Returns:
         Returns the generated JSON profile.
      */
-    private func getProfile() -> JSON
+    private func getProfile() -> Any
     {
-        let profile = JSON()
+        var profile = [String : Any]()
         
         profile[KeyType]             = type.string
-        profile[KeyCertificate]      = certificate.profile
-        profile[KeyCertificateChain] = chain.map { $0.profile }
+        profile[KeyCertificate]      = certificate.data.base64EncodedString()
+        profile[KeyCertificateChain] = chain.map { $0.data.base64EncodedString() }
         
         return profile
     }

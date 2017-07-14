@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,26 +28,7 @@ import MedKitCore
  
  - Requirement: RFC-5280, 4.1
  */
-struct X509TBSCertificate: DERCodable {
-    
-    // MARK: - Properties
-    var cache           : Data
-    
-    var version         : [UInt8]?
-    var serialNumber    : [UInt8]
-    var algorithm       : X509Algorithm
-    var issuer          : X509Name
-    var validity        : X509Validity
-    var subject         : X509Name
-    var publicKey       : X509SubjectPublicKeyInfo
-    var issuerUniqueID  : [UInt8]?
-    var subjectUniqueID : [UInt8]?
-    var extensions      : [X509Extension]?
-    
-    // extensions
-    var basicConstraints : X509BasicConstraints?
-    var keyUsage         : X509KeyUsage?
-    var extendedKeyUsage : X509ExtendedKeyUsage?
+extension X509TBSCertificate: DERCodable {
     
     // MARK: - Private Class Constants
     private static let TagVersion         = DERCoder.makeContextDefinedTag(id: 0, primitive: false)
@@ -57,17 +38,6 @@ struct X509TBSCertificate: DERCodable {
     
     // MARK: - Initializers
     
-    init(algorithm: X509Algorithm, issuer: X509Name, validity: ClosedRange<Date>, subject: X509Name, publicKey: X509SubjectPublicKeyInfo)
-    {
-        self.cache        = Data()
-        self.serialNumber = X509TBSCertificate.generateSerialNumber()
-        self.algorithm    = algorithm
-        self.issuer       = issuer
-        self.validity     = X509Validity(range: validity)
-        self.subject      = subject
-        self.publicKey    = publicKey
-    }
-    
     /**
      Initialize instance from decoder.
      
@@ -75,9 +45,9 @@ struct X509TBSCertificate: DERCodable {
      */
     init(decoder: DERDecoder) throws
     {
-        cache           = Data(decoder.bytes)
+        data            = Data(decoder.bytes)
         version         = try X509TBSCertificate.decodeVersion(decoder: decoder)
-        serialNumber    = try decoder.decodeInteger()
+        serialNumber    = try decoder.decodeUnsignedInteger()
         algorithm       = try X509Algorithm(decoder: try decoder.decoderFromSequence())
         issuer          = try X509Name(decoder: try decoder.decoderFromSequence())
         validity        = try X509Validity(decoder: try decoder.decoderFromSequence())
@@ -87,21 +57,25 @@ struct X509TBSCertificate: DERCodable {
         subjectUniqueID = try X509TBSCertificate.decodeUniqueIdentifier(decoder: decoder, with: X509TBSCertificate.TagSubjectUniqueID)
         extensions      = try X509TBSCertificate.decodeExtensions(decoder: decoder)
         
+        basicConstraints = nil
+        keyUsage         = nil
+        extendedKeyUsage = nil
+        
         if let extensions = extensions {
             for extn in extensions {
                 switch extn.extnID {
-                case X509ExtnBasicConstraints :
+                case x509ExtnBasicConstraints :
                     basicConstraints = try X509BasicConstraints(from: extn)
                     
-                case X509ExtnKeyUsage :
+                case x509ExtnKeyUsage :
                     keyUsage = try X509KeyUsage(from: extn)
                     
-                case X509ExtnExtendedKeyUsage :
+                case x509ExtnExtendedKeyUsage :
                     extendedKeyUsage = try X509ExtendedKeyUsage(from: extn)
                     
                 default :
                     if extn.critical {
-                        throw MedKitError.failed
+                        throw SecurityKitError.failed
                     }
                     break
                 }
@@ -116,8 +90,8 @@ struct X509TBSCertificate: DERCodable {
     {
         var bytes = [UInt8]()
         
-        bytes += encoder.encodeContextDefined(id: 0, primitive: false, bytes: encoder.encodeInteger(2))
-        bytes += encoder.encodeInteger(bytes: serialNumber)
+        bytes += encoder.encodeContextDefined(id: 0, primitive: false, bytes: encoder.encodeUnsignedInteger(2))
+        bytes += encoder.encodeUnsignedInteger(bytes: serialNumber)
         bytes += encoder.encode(algorithm)
         bytes += encoder.encode(issuer)
         bytes += encoder.encode(validity)
@@ -128,7 +102,7 @@ struct X509TBSCertificate: DERCodable {
         return encoder.encodeSequence(bytes: bytes)
     }
     
-    private static func generateSerialNumber() -> [UInt8]
+    static func generateSerialNumber() -> [UInt8]
     {
         var serialNumber = [UInt8](repeating: 0, count: 8)
         var result       : Int32
@@ -138,9 +112,6 @@ struct X509TBSCertificate: DERCodable {
             fatalError("Unexpected error.")
         }
         
-        if (serialNumber[0] & 0x80) == 0x80 {
-            return [0] + serialNumber
-        }
         return serialNumber
     }
     
@@ -157,54 +128,12 @@ struct X509TBSCertificate: DERCodable {
         return encoder.encodeContextDefined(id: 3, primitive: false, bytes: data)!
     }
     
-    /*
-    private func encodeExtSubjectKeyIdentifier(encoder: DEREncoder, _ key: SecKey) -> [UInt8]
-    {
-        let encodedKey    = [UInt8](SecKeyCopyExternalRepresentation(key, nil)! as Data)
-        var data          = [UInt8]()
-        var keyIdentifier : [UInt8]
-        let digest        = SHA1()
-        
-        digest.update(bytes: [0] + encodedKey)
-        keyIdentifier = encoder.encodeOctetString(bytes: digest.final())
-        
-        data += encoder.encodeObjectIdentifier(components: X509ExtnSubjectKeyIdentifier)
-        data += encoder.encodeOctetString(bytes: keyIdentifier)
-        
-        return encoder.encodeSequence(bytes: data)
-    }
-    
-    private func encodeExtAuthorityKeyIdentifier(encoder: DEREncoder, _ key: SecKey) -> [UInt8]
-    {
-        let encodedKey    = [UInt8](SecKeyCopyExternalRepresentation(key, nil)! as Data)
-        var data          = [UInt8]()
-        var name          : [UInt8]?
-        var value         = [UInt8]()
-        var keyIdentifier : [UInt8]
-        let digest        = SHA1()
-        
-        digest.update(bytes: [0] + encodedKey)
-        keyIdentifier = encoder.encodeOctetString(bytes: digest.final())
-        
-        name   = encoder.encodeContextDefined(id: 4, primitive: false, bytes: encoder.encode(issuer))
-        value += encoder.encodeContextDefined(id: 0, primitive: false, bytes: keyIdentifier)
-        value += encoder.encodeContextDefined(id: 1, primitive: false, bytes: name)
-        value += encoder.encodeContextDefined(id: 2, primitive: true,  bytes: serialNumber)
-        value  = encoder.encodeSequence(bytes: value)
-        
-        data += encoder.encodeObjectIdentifier(components: X509ExtnAuthorityKeyIdentifier)
-        data += encoder.encodeOctetString(bytes: value)
-        
-        return encoder.encodeSequence(bytes: data)
-    }
-    */
-    
     private func encodeExtKeyUsage(encoder: DEREncoder) -> [UInt8]
     {
         var data     = [UInt8]()
         let valueSeq = encoder.encodeBitString(bytes: [ 0x07, 0xff, 0x80])
         
-        data += encoder.encodeObjectIdentifier(components: X509ExtnKeyUsage)
+        data += encoder.encode(x509ExtnKeyUsage)
         data += encoder.encodeBoolean(true) // critical
         data += encoder.encodeOctetString(bytes: valueSeq)
         
@@ -217,7 +146,7 @@ struct X509TBSCertificate: DERCodable {
         let value    = encoder.encodeBoolean(true)
         let valueSeq = encoder.encodeSequence(bytes: value)
         
-        data += encoder.encodeObjectIdentifier(components: X509ExtnBasicConstraints)
+        data += encoder.encode(x509ExtnBasicConstraints)
         data += encoder.encodeBoolean(true) // critical
         data += encoder.encodeOctetString(bytes: valueSeq)
         

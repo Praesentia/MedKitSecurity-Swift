@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitCore.
+ This source file is part of MedKitSecurity.
  
  Copyright 2017 Jon Griffeth
  
@@ -33,17 +33,7 @@ func instantiateTestKeychain() -> SecKeychain?
     try? fileManager.removeItem(at: testKeychainURL)
     
     if let keychain = SecKeychain.create(url: testKeychainURL, password: testKeychainPassword) {
-        var settings = SecKeychainSettings()
-        
-        settings.lockInterval    = UInt32.max
-        settings.lockOnSleep     = false
-        settings.useLockInterval = false
-        
-        if SecKeychainSetSettings(keychain, &settings) == errSecSuccess {
-            if keychain.unlock(password: testKeychainPassword) {
-                return keychain
-            }
-        }
+        return keychain
     }
 
     assert(false)
@@ -52,6 +42,33 @@ func instantiateTestKeychain() -> SecKeychain?
 extension SecKeychain {
     
     static var testKeychain: SecKeychain? = instantiateTestKeychain()
+    
+    class func create(url: URL, password: String) -> SecKeychain?
+    {
+        let pathname       = url.path
+        var password       = password.utf8
+        let passwordLength = UInt32(password.count)
+        var keychain       : SecKeychain?
+        
+        let status = SecKeychainCreate(pathname, passwordLength, &password, false, nil, &keychain)
+        
+        switch status {
+        case errSecSuccess :
+            return keychain
+            
+        default :
+            return nil
+        }
+    }
+    
+    func unlock(password: String) -> Bool
+    {
+        var password       = password.utf8
+        let passwordLength = UInt32(password.count)
+        
+        let status = SecKeychainUnlock(self, passwordLength, &password, true)
+        return status == errSecSuccess
+    }
     
 }
 

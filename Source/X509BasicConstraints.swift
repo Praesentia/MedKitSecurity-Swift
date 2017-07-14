@@ -20,7 +20,7 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
@@ -28,11 +28,7 @@ import MedKitCore
  
  - Requirement: RFC-5280
  */
-struct X509BasicConstraints {
-    
-    // MARK: - Properties
-    var cA    : Bool
-    var depth : [UInt8]? = nil
+extension X509BasicConstraints {
     
     // MARK: - Initializers
     
@@ -45,6 +41,7 @@ struct X509BasicConstraints {
         let sequence = try decoder.decoderFromSequence()
         
         cA    = try sequence.decodeBoolean()
+        depth = []
         //depth = try sequence.decodeInteger()
         
         //try decoder.assertAtEnd()

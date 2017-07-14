@@ -20,16 +20,15 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
 /**
- Base class for DER coders.
+ ASN.1 Distinguished Encoding Rules (DER) coder base class.
  */
 class DERCoder {
     
-    static let ContextDefined      : UInt8 = 0x80
-    static let Constructed         : UInt8 = 0x20
+    // MARK: - Tag Constants
     static let TagBoolean          : UInt8 = 0x01
     static let TagInteger          : UInt8 = 0x02
     static let TagBitString        : UInt8 = 0x03
@@ -48,8 +47,13 @@ class DERCoder {
     static let TagSequence         : UInt8 = 0x30
     static let TagSet              : UInt8 = 0x31
     
-    // MARK: Internal Properties
-    static let dateFormatter = DateFormatter(dateFormat: "yyMMddHHmmss'Z'")
+    // MARK: - Contextual Tag Constants
+    static let ContextDefined      : UInt8 = 0x80
+    static let Constructed         : UInt8 = 0x20
+    
+    // MARK: - Date/Time Formatter
+    static let dateFormatterUTC       = DateFormatter(dateFormat: "yyMMddHHmmss'Z'",   timeZone: TimeZone(abbreviation: "UTC")!)
+    static let dateFormatterUniversal = DateFormatter(dateFormat: "yyyyMMddHHmmss'Z'", timeZone: TimeZone(abbreviation: "UTC")!)
     
     // MARK: - Initializers
     
@@ -65,13 +69,6 @@ class DERCoder {
             return DERCoder.ContextDefined | id
         }
         return DERCoder.ContextDefined | DERCoder.Constructed | id
-    }
-    
-    func assert(_ value: Bool) throws
-    {
-        if !value {
-            throw MedKitError.failed
-        }
     }
     
 }

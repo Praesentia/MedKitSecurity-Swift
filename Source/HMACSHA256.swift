@@ -19,26 +19,32 @@
  */
 
 
+import CommonCrypto
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-let PKCS1RSAEncryption           : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  1 ]
-let PKCS1MD2WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  2 ]
-let PKCS1MD5WithRSAEncryption    : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  4 ]
-let PKCS1SHA1WithRSAEncryption   : [UInt]  = [ 1, 2, 840, 113549, 1, 1,  5 ]
-let PKCS1SHA256WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 11 ]
-let PKCS1SHA384WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 12 ]
-let PKCS1SHA512WithRSAEncryption : [UInt]  = [ 1, 2, 840, 113549, 1, 1, 13 ]
-
-/*
-let mapPKCS1AlgorithmToDigest : [ [UInt] : DigestType ] = [
-    PKCS1MD2WithRSAEncryption    : .md2,
-    PKCS1MD5WithRSAEncryption    : .md5,
-    PKCS1SHA1WithRSAEncryption   : .sha1,
-    PKCS1SHA256WithRSAEncryption : .sha256
-]
+/**
+ SHA256 HMAC
  */
+class HMACSHA256: HMAC {
+    
+    // MARK: - Private Properties
+    private static let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
+            static let size      = Int(CC_SHA256_DIGEST_LENGTH)
+    
+    // MARK: -
+    
+    func sign(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    {
+        var output = [UInt8](repeating: 0, count: HMACSHA256.size)
+        
+        CCHmac(HMACSHA256.algorithm, secret, secret.count, bytes, bytes.count, &output)
+        
+        return output
+    }
+
+}
 
 
 // End of File
