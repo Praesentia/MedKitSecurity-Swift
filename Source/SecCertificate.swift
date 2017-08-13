@@ -29,6 +29,16 @@ extension SecCertificate {
     var data      : Data    { return SecCertificateCopyData(self) as Data }
     var publicKey : SecKey? { return SecCertificateCopyPublicKey(self) }
     
+    /**
+     Create certificate from data.
+     */
+    static func create(from data: Data) -> SecCertificate?
+    {
+        return SecCertificateCreateWithData(nil, data as CFData)
+    }
+    
+    // MARK: Private
+    
     private func getCommonName() -> String?
     {
         var commonName: CFString?
@@ -36,7 +46,7 @@ extension SecCertificate {
         let status = SecCertificateCopyCommonName(self, &commonName)
         return (status == errSecSuccess) ? commonName as String? : nil
     }
-    
+
 }
 
 

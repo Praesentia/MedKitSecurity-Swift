@@ -26,7 +26,6 @@ import SecurityKit
 
 class KeyPairTests: XCTestCase {
     
-    let keychain = Keychain(keychain: SecKeychain.testKeychain)
     let timeout  = TimeInterval(10)
     var bytes    = [UInt8]()
     
@@ -34,63 +33,41 @@ class KeyPairTests: XCTestCase {
     {
         let digest = SHA256()
         
-        digest.update(bytes: [0, 1, 2, 3, 4, 5, 6, 7 ])
+        digest.update(bytes: [0, 1, 2, 3, 4, 5, 6, 7])
         bytes = digest.final()
         
-        _ = keychain.removeKeyPair(for: TestIdentity)
+        Keychain.initialize(keychain: SecKeychain.testKeychain)
+        _ = Keychain.main.removeKeyPair(for: testName)
     }
     
     override func tearDown()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity)
+        _ = Keychain.main.removeKeyPair(for: testName)
     }
     
     func testCreateKeyPair()
     {
-        var error      : Error?
-        var publicKey  : SecKey?
-        var privateKey : SecKey?
-        var signature  : [UInt8]?
-        var verified   : Bool = false
-        
-        (publicKey, privateKey) = keychain.createKeyPair(for: TestIdentity, keySize: 2048)
-        XCTAssertNotNil(publicKey)
-        XCTAssertNotNil(privateKey)
-        
-        signature = privateKey?.sign(bytes: bytes, padding: DigestType.sha256.padding)
-        XCTAssertNotNil(signature)
-        
-        verified = publicKey?.verify(signature: signature!, padding: DigestType.sha256.padding, for: bytes) ?? false
-        XCTAssertTrue(verified)
-        
-        publicKey = keychain.loadPublicKey(for: TestIdentity)
-        XCTAssertNotNil(publicKey)
-        
-        privateKey = keychain.loadPrivateKey(for: TestIdentity)
-        XCTAssertNotNil(privateKey)
-        
-        signature = privateKey?.sign(bytes: bytes, padding: DigestType.sha256.padding)
-        XCTAssertNotNil(signature)
-        
-        verified = publicKey?.verify(signature: signature!, padding: DigestType.sha256.padding, for: bytes) ?? false
-        XCTAssertTrue(verified)
-        
-        error = keychain.removeKeyPair(for: TestIdentity)
-        XCTAssertNil(error)
-    }
-    
-    func testGenerateKeyPair()
-    {
         /*
-        let expect = expectation(description: "GenerateKeyPair")
+        var signature : [UInt8]?
+        var verified  : Bool = false
         
-        keychain.generateKeyPair(for: TestIdentity, role: SecKeyAuthentication) { error in
-            XCTAssertNil(error)
-            expect.fulfill()
-        }
- 
-        waitForExpectations(timeout: timeout) { error in
+        let (keyPair, error) = KeyStore.main.createKeyPair(for: testName, keySize: 2048)
 
+        XCTAssertNil(error)
+        XCTAssertNotNil(keyPair)
+        
+        if error == nil, let (publicKey, privateKey) = keyPair {
+            signature = privateKey.sign(bytes: self.bytes, padding: DigestType.sha256.padding)
+            XCTAssertNotNil(signature)
+            
+            verified = publicKey.verify(signature: signature!, for: self.bytes, padding: DigestType.sha256.padding)
+            XCTAssertTrue(verified)
+            
+            reloadPrivateKey = KeyStore.main.loadPrivateKey(for: publicKey)
+            XCTAssertNotNil(reloadPrivateKey)
+            
+            signature = reloadPrivateKey?.sign(bytes: self.bytes, padding: DigestType.sha256.padding)
+            XCTAssertNotNil(signature)
         }
          */
     }

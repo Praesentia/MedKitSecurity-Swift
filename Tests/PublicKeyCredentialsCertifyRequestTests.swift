@@ -24,22 +24,34 @@ import SecurityKit
 @testable import MedKitSecurity
 
 
-class X509DecoderTests: XCTestCase {
-    
-    var certificateData: Data!
+class PublicKeyCredentialsCertificationRequestTests: XCTestCase {
     
     override func setUp()
     {
-        let certificateURL = Bundle.tests.url(forResource: "TestCA", ofType: "cer")!
-        
-        certificateData = try! Data(contentsOf: certificateURL)
+        Keychain.initialize(keychain: SecKeychain.testKeychain)
     }
     
-    func testDecodeCertificate()
+    func testCertifyRequest()
     {
-        let certificate = try? X509Certificate(from: certificateData)
+        let data                 = try! Data(contentsOf: testCAP12URL)
+        let (certificate, error) = CertificateStore.main.importCertificate(from: data, with: testCAP12Password)
         
+        XCTAssertNil(error)
         XCTAssertNotNil(certificate)
+        
+        if let certificate = certificate as? X509 {
+            let (certificationRequest, error) = certificate.createCertificationRequest()
+            
+            XCTAssertNil(error)
+            XCTAssertNotNil(certificationRequest)
+            
+            /*
+            if error == nil, let certificationRequest = certificationRequest {
+                let certificate = credentials.certifyRequest(certificationRequest)
+                XCTAssertNotNil(certificate)
+            }
+             */
+        }
     }
     
 }

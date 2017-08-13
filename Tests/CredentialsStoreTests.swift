@@ -24,38 +24,25 @@ import SecurityKit
 @testable import MedKitSecurity
 
 
-class CertificateTests: XCTestCase {
-    
-    let keychain = Keychain(keychain: SecKeychain.testKeychain)
+class CredentialsStoreTests: XCTestCase {
     
     override func setUp()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity)
+        Keychain.initialize(keychain: SecKeychain.testKeychain)
     }
     
-    override func tearDown()
+    func testImportPublicKeyCredentials()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity)
+        let data                 = try! Data(contentsOf: testCAP12URL)
+        let (credentials, error) = CredentialsStore.main.importPublicKeyCredentials(from: data, with: testCAP12Password)
+        
+        XCTAssertNil(error)
+        XCTAssertNotNil(credentials)
     }
     
-    func testCreateCertificate()
-    {
-        let expect = expectation(description: "GenerateKeyPair")
-        
-        keychain.createSelfSignedCertificate(for: TestIdentity) { certificate, error in
-        
-            XCTAssertNil(error)
-            XCTAssertNotNil(certificate)
-         
-            expect.fulfill()
-        }
-        
-        waitForExpectations(timeout: 60) { error in
-            
-        }
-    }
-
 }
 
 
 // End of File
+
+

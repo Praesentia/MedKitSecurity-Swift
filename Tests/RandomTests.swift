@@ -32,9 +32,10 @@ class RandomTests: XCTestCase {
      */
     func testByteCount()
     {
-        let bytes = Random.bytes(count: 20)
-        
-        XCTAssert(bytes.count == 20)
+        for count in [ 20, 0 ] {
+            let bytes = Random.bytes(count: count)
+            XCTAssert(bytes.count == count, "Count \(count)")
+        }
     }
     
 }

@@ -23,32 +23,14 @@ import Foundation
 import SecurityKit
 
 
-extension X509SubjectPublicKeyInfo: DERCodable {
+extension X509SubjectPublicKeyInfo {
     
     // MARK: - Initializers
     
-    init(subjectPublicKey: SecKey)
+    init(publicKey: PublicKey)
     {
-        self.algorithm        = X509Algorithm.rsaEncryption
-        self.subjectPublicKey = X509PublicKey(data: subjectPublicKey.data!)
-    }
-    
-    init(decoder: DERDecoder) throws
-    {
-        algorithm        = try X509Algorithm(decoder: decoder.decoderFromSequence())
-        subjectPublicKey = try X509PublicKey(decoder: decoder)
-    }
-    
-    // MARK: - DERCodable
-    
-    func encode(encoder: DEREncoder) -> [UInt8]
-    {
-        var bytes = [UInt8]()
-        
-        bytes += encoder.encode(algorithm)
-        bytes += encoder.encode(subjectPublicKey)
-            
-        return encoder.encodeSequence(bytes: bytes)
+        self.algorithm        = publicKey.algorithm
+        self.subjectPublicKey = X509PublicKey(data: publicKey.data)
     }
     
 }

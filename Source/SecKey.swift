@@ -26,6 +26,18 @@ extension SecKey {
     
     var data: Data? { return SecKeyCopyExternalRepresentation(self, nil) as Data? }
     
+    class func create(from data: Data, withKeySize keySize: UInt) -> SecKey?
+    {
+        let options : [CFString: Any] = [
+            kSecAttrKeyType       : kSecAttrKeyTypeRSA,
+            kSecAttrKeyClass      : kSecAttrKeyClassPublic,
+            kSecAttrKeySizeInBits : keySize
+        ]
+        var error: Unmanaged<CFError>?
+        
+        return SecKeyCreateWithData(data as CFData, options as CFDictionary, &error)
+    }
+    
     /**
      */
     func sign(bytes: [UInt8], padding: SecPadding) -> [UInt8]?
@@ -39,7 +51,7 @@ extension SecKey {
     
     /**
      */
-    func verify(signature: [UInt8], padding: SecPadding, for bytes: [UInt8]) -> Bool
+    func verify(signature: [UInt8], for bytes: [UInt8], padding: SecPadding) -> Bool
     {
         let status = SecKeyRawVerify(self, padding, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count)
         return status == errSecSuccess

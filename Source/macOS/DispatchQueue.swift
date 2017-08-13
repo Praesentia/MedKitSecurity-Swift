@@ -23,7 +23,7 @@ import Foundation
 
 extension DispatchQueue {
     
-    private static let queueIdentifier = "SecurityManager"
+    private static let queueIdentifier = "SecurityKit"
     
     /**
      Main module dispatch queue.

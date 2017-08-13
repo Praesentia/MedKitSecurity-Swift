@@ -28,7 +28,36 @@ extension SecKeychain {
     /**
      Unit tests run in a simulator with it's own keychain.
      */
-    static let testKeychain: SecKeychain? = nil
+    static var testKeychain: SecKeychain? { return instantiateTestKeychain() }
+    
+    /**
+     Just reset the default keychain.
+     
+     Resets the default keychain by deleting all interesting items.
+     */
+    private static func instantiateTestKeychain() -> SecKeychain?
+    {
+        deleteAll(for: kSecClassIdentity)
+        deleteAll(for: kSecClassCertificate)
+        deleteAll(for: kSecClassKey)
+        deleteAll(for: kSecClassGenericPassword)
+        deleteAll(for: kSecClassInternetPassword)
+        return nil
+    }
+    
+    /**
+     Delete all items of type.
+     */
+    private static func deleteAll(for secClass: CFTypeRef)
+    {
+        let query: [CFString : Any] = [
+            kSecClass : secClass,
+        ]
+        var status: OSStatus
+        
+        status = SecItemDelete(query as CFDictionary)
+        assert(status == errSecSuccess || status == errSecItemNotFound)
+    }
     
 }
 

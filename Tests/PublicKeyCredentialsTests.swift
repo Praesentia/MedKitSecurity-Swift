@@ -26,16 +26,15 @@ import SecurityKit
 
 class PublicKeyCredentialsTests: XCTestCase {
     
-    let keychain = Keychain(keychain: SecKeychain.testKeychain)
-    
     override func setUp()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity)
+        Keychain.initialize(keychain: SecKeychain.testKeychain)
+        _ = Keychain.main.removeKeyPair(for: testName)
     }
     
     override func tearDown()
     {
-        _ = keychain.removeKeyPair(for: TestIdentity)
+        _ = Keychain.main.removeKeyPair(for: testName)
     }
     
     /*

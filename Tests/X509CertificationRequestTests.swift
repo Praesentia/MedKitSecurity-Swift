@@ -19,33 +19,32 @@
  */
 
 
-import Foundation
+import XCTest
 import SecurityKit
+@testable import MedKitSecurity
 
 
-extension X509Algorithm: DERCodable {
+class X509PCKS10CertificationRequestTests: XCTestCase {
     
-    // MARK: - Initializers
-    
-    init(decoder: DERDecoder) throws
+    override func setUp()
     {
-        let oid        = try OID(decoder: decoder)
-        let parameters = try decoder.decodeNull()
-        try decoder.assertAtEnd()
-        
-        self.init(oid: oid, parameters: parameters)
+        Keychain.initialize(keychain: SecKeychain.testKeychain)
     }
     
-    // MARK: - DERCodable
-    
-    func encode(encoder: DEREncoder) -> [UInt8]
+    func testCreateCertificateRequest()
     {
-        var bytes = [UInt8]()
+        let data                 = try! Data(contentsOf: testCAP12URL)
+        let (credentials, error) = CredentialsStore.main.importPublicKeyCredentials(from: data, with: testCAP12Password)
         
-        bytes += encoder.encode(oid)
-        bytes += encoder.encodeNull()
-        
-        return encoder.encodeSequence(bytes: bytes)
+        XCTAssertNil(error)
+        XCTAssertNotNil(credentials)
+
+        if let certificate = credentials?.certificate as? X509 {
+            let (certificationRequest, error) = certificate.createCertificationRequest()
+            
+            XCTAssertNil(error)
+            XCTAssertNotNil(certificationRequest)
+        }
     }
     
 }

@@ -23,40 +23,44 @@ import Foundation
 import SecurityKit
 
 
-extension SecIdentity {
+extension SecurityKitError {
     
-    /**
-     Load certificate.
-     */
-    static func find(for id: Identity, searchList: [SecKeychain]?) -> SecIdentity?
+    private static let osstatusMap: [OSStatus : SecurityKitError] = [
+        errSecInvalidData        : .invalidData,
+        errSecMissingEntitlement : .notPermitted
+    ]
+
+    init?(from osstatus: OSStatus)
     {
-        var query: [CFString : Any] = [
-            kSecClass      : kSecClassIdentity,
-            kSecReturnRef  : kCFBooleanTrue,
-            kSecMatchLimit : kSecMatchLimitAll
-        ]
-        
-        if let searchList = searchList {
-            query[kSecMatchSearchList] = searchList
-        }
-        
-        var result: AnyObject?
-        var status: OSStatus
-        
-        status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status != errSecSuccess {
+        switch osstatus {
+        case errSecSuccess :
             return nil
+            
+        default :
+            self = SecurityKitError.osstatusMap[osstatus] ?? SecurityKitError.failed
         }
-        
-        if let array = result as? [SecIdentity] {
-            for identity in array {
-                if identity.certificate?.commonName == id.string {
-                    return identity
-                }
+    }
+    
+    init?(from error: Error?)
+    {
+        switch error {
+        case nil :
+            return nil
+            
+        case let error as NSError :
+            if error.domain == NSOSStatusErrorDomain {
+                self = SecurityKitError.osstatusMap[Int32(error.code)] ?? .failed
             }
+            else {
+                self = .failed
+            }
+            
+        case let error as SecurityKitError :
+            self = error
+            
+        default :
+            self = .failed
         }
-        
-        return nil
     }
     
 }

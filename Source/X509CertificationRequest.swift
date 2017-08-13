@@ -19,37 +19,20 @@
  */
 
 
-import XCTest
+import Foundation
 import SecurityKit
-@testable import MedKitSecurity
 
 
-class X509VerificationTests: XCTestCase {
-    
-    var root: X509!
-    var leaf: X509!
-    
-    override func setUp()
+extension PCKS10CertificationRequest {
+
+    func verifySignature() -> Bool
     {
-        let rootURL  = Bundle.tests.url(forResource: "TestCA", ofType: "cer")!
-        let rootData = try! Data(contentsOf: rootURL)
-        let leafURL  = Bundle.tests.url(forResource: "TestUser", ofType: "cer")!
-        let leafData = try! Data(contentsOf: leafURL)
-        
-        root = X509(from: rootData)
-        leaf = X509(from: leafData)
+        if let publicKey = try? PublicKeyRSA(from: certificationRequestInfo.subjectPublicKeyInfo.subjectPublicKey.data), let digestType = signatureAlgorithm.digest {
+            return publicKey.verify(signature: signature, for: certificationRequestInfo.bytes, using: digestType)
+        }
+        return false
     }
-    
-    func testVerifyRootCertificate()
-    {
-        XCTAssertTrue(root.verifySelfSigned())
-    }
-    
-    func testVerifyLeafCertificate()
-    {
-        XCTAssertTrue(root.publicKey.verify(signature: leaf.signature, using: .sha256, for: leaf.tbsData))
-    }
-    
+
 }
 
 

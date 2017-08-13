@@ -35,7 +35,8 @@ class SharedSecretCredentials: Credentials {
     public var validity : ClosedRange<Date>? { return nil } // TODO
     
     // MARK: - Private Properties
-    private let key: Key
+    private let digestType: DigestType = .sha256
+    private let key       : Key
     
     // MARK: - Initializers
     
@@ -55,31 +56,19 @@ class SharedSecretCredentials: Credentials {
         completion(nil)
     }
     
-    // MARK: - Signing
+    // MARK: Signing
     
-    /**
-     Sign bytes.
-     
-     - Parameters:
-        - bytes: The bytes being signed.  This will typically be a hash value
-            of the actual data.
-     */
-    public func sign(bytes: [UInt8], padding digest: DigestType) -> [UInt8]?
+    public func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]?
     {
-        return key.sign(bytes: bytes, padding: digest)
+        return key.sign(bytes: bytes, using: digestType)
     }
     
-    /**
-     Verify signature.
-     
-     - Parameters:
-        - bytes: The bytes that were originally signed.  This will typically be
-        a hash value of the actual data.
-     */
-    public func verify(signature: [UInt8], padding digest: DigestType, for bytes: [UInt8]) -> Bool
+    public func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
     {
-        return key.verify(signature: signature, padding: digest, for: bytes)
+        return key.verify(signature: signature, for: bytes, using: digestType)
     }
+
+    // MARK: - Private
     
     /**
      Get profile.

@@ -26,50 +26,53 @@ import Foundation
 let testKeychainURL      = URL(fileURLWithPath: "test.keychain")
 let testKeychainPassword = "test"
 
-func instantiateTestKeychain() -> SecKeychain?
-{
-    let fileManager = FileManager.default
-    
-    try? fileManager.removeItem(at: testKeychainURL)
-    
-    if let keychain = SecKeychain.create(url: testKeychainURL, password: testKeychainPassword) {
-        return keychain
-    }
-
-    assert(false)
-}
 
 extension SecKeychain {
     
-    static var testKeychain: SecKeychain? = instantiateTestKeychain()
+    static var testKeychain: SecKeychain? { return instantiateTestKeychain() }
+    
+    // MARK: Shadowed Properties
+    static var _testKeychain: SecKeychain?
     
     class func create(url: URL, password: String) -> SecKeychain?
     {
-        let pathname       = url.path
-        var password       = password.utf8
-        let passwordLength = UInt32(password.count)
+        var passwordUTF8   = Array(password.utf8)
+        let passwordLength = UInt32(passwordUTF8.count)
         var keychain       : SecKeychain?
         
-        let status = SecKeychainCreate(pathname, passwordLength, &password, false, nil, &keychain)
-        
-        switch status {
-        case errSecSuccess :
-            return keychain
-            
-        default :
+        let status = SecKeychainCreate(url.path, passwordLength, &passwordUTF8, false, nil, &keychain)
+        if status != errSecSuccess {
             return nil
         }
-    }
-    
-    func unlock(password: String) -> Bool
-    {
-        var password       = password.utf8
-        let passwordLength = UInt32(password.count)
         
-        let status = SecKeychainUnlock(self, passwordLength, &password, true)
-        return status == errSecSuccess
+        return keychain
     }
     
+    static func instantiateTestKeychain() -> SecKeychain?
+    {
+        let fileManager = FileManager.default
+        
+        do {
+            if let keychain = _testKeychain {
+                let status = SecKeychainDelete(keychain)
+                assert(status == errSecSuccess)
+            }
+            
+            if fileManager.fileExists(atPath: testKeychainURL.path) {
+                try fileManager.removeItem(at: testKeychainURL)
+            }
+            
+            if let keychain = SecKeychain.create(url: testKeychainURL, password: testKeychainPassword) {
+                _testKeychain = keychain
+                return keychain
+            }
+            
+            assert(false)
+        }
+        catch {
+            assert(false)
+        }
+    }
 }
 
 // End of File

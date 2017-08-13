@@ -19,45 +19,34 @@
  */
 
 
-import Foundation
+import XCTest
 import SecurityKit
+@testable import MedKitSecurity
 
 
-/**
- X509 Validity
- 
- - Requirement: RFC-5280
- */
-extension X509Validity: DERCodable {
+class X509VerificationTests: XCTestCase {
     
-    // MARK: - Initializers
-    
-    /**
-     Initialize instance from decoder.
-     
-     - Requirement: RFC 5280
-     */
-    init(decoder: DERDecoder) throws
+    override func setUp()
     {
-        let fromDate  = try decoder.decodeUTCTime()
-        let untilDate = try decoder.decodeUTCTime()
-        
-        try decoder.assert(fromDate <= untilDate)
-        try decoder.assertAtEnd()
-    
-        period = fromDate ... untilDate
+        Keychain.initialize(keychain: SecKeychain.testKeychain)
     }
     
-    // MARK: - DERCodable
-    
-    func encode(encoder: DEREncoder) -> [UInt8]
+    func testVerifyRootCertificate()
     {
-        var bytes = [UInt8]()
+        let rootData = try! Data(contentsOf: testCACerURL)
+        let root     = X509(from: rootData)!
+
+        XCTAssertTrue(root.selfSigned())
+    }
+    
+    func testVerifyLeafCertificate()
+    {
+        let rootData = try! Data(contentsOf: testCACerURL)
+        let root     = X509(from: rootData)!
+        let leafData = try! Data(contentsOf: testCerURL)
+        let leaf     = X509(from: leafData)!
         
-        bytes += encoder.encodeUTCTime(period.lowerBound)
-        bytes += encoder.encodeUTCTime(period.upperBound)
-        
-        return encoder.encodeSequence(bytes: bytes)
+        XCTAssertTrue(root.publicKey.verify(signature: leaf.signature, for: leaf.x509!.tbsCertificate.bytes, using: leaf.algorithm.digest!))
     }
     
 }

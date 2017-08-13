@@ -23,44 +23,13 @@ import Foundation
 import SecurityKit
 
 
-/**
- Private Key
- */
-class PublicKey: Key {
+extension PublicKey {
     
-    // MARK: - Properties
-    public var blockSize: Int { return SecKeyGetBlockSize(key) }
-    
-    // MARK: Private Properties
-    private let key: SecKey
-    
-    // MARK: - Initializers
-    
-    init(_ key: SecKey)
-    {
-        self.key = key
-    }
-    
-    // MARK: - Signing
-    
-    func sign(bytes: [UInt8], padding digest: DigestType) -> [UInt8]
-    {
-        return key.sign(bytes: bytes, padding: digest.padding)!
-    }
-    
-    func verify(signature: [UInt8], padding digest: DigestType, for bytes: [UInt8]) -> Bool
-    {
-        return key.verify(signature: signature, padding: digest.padding, for: bytes)
-    }
-    
-    func verify(signature: [UInt8], using digestType: DigestType, for data: Data) -> Bool
-    {
-        let digest = instantiateDigest(ofType: digestType)
-        
-        digest.update(data: data)
-        
-        return key.verify(signature: signature, padding: digestType.padding, for: digest.final())
-    }
+    // Default fingerprint for public key.
+    // @par
+    // Keychain utilizes a SHA1 hash of the public key.
+    //
+    var fingerprint: [UInt8] { return fingerprint(using: .sha1) }
     
 }
 

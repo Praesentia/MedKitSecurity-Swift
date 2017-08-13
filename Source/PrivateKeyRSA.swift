@@ -26,13 +26,15 @@ import SecurityKit
 /**
  Private Key
  */
-class PrivateKey: Key {
+class PrivateKeyRSA: PrivateKey {
     
     // MARK: - Properties
-    public var blockSize: Int { return SecKeyGetBlockSize(key) }
+    public let algorithm = X509Algorithm.rsaEncryption
+    public var blockSize : Int  { return SecKeyGetBlockSize(key) }
+    public var keySize   : UInt { return 0 }
     
-    // MARK: Private Properties
-    private let key: SecKey
+    // MARK: Internal Properties
+    let key: SecKey
     
     // MARK: - Initializers
     
@@ -53,26 +55,21 @@ class PrivateKey: Key {
     
     // MARK: - Signing
     
-    func sign(bytes: [UInt8], padding digest: DigestType) -> [UInt8]
+    func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]
     {
-        return key.sign(bytes: bytes, padding: digest.padding)!
+        let digest = instantiateDigest(ofType: digestType)
+        let hash   = digest.hash(bytes: bytes)
+        return key.sign(bytes: hash, padding: digestType.padding)!
     }
     
-    func verify(signature: [UInt8], padding digest: DigestType, for bytes: [UInt8]) -> Bool
+    func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
     {
-        return key.verify(signature: signature, padding: digest.padding, for: bytes)
-    }
-    
-    func verify(signature: [UInt8], using digestType: DigestType, for data: Data) -> Bool
-    {
-        let digest  = instantiateDigest(ofType: digestType)
-        
-        digest.update(data: data)
-        
-        return key.verify(signature: signature, padding: digestType.padding, for: digest.final())
+        let digest = instantiateDigest(ofType: digestType)
+        return key.verify(signature: signature, for: digest.hash(bytes: bytes), padding: digestType.padding)
     }
     
 }
 
 
 // End of File
+

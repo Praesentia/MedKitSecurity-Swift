@@ -29,7 +29,8 @@ import SecurityKit
 class SharedKey: Key {
     
     // MARK: - Properties
-    public var blockSize: Int { return HMACSHA256.size }
+    public var blockSize: Int  { return HMACSHA256.size }
+    public var keySize  : UInt { return UInt(secret.count) * 8 }
     
     // MARK: Private Properties
     private let secret: [UInt8]
@@ -43,22 +44,29 @@ class SharedKey: Key {
     
     // MARK: - Signing
     
+    func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]
+    {
+        let hmac = HMACSHA256()
+
+        return hmac.sign(bytes: bytes, using: secret)
+    }
+    
     func sign(bytes: [UInt8], padding: DigestType) -> [UInt8]
     {
         let hmac = HMACSHA256()
         return hmac.sign(bytes: bytes, using: secret)
     }
     
-    func verify(signature: [UInt8], padding: DigestType, for bytes: [UInt8]) -> Bool
+    func verify(signature: [UInt8], for bytes: [UInt8], padding digestType: DigestType) -> Bool
     {
         let hmac = HMACSHA256()
         return signature == hmac.sign(bytes: bytes, using: secret)
     }
     
-    func verify(signature: [UInt8], using digestType: DigestType, for data: Data) -> Bool
+    func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
     {
         let hmac = instantiateHMAC(using: digestType)
-        return signature == hmac.sign(bytes: [UInt8](data), using: secret)
+        return signature == hmac.sign(bytes: bytes, using: secret)
     }
     
 }

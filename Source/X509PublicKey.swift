@@ -23,37 +23,10 @@ import Foundation
 import SecurityKit
 
 
-/**
- X509 Extension
- */
-extension X509PublicKey: DERCodable {
-    
-    // MARK: - Initializers
-    
-    /**
-     Initialize instance from decoder.
-     
-     - Requirement: RFC 5280
-     */
-    init(decoder: DERDecoder) throws
-    {
-        let bytes   = try decoder.decodeBitString()
-        let decoder = try DERDecoder(bytes: bytes[1..<bytes.count]).decoderFromSequence()
-        
-        let modulus  = try decoder.decodeUnsignedInteger()
-        let exponent = try decoder.decodeUnsignedInteger()
-        try decoder.assertAtEnd()
-        
-        self.init(data: Data(decoder.bytes), modulus: modulus, exponent: exponent)
-    }
-    
-    // MARK: - DERCodable
-    
-    func encode(encoder: DEREncoder) -> [UInt8]
-    {
-        return encoder.encodeBitString(bytes: [0] + [UInt8](data))
-    }
-    
+extension X509PublicKey {
+
+    var publicKey: PublicKey? { return try? PublicKeyRSA(from: data) }
+
 }
 
 

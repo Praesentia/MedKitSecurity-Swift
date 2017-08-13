@@ -19,29 +19,34 @@
  */
 
 
-import Foundation
+import XCTest
+import SecurityKit
+@testable import MedKitSecurity
 
 
-/**
- DER Codable protocol.
- */
-protocol DERCodable {
+class X509Tests: XCTestCase {
     
-    /**
-     Encode object.
-     
-     - Parameters:
-        - encoder: DER encoder.
-     */
-    func encode(encoder: DEREncoder) -> [UInt8]
-    
-}
-
-extension UInt: DERCodable {
-    
-    func encode(encoder: DEREncoder) -> [UInt8]
+    func testInitializers()
     {
-        return encoder.encodeUnsignedInteger(self)
+        let data        = try! Data(contentsOf: testCACerURL)
+        let certificate = X509Certificate(from: data)
+        
+        XCTAssertNotNil(certificate)
+    }
+    
+    func testVerifySignature()
+    {
+        let caData      = try! Data(contentsOf: testCACerURL)
+        let ca          = X509(from: caData)!
+        
+        let cerData     = try! Data(contentsOf: testCerURL)
+        let certificate = X509(from: cerData)!
+        let x509        = certificate.x509!
+        let digest      = x509.algorithm.digest!
+        
+        let result = ca.publicKey.verify(signature: x509.signature, for: x509.tbsCertificate.bytes, using: digest)
+        
+        XCTAssertTrue(result)
     }
     
 }

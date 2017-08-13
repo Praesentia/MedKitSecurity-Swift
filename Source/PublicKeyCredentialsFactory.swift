@@ -24,7 +24,7 @@ import SecurityKit
 
 
 /**
- PublicKeyCredentials factory.
+ PublicKeyCredentialsImpl factory.
  */
 public class PublicKeyCredentialsFactory: CredentialsFactory {
     

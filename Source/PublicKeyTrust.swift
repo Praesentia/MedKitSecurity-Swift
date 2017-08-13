@@ -34,7 +34,7 @@ class PublicKeyTrust {
     static let main = PublicKeyTrust()
     
     // MARK: - Private Properties
-    private lazy var trusted: [X509] = self.getTrustedCertificates()
+    private lazy var trusted: [X509] = CertificateStore.main.getTrustedCertificates()
     
     // MARK: - Initializers
     
@@ -56,7 +56,6 @@ class PublicKeyTrust {
     func verify(certificate: X509, with chain: [X509], completionHandler completion: @escaping (Error?) -> Void)
     {
         DispatchQueue.module.async {
-            
             var error: SecurityKitError?
             
             if !self.verify(certificate: certificate, with: ArraySlice(chain)) {
@@ -78,7 +77,7 @@ class PublicKeyTrust {
     {
         if let authority = chain.first {
             if verify(certificate: authority, with: chain[1..<chain.count]) {
-                return verify(certificate: certificate, issuedBy: authority)
+                return verify(certificate: certificate, certifiedBy: authority)
             }
             return false
         }
@@ -98,12 +97,12 @@ class PublicKeyTrust {
         // TODO: look up authority instead of using list
         
         for authority in trusted {
-            if verify(certificate: certificate, issuedBy: authority) {
+            if verify(certificate: certificate, certifiedBy: authority) {
                 return true
             }
         }
         
-        NSLog("Certificate for \"%s\" is not trusted.", certificate.subject.string)
+        NSLog("Certificate for \"\(certificate.subject.string)\" is not trusted.")
         return false
     }
     
@@ -116,11 +115,11 @@ class PublicKeyTrust {
         - certificate: The certificate.
         - authority:   The authority certificate.
      */
-    private func verify(certificate: X509, issuedBy authority: X509) -> Bool
+    private func verify(certificate: X509, certifiedBy authority: X509) -> Bool
     {
         if (certificate.issuer == authority.subject) && (authority.valid(for: certificate.validity)) {
-            if let digest = authority.algorithm.digest {
-                if authority.publicKey.verify(signature: certificate.signature, using: digest, for: certificate.tbsData) {
+            if let digest = certificate.algorithm.digest {
+                if authority.publicKey.verify(signature: certificate.signature, for: certificate.x509!.tbsCertificate.bytes, using: digest) {
                     return true
                 }
                 else {
@@ -131,13 +130,6 @@ class PublicKeyTrust {
         }
         
         return false
-    }
-    
-    private func getTrustedCertificates() -> [X509]
-    {
-        let certificates = Keychain.main.getTrustedCertificates().map { X509(using: $0) }
-    
-        return certificates.filter { $0.basicConstraints?.cA ?? false }
     }
     
 }

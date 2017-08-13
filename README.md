@@ -46,3 +46,9 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+## Trademarks
+
+Apple iOS operating system is trademark of Apple, Inc.  Apple macOS operating system and XCode developer software are registered trademarks of Apple, Inc.
+
+MedKit framework is a trademark of Jon Griffeth.

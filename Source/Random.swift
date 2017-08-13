@@ -23,6 +23,7 @@ import Foundation
 
 
 /**
+ Secure random number generator.
  */
 class Random {
     
@@ -32,16 +33,16 @@ class Random {
      - Parameters:
         - count: Number of bytes requested.
      
-     - Returns:
+     - Returns∫:
         Returns an array of count bytes.
      */
     static func bytes(count: Int) -> [UInt8]
     {
         var bytes  = [UInt8](repeating: 0, count: count)
-        var result : Int32
+        var status : Int32
         
-        result = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        if result != errSecSuccess { // TODO: Under what circumstances would this occur?
+        status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        if status != errSecSuccess { // TODO: Under what circumstances would this occur?
             fatalError("Unexpected error.")
         }
         
