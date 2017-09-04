@@ -34,7 +34,9 @@ class CertificateStore {
     private let keychain: Keychain = Keychain.main
     
     // MARK: - Initializers
-    
+
+    /** Initilializer
+     */
     init()
     {
     }
@@ -47,8 +49,11 @@ class CertificateStore {
      Creates a new CertificateRequestInfo structure.
      
      - Parameters:
-         - subject:
-         - publicKey:
+         - subject:   X509 subject name.
+         - publicKey: Public key.
+
+     - Returns:
+
      */
     func createCertificationRequest(for subject: X509Name, withPublicKey publicKey: PublicKey) -> PCKS10CertificationRequestInfo
     {
@@ -57,18 +62,18 @@ class CertificateStore {
     }
     
     /**
-     Create certification request.
+     Create certification request info.
      
      Generates a new key pair and associated CertificateRequestInfo structure.
      
      - Parameters:
-         - identity:
-         - keySize:
+         - subject: X509 subject name.
+         - keySize: Key size in bits.
      
      - Invariant:
          (error == nil) ⇒ (certificateRequestInfo != nil)
      */
-    func createCertificationRequest(for subject: X509Name, keySize: UInt) -> (PCKS10CertificationRequestInfo?, Error?)
+    func createCertificationRequestInfo(for subject: X509Name, keySize: UInt) -> (certificateRequestInfo: PCKS10CertificationRequestInfo?, error: Error?)
     {
         var certificationRequestInfo: PCKS10CertificationRequestInfo?
         
@@ -86,12 +91,13 @@ class CertificateStore {
      Creates a self-signed certificate for subject.
      
      - Parameters:
-         - name:
-         - keySize:
-     
+         - subject:  X509 subject name.
+         - keySize:  Key size in bits.
+         - validity: X509 validity range.
+
      - Returns:
-         - error:       Error
          - certificate: A certificate instance.
+         - error:       Error
      
      - Invariant:
          (error == nil) ⇒ (certificate != nil)
@@ -135,7 +141,11 @@ class CertificateStore {
      Import certificate from data.
      
      Imports a certificate into the keychain.
-     
+
+     - Returns:
+         - certificate: A certificate instance.
+         - error:       Error
+
      - Invariant:
          (error == nil) ⇒ (certificate != nil)
      */
@@ -155,9 +165,16 @@ class CertificateStore {
     }
     
     /**
-     Import certificate.
+     Import X059 certificate.
      
-     Imports a certificate into the certificate store.
+     Imports an X509 certificate into the certificate store.
+
+     - Returns:
+         - certificate: A certificate instance.
+         - error:       Error
+
+     - Invariant:
+         (error == nil) ⇒ (certificate != nil)
      */
     func importCertificate(_ certificate: X509Certificate) -> (Certificate?, Error?)
     {
@@ -177,7 +194,10 @@ class CertificateStore {
     /**
      Import certificate.
      
-     Imports a certificate into the certificate store.
+     Imports an ephemeral certificate into the certificate store.
+
+     - Returns:
+
      */
     func importCertificate(_ certificate: Certificate) -> Error?
     {
@@ -190,11 +210,15 @@ class CertificateStore {
     }
     
     /**
-     Import public key credentials from PKCS12 data.
+     Import public key certificate from PKCS12 data.
      
      - Parameters:
          - data    : DER encoded PKCS12 data.
          - password: Password used to unlock the PKCS12 data.
+
+     - Returns:
+         - certificate:
+         - error:
      
      - Invariant:
          (error == nil) ⇒ (certificate != nil)
@@ -215,6 +239,10 @@ class CertificateStore {
 
     /**
      Find root certifcates.
+
+     - Returns:
+         - certificates:
+         - error:
      
      - Invariant:
          (error == nil) ⇒ (certificates != nil)
@@ -232,6 +260,9 @@ class CertificateStore {
     
     /**
      Get trusted root certificates.
+
+     - Returns:
+
      */
     func getTrustedCertificates() -> [X509]
     {
@@ -241,6 +272,10 @@ class CertificateStore {
     
     /**
      Find certifcates.
+
+     - Returns:
+         - certificates:
+         - error:
      
      - Invariant:
          (error == nil) ⇒ (certificates != nil)
@@ -255,19 +290,44 @@ class CertificateStore {
         
         return (nil, SecurityKitError(from: error))
     }
-    
+
+    /**
+     Find certifcate with fingerprint.
+
+      - Returns:
+         - certificate:
+         - error:
+
+     - Invariant:
+         (error == nil) ⇒ (certificate != nil)
+     */
+    func findCertificate(withFingerprint fingerprint: [UInt8]) -> (certificate: X509?, error: Error?)
+    {
+        let (certificate, error) = keychain.findCertificate(withFingerprint: fingerprint)
+
+        if error == nil, let certificate = certificate {
+            return (X509(from: certificate), nil)
+        }
+
+        return (nil, SecurityKitError(from: error))
+    }
+
     // MARK: - Certificate Chains
     
     /**
      Construct certificate chain.
      
      Constructs a certificate chain for the specified certificate.
-     
-     - Remarks:
-         This is pretty crude at the moment, it simply picks the longest path.
-     
+
+      - Returns:
+         - chain:
+         - error:
+
      - Invariant:
          (error == nil) ⇒ (chain != nil)
+
+     - Remarks:
+         This is pretty crude at the moment, it simply picks the longest path.
      */
     func buildCertificateChain(for certificate: Certificate) -> (chain: [X509]?, error: Error?)
     {
@@ -286,6 +346,9 @@ class CertificateStore {
     
     /**
      Instantiate certificate chain from data.
+
+     - Returns:
+
      */
     func instantiateCertificateChain(from list: [Data]) -> [X509]?
     {
@@ -312,6 +375,10 @@ class CertificateStore {
      
      - Precondition:
          !certificate.selfSigned
+
+     - Returns:
+         - chain:
+         - error:
      
      - Invariant:
          (error == nil) ⇒ (chain != nil)

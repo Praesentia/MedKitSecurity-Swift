@@ -25,6 +25,8 @@ import SecurityKit
 
 /**
  KeyStore
+
+ The KeyStore is essentially an adapter to the Keychain facility.
  */
 class KeyStore {
     
@@ -43,7 +45,18 @@ class KeyStore {
     
     /**
      Create public key pair.
-     
+
+     - Parameters:
+         - name:    X509 name to be associated with the keys.
+         - keySize: Key size in bits.
+
+     - Returns:
+         - keyPair:
+             The new key pair, if successful.
+         - error:
+             Nil if successful.  A non-nil value indicates that the operation
+             failed, as well as the reason for the failure.
+
      - Invariant:
          (error == nil) ⇒ (keyPair != nil)
      */
@@ -60,13 +73,14 @@ class KeyStore {
     }
     
     /**
-     Load a public key's associated private key.
+     Load private key associated with a public key.
      
      - Parameters:
-         - publicKey:
+         - publicKey: The public key.
      
      - Returns:
-         ...
+         Returns a private key.  A return value of nil indicates that the
+         private key does not exist within the key store.
      */
     func loadPrivateKey(for publicKey: PublicKey) -> PrivateKey?
     {
@@ -91,10 +105,17 @@ class KeyStore {
          - identity:  The identity to which the shared secret will be associated.
          - secret:    The secret to be interned within the security enclave.
 
+     - Returns:
+         - key:
+             A shared secret key, if successful.
+         - error:
+             Nil if successful.  A non-nil value indicates that the operation
+             failed, as well as the reason for the failure.
+
      - Invariant:
          (error == nil) ⇒ (key != nil)
      */
-    public func importSharedKey(for identity: Identity, with secret: [UInt8]) -> (SharedKey?, Error?)
+    public func importSharedKey(for identity: Identity, with secret: [UInt8]) -> (key: SharedKey?, error: Error?)
     {
         var key: SharedKey?
         
@@ -107,15 +128,22 @@ class KeyStore {
     }
     
     /**
-     Load shared secret key.
+     Load shared secret key for identity.
      
      - Parameters:
-         - identity:  The identity.
-     
+         - identity: The identity associated with the key.
+
+     - Returns:
+         - key:
+             A shared secret key, if successful.
+         - error:
+             Nil if successful.  A non-nil value indicates that the operation
+             failed, as well as the reason for the failure.
+
      - Invariant:
          (error == nil) ⇒ (key != nil)
      */
-    func loadSharedKey(for identity: Identity) -> (SharedKey?, Error?)
+    func loadSharedKey(for identity: Identity) -> (key: SharedKey?, error: Error?)
     {
         var key: SharedKey?
         
@@ -131,9 +159,13 @@ class KeyStore {
      Remove shared secret key.
      
      Removes a shared secret key from the security enclave.
-     
+
      - Parameters:
-         - identity: The identity for the shared key.
+         - identity: The identity associated with the shared key.
+
+     - Returns:
+         Returns nil if successful.  A non-nil value indicates that the
+         operation failed, as well as the reason for the failure.
      */
     public func removeSharedSecretCredentials(for identity: Identity) -> Error?
     {

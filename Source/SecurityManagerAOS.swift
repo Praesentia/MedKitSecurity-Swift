@@ -140,7 +140,32 @@ class SecurityManagerAOS: SecurityManager {
             DispatchQueue.main.async { completion(credentials, error) }
         }
     }
-    
+
+    func findPublicKeyCredentials(withFingerprint fingerprint: [UInt8], completionHandler completion: @escaping (PublicKeyCredentials?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+            let (credentials, error) = CredentialsStore.main.findPublicKeyCredentials(withFingerprint: fingerprint)
+            DispatchQueue.main.async { completion(credentials, error) }
+        }
+    }
+
+    func findPublicKeyCredentials(withFingerprints fingerprints: [[UInt8]], completionHandler completion: @escaping ([PublicKeyCredentials]?, Error?) -> Void)
+    {
+        DispatchQueue.module.async {
+            var credentials = [PublicKeyCredentials]()
+
+            for fingerprint in fingerprints {
+                let (creds, error) = CredentialsStore.main.findPublicKeyCredentials(withFingerprint: fingerprint)
+
+                if error == nil, let creds = creds {
+                    credentials.append(creds)
+                }
+            }
+
+            DispatchQueue.main.async { completion(credentials, nil) }
+        }
+    }
+
     /**
      Create public key credentials.
      
@@ -178,7 +203,7 @@ class SecurityManagerAOS: SecurityManager {
             let subject                  = X509Name(from: identity)
             var error                    : Error?
             
-            (certificationRequestInfo, error) = CertificateStore.main.createCertificationRequest(for: subject, keySize: keySize)
+            (certificationRequestInfo, error) = CertificateStore.main.createCertificationRequestInfo(for: subject, keySize: keySize)
             if error == nil, let certificationRequestInfo = certificationRequestInfo {
                 var x509: X509Certificate?
                 
@@ -236,7 +261,7 @@ class SecurityManagerAOS: SecurityManager {
             var certificationRequestInfo : PCKS10CertificationRequestInfo?
             var error                    : Error?
 
-            (certificationRequestInfo, error) = CertificateStore.main.createCertificationRequest(for: subject, keySize: keySize)
+            (certificationRequestInfo, error) = CertificateStore.main.createCertificationRequestInfo(for: subject, keySize: keySize)
             if error == nil, let certificationRequestInfo = certificationRequestInfo {
                 let issuer = issuer as! PublicKeyCredentialsImpl
                 var x509   : X509Certificate?

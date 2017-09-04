@@ -29,17 +29,15 @@ import SecurityKit
 class PublicKeyRSA: PublicKey {
     
     // MARK: - Properties
-    public var blockSize : Int  { return SecKeyGetBlockSize(key) }
+    public var keySize: UInt { return UInt(modulus.count) * 8 }
     
+    // MARK: - Internal Properties
     let        algorithm = X509Algorithm.rsaEncryption
     var        bytes     : [UInt8]  { return [UInt8](data) }
     var        data      : Data     { return key.data! }
     let        modulus   : [UInt8]
     let        exponent  : [UInt8]
-    var        keySize   : UInt { return UInt(modulus.count) * 8 }
-    
-    // MARK: Internal Properties
-    let key: SecKey
+    let        key       : SecKey
     
     // MARK: - Initializers
     

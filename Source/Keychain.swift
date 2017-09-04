@@ -24,7 +24,13 @@ import SecurityKit
 
 
 /**
- Keychain interface.
+ Keychain
+
+ The Keychain class implements a facade for the Keychain facility provided by
+ iOS and macOS.   The facade is intended to "paper-over" some differences
+ between the two operating system and present a more conventional interface for
+ Swift development.  It also provides some higher-level functionality for
+ support of SecurityKit.
  */
 class Keychain {
     
@@ -40,10 +46,15 @@ class Keychain {
     
     /**
      Initialize main keychain instance.
+
+     The keychain paramter may be used to specify an application specific
+     keychain (macOS only).
      
      - Parameters:
-        - service:  Service identifier.
         - keychain: Keychain instance.
+
+     - Remarks:
+         The keychain parameter is ignored on iOS.
      */
     static func initialize(keychain: SecKeychain?)
     {
@@ -54,9 +65,15 @@ class Keychain {
     
     /**
      Initialize instance.
+
+     The keychain parameter may be used to specify an application specific
+     keychain (macOS only).
      
      - Parameters:
-        - keychain:
+        - keychain: Keychain instance.
+
+     - Remarks:
+         The keychain parameter is ignored on iOS.
      */
     init(keychain: SecKeychain?)
     {
@@ -71,8 +88,14 @@ class Keychain {
     }
     
     // MARK: - Public Key
-    
-    func findRootCertificates() -> ([SecCertificate]?, Error?)
+
+    /**
+     Find root certificates.
+
+     - Invariant:
+         (error == nil) ⇒ (certificates != nil)
+     */
+    func findRootCertificates() -> (certificates: [SecCertificate]?, error: Error?)
     {
         var query : [CFString : Any] = [
             kSecClass      : kSecClassCertificate,
@@ -98,8 +121,41 @@ class Keychain {
         
         return (certificates, error)
     }
-    
-    func findCertificates(withCommonName commonName: String) -> ([SecCertificate]?, Error?)
+
+    /**
+     Get trusted root certificates.
+     */
+    func getTrustedCertificates() -> [SecCertificate]
+    {
+        var query : [CFString : Any] = [
+            kSecClass      : kSecClassCertificate,
+            kSecReturnRef  : kCFBooleanTrue,
+            kSecMatchLimit : kSecMatchLimitAll
+        ]
+
+        if let searchList = self.searchList {
+            query[kSecMatchSearchList]  = searchList
+            //query[kSecMatchTrustedOnly] = true
+        }
+
+        var result: AnyObject?
+        var status: OSStatus
+
+        status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecSuccess, let certificates = result as? [SecCertificate] {
+            return certificates
+        }
+
+        return []
+    }
+
+    /**
+     Find certificates with common name.
+
+     - Invariant:
+         (error == nil) ⇒ (certificates != nil)
+     */
+    func findCertificates(withCommonName commonName: String) -> (certificates: [SecCertificate]?, error: Error?)
     {
         var query : [CFString : Any] = [
             kSecClass                : kSecClassCertificate,
@@ -126,34 +182,44 @@ class Keychain {
         
         return (certificates, error)
     }
-    
     /**
-     Get trusted root certificates.
+     Find certificate with fingerprint.
+
+     - Invariant:
+         (error == nil) ⇒ (certificate != nil)
      */
-    func getTrustedCertificates() -> [SecCertificate]
+    func findCertificate(withFingerprint fingerprint: [UInt8]) -> (certificate: SecCertificate?, error: Error?)
     {
         var query : [CFString : Any] = [
             kSecClass      : kSecClassCertificate,
             kSecReturnRef  : kCFBooleanTrue,
             kSecMatchLimit : kSecMatchLimitAll
         ]
-        
+
         if let searchList = self.searchList {
-            query[kSecMatchSearchList]  = searchList
-            //query[kSecMatchTrustedOnly] = true
+            query[kSecMatchSearchList] = searchList
         }
-        
-        var result: AnyObject?
-        var status: OSStatus
-        
+
+        var result      : AnyObject?
+        var status      : OSStatus
+        var error       : Error?
+        var certificate : SecCertificate?
+
         status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status == errSecSuccess, let certificates = result as? [SecCertificate] {
-            return certificates
+        error  = NSError(osstatus: status)
+
+        if error == nil, let array = result as? [SecCertificate] {
+            for cert in array {
+                if cert.fingerprint == fingerprint {
+                    certificate = cert
+                    break
+                }
+            }
         }
-        
-        return []
+
+        return (certificate, error)
     }
-    
+
     /**
      Import certificate.
      
@@ -182,8 +248,14 @@ class Keychain {
         return SecCertificate.find(keychain, for: identity)
     }
     
+    // MARK: - Key Pairs
+    
     /**
      Create key pair for identity.
+
+     - Parameters:
+         - name   : An X509 name to be assoiciated with the keys.
+         - keySize: Key size in bits.
      
      - Invariant:
          (error == nil) ⇒ (keyPair != nil)
@@ -227,18 +299,17 @@ class Keychain {
     }
     
     /**
-     Load a public key's associated private key.
+     Load private key.
      
      - Parameters:
-         - publicKey:
+         - fingerprint:
+             A SHA1 hash of the associated public key data.
      
      - Returns:
          ...
      */
     func loadPrivateKey(with fingerprint: Data) -> SecKey?
     {
-        var key: SecKey?
-        
         var query : [CFString : Any] = [
             kSecClass                : kSecClassKey,
             kSecAttrKeyClass         : kSecAttrKeyClassPrivate,
@@ -252,6 +323,7 @@ class Keychain {
             query[kSecMatchSearchList] = searchList
         }
         
+        var key   : SecKey?
         var result: AnyObject?
         var status: OSStatus
         
@@ -310,10 +382,11 @@ class Keychain {
      destroyed.
      
      - Parameters:
-        - identity:  The identity to which the shared secret will be associated.
-        - secret:    The secret to be interned within the security enclave.
-        - completion A completion handler that will be invoked with the result
-                     of the operation.
+        - identity: The identity to which the shared secret will be associated.
+        - secret:   The secret to be interned within the security enclave.
+
+     - Returns:
+
      */
     func importSharedKey(for identity: Identity, with secret: [UInt8]) -> Error?
     {
@@ -463,6 +536,30 @@ class Keychain {
         
         let status = SecItemAdd(attributes as CFDictionary, nil)
         return NSError(osstatus: status)
+    }
+    
+    /**
+     Instantiate identity.
+     
+     - Parameters:
+         - certificate: Certificate associated with the identity.
+
+     - Invariant:
+         (error == nil) ⇒ (identity != nil)
+     */
+    func instantiateIdentity(with certificate: SecCertificate) -> (identity: SecIdentity?, error: Error?)
+    {
+        var identity : SecIdentity?
+        var error    : Error?
+        
+        #if os(macOS)
+        let status = SecIdentityCreateWithCertificate(searchList as CFTypeRef?, certificate, &identity)
+        error = NSError(osstatus: status)
+        #else
+        error = SecurityKitError.notSupported
+        #endif
+        
+        return (identity, error)
     }
     
     // MARK: - Tags
