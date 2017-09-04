@@ -43,8 +43,9 @@ class SSLContext2 {
         if let context = context {
             self.context = context
 
-            let _ = SSLSetConnection(context, bridge(obj: self))
-            let _ = SSLSetIOFuncs(context, readFunc, writeFunc)
+            let connection = UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque())
+            let _          = SSLSetConnection(context, connection)
+            let _          = SSLSetIOFuncs(context, readFunc, writeFunc)
         }
         else {
             return nil
@@ -142,7 +143,7 @@ class SSLContext2 {
  */
 fileprivate func readFunc(_ connection: SSLConnectionRef, _ data: UnsafeMutableRawPointer, _ dataLength: UnsafeMutablePointer<Int>) -> OSStatus
 {
-    let connection : SSLContext2 = bridge(ptr: connection)
+    let connection : SSLContext2 = Unmanaged<SSLContext2>.fromOpaque(connection).takeUnretainedValue()
     var status     : OSStatus    = errSecIO
 
     if let delegate = connection.delegate {
@@ -158,7 +159,7 @@ fileprivate func readFunc(_ connection: SSLConnectionRef, _ data: UnsafeMutableR
  */
 fileprivate func writeFunc(_ connection: SSLConnectionRef, _ data: UnsafeRawPointer, _ dataLength: UnsafeMutablePointer<Int>) -> OSStatus
 {
-    let connection : SSLContext2 = bridge(ptr: connection)
+    let connection : SSLContext2 = Unmanaged<SSLContext2>.fromOpaque(connection).takeUnretainedValue()
     var status     : OSStatus    = errSecIO
 
     if let delegate = connection.delegate {
