@@ -25,10 +25,11 @@ import SecurityKit
 
 extension SecCertificate {
     
-    var commonName: String? { return getCommonName() }
-    var data      : Data    { return SecCertificateCopyData(self) as Data }
-    var publicKey : SecKey? { return SecCertificateCopyPublicKey(self) }
-    
+    var commonName  : String? { return getCommonName() }
+    var data        : Data    { return SecCertificateCopyData(self) as Data }
+    var publicKey   : SecKey? { return SecCertificateCopyPublicKey(self) }
+    var fingerprint : [UInt8] { return getFingerprint() }
+
     /**
      Create certificate from data.
      */
@@ -45,6 +46,12 @@ extension SecCertificate {
     
         let status = SecCertificateCopyCommonName(self, &commonName)
         return (status == errSecSuccess) ? commonName as String? : nil
+    }
+
+    private func getFingerprint() -> [UInt8]
+    {
+        let digest = SHA1()
+        return digest.hash(bytes: [UInt8](data))
     }
 
 }

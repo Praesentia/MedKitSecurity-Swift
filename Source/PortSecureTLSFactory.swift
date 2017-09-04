@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of MedKitSecurity.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2016-2017 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,42 +20,21 @@
 
 
 import Foundation
-import SecurityKit
+import MedKitCore
 
 
 /**
- Shared Key
  */
-class SharedKey: Key {
-    
-    // MARK: - Properties
-    public var keySize: UInt { return UInt(secret.count) * 8 }
-    
-    // MARK: Private Properties
-    private let secret: [UInt8]
-    
-    // MARK: - Initializers
-    
-    init(with secret: [UInt8])
+class PortSecureTLSFactory: PortSecureFactory {
+
+    func instantiate(port: MedKitCore.Port, mode: ProtocolMode) -> PortSecure
     {
-        self.secret = secret
-    }
-    
-    // MARK: - Signing
-    
-    func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]
-    {
-        let hmac = instantiateHMAC(using: digestType)
-        return hmac.sign(bytes: bytes, using: secret)
-    }
-    
-    func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
-    {
-        let hmac = instantiateHMAC(using: digestType)
-        return signature == hmac.sign(bytes: bytes, using: secret)
+        return PortSecureTLS(port: port, mode: mode)
     }
     
 }
 
 
 // End of File
+
+

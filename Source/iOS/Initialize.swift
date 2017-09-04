@@ -20,6 +20,7 @@
 
 
 import Foundation
+import MedKitCore
 import SecurityKit
 
 
@@ -30,6 +31,7 @@ public func initialize()
 {
     Keychain.initialize(keychain: nil)
     SecurityManagerShared.initializeMain(SecurityManagerAOS())
+    PortSecureShared.main = PortSecureTLSFactory()
 }
 
 

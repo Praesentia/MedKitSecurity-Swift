@@ -30,7 +30,6 @@ class PrivateKeyRSA: PrivateKey {
     
     // MARK: - Properties
     public let algorithm = X509Algorithm.rsaEncryption
-    public var blockSize : Int  { return SecKeyGetBlockSize(key) }
     public var keySize   : UInt { return 0 }
     
     // MARK: Internal Properties

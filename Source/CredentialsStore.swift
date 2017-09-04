@@ -35,7 +35,9 @@ class CredentialsStore {
     private let keychain: Keychain = Keychain.main
     
     // MARK: Initializers
-    
+
+    /** Initializer
+     */
     init()
     {
     }
@@ -48,7 +50,11 @@ class CredentialsStore {
      - Parameters:
          - data    : DER encoded PKCS12 data.
          - password: Password used to unlock the PKCS12 data.
-     
+
+     - Returns:
+         - credentials:
+         - error:
+
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
      */
@@ -68,6 +74,10 @@ class CredentialsStore {
     
     /**
      Find root credentials.
+
+     - Returns:
+         - credentials:
+         - error:
      
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
@@ -86,6 +96,13 @@ class CredentialsStore {
     
     /**
      Find public key credentials.
+
+     - Parameters:
+         - identity: Identity.
+
+     - Returns:
+         - credentials:
+         - error:
      
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
@@ -111,7 +128,38 @@ class CredentialsStore {
         
         return (credentials, error)
     }
-    
+
+    /**
+     Find public key credentials.
+
+     - Parameters:
+         - fingerprint: The fingerprint associated with the credentials
+            certificate.
+
+     - Returns:
+         - credentials:
+         - error:
+
+     - Invariant:
+         (error == nil) ⇒ (credentials != nil)
+     */
+    func findPublicKeyCredentials(withFingerprint fingerprint: [UInt8]) -> (credentials: PublicKeyCredentials?, error: Error?)
+    {
+        var certificate : X509?
+        var credentials : PublicKeyCredentials?
+        var error       : Error?
+
+        (certificate, error) = CertificateStore.main.findCertificate(withFingerprint: fingerprint)
+        if error == nil, let certificate = certificate {
+            let (chain, error) = CertificateStore.main.buildCertificateChain(for: certificate)
+            if error == nil, let chain = chain {
+                credentials = PublicKeyCredentialsImpl(with: certificate, chain: chain)
+            }
+        }
+
+        return (credentials, error)
+    }
+
     // MARK: - Shared Secret
     
     /**
@@ -124,7 +172,11 @@ class CredentialsStore {
      - Parameters:
          - identity: The identity to which the shared secret will be associated.
          - secret:   The secret to be interned within the security enclave.
-     
+
+     - Returns:
+         - credentials:
+         - error:
+
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
      */
@@ -145,11 +197,15 @@ class CredentialsStore {
      
      - Parameters:
          - identity: The identity.
+
+     - Returns:
+         - credentials:
+         - error:
     
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
      */
-    func loadSharedSecretCredentials(for identity: Identity) -> (Credentials?, Error?)
+    func loadSharedSecretCredentials(for identity: Identity) -> (credentials: Credentials?, error: Error?)
     {
         var credentials: SharedSecretCredentials?
         

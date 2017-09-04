@@ -20,42 +20,31 @@
 
 
 import Foundation
-import SecurityKit
+import MedKitCore
 
 
-/**
- Shared Key
- */
-class SharedKey: Key {
+extension ProtocolMode {
+
+    var protocolSide: SSLProtocolSide { return getProtocolSide() }
     
-    // MARK: - Properties
-    public var keySize: UInt { return UInt(secret.count) * 8 }
-    
-    // MARK: Private Properties
-    private let secret: [UInt8]
-    
-    // MARK: - Initializers
-    
-    init(with secret: [UInt8])
+    private func getProtocolSide() -> SSLProtocolSide
     {
-        self.secret = secret
-    }
-    
-    // MARK: - Signing
-    
-    func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]
-    {
-        let hmac = instantiateHMAC(using: digestType)
-        return hmac.sign(bytes: bytes, using: secret)
-    }
-    
-    func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
-    {
-        let hmac = instantiateHMAC(using: digestType)
-        return signature == hmac.sign(bytes: bytes, using: secret)
+        let protocolSide: SSLProtocolSide
+        
+        switch self {
+        case .client :
+            protocolSide = .clientSide
+        
+        case .server :
+            protocolSide = .serverSide
+        }
+        
+        return protocolSide
     }
     
 }
 
 
 // End of File
+
+

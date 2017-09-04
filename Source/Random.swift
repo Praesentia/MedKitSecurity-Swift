@@ -33,7 +33,7 @@ class Random {
      - Parameters:
         - count: Number of bytes requested.
      
-     - Returns∫:
+     - Returns:
         Returns an array of count bytes.
      */
     static func bytes(count: Int) -> [UInt8]
