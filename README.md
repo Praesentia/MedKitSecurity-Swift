@@ -1,13 +1,13 @@
 
-# MedKit Security
+# SecurityKit for Apple Operating Systems
 
 ## Synopsis
 
 MedKit is an open source framework facilitating secure, bi-directional
 communication with medical devices.
 
-MedKitSecurity is one of a number of MedKit modules which include: MedKit,
-MedKitCore, MedKitDomain, MedKitMIP and SecurityKit.  MedKitSecurity implements the
+SecurityKitAOS is one of a number of MedKit modules which include: MedKit,
+MedKitCore, MedKitDomain, MedKitMIP and SecurityKit.  SecurityKitAOS implements the
 SecurityKit SecurityManager protocol for Apple Operating Systems (AOS), including iOS and
 macOS.
 

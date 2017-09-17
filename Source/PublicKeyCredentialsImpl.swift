@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -37,13 +37,8 @@ class PublicKeyCredentialsImpl: PublicKeyCredentials {
     // MARK: - Properties
     public var certificate : Certificate
     public var chain       : [Certificate]
-    public var identity    : Identity?          { return certificate.identity }
     public var profile     : Any                { return getProfile() }
     public var type        : CredentialsType    { return .publicKey }
-    public var validity    : ClosedRange<Date>? { return certificate.validity }
-
-    public var publicKey  : PublicKey           { return certificate.publicKey }
-    public var privateKey : PrivateKey?         { return certificate.privateKey }
     
     // MARK: - Internal Properties
     let trust: PublicKeyTrust = PublicKeyTrust.main

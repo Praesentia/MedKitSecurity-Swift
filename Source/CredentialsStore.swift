@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -180,13 +180,13 @@ class CredentialsStore {
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
      */
-    public func importSharedSecretCredentials(for identity: Identity, with secret: [UInt8]) -> (Credentials?, Error?)
+    func importSharedSecretCredentials(for identity: Identity, with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm) -> (Credentials?, Error?)
     {
         var credentials: SharedSecretCredentials?
         
-        let (key, error) = KeyStore.main.importSharedKey(for: identity, with: secret)
+        let (key, error) = KeyStore.main.importSharedSecretKeyImpl(for: identity, with: secret, using: encryptionAlgorithm)
         if error == nil, let key = key {
-            credentials = SharedSecretCredentials(for: identity, with: key)
+            credentials = SharedSecretCredentialsImpl(for: identity, with: key)
         }
         
         return (credentials, SecurityKitError(from: error))
@@ -209,9 +209,9 @@ class CredentialsStore {
     {
         var credentials: SharedSecretCredentials?
         
-        let (key, error) = KeyStore.main.loadSharedKey(for: identity)
+        let (key, error) = KeyStore.main.loadSharedSecretKeyImpl(for: identity)
         if error == nil, let key = key {
-            credentials = SharedSecretCredentials(for: identity, with: key)
+            credentials = SharedSecretCredentialsImpl(for: identity, with: key)
         }
         
         return (credentials, SecurityKitError(from: error))

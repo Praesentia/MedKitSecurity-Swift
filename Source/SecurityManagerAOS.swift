@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -409,10 +409,10 @@ class SecurityManagerAOS: SecurityManager {
         - completion A completion handler that will be invoked with the result
                      of the operation.
      */
-    public func importSharedSecretCredentials(for identity: Identity, with secret: [UInt8], completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    public func importSharedSecretCredentials(for identity: Identity, with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
         DispatchQueue.module.async {
-            let (credentials, error) = CredentialsStore.main.importSharedSecretCredentials(for: identity, with: secret)
+            let (credentials, error) = CredentialsStore.main.importSharedSecretCredentials(for: identity, with: secret, using: encryptionAlgorithm)
             DispatchQueue.main.async { completion(credentials, error) }
         }
     }

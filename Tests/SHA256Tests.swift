@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,7 +20,7 @@
 
 
 import XCTest
-@testable import MedKitSecurity
+@testable import SecurityKitAOS
 
 
 /**

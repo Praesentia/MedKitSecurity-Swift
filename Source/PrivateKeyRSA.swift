@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -30,6 +30,7 @@ class PrivateKeyRSA: PrivateKey {
     
     // MARK: - Properties
     public let algorithm = X509Algorithm.rsaEncryption
+    public let encryptionAlgorithm = PublicKeyEncryptionAlgorithm.rsa
     public var keySize   : UInt { return 0 }
     
     // MARK: Internal Properties

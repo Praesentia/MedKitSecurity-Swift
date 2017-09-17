@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -24,23 +24,25 @@ import SecurityKit
 
 
 /**
- Shared Key
+ Shared Secret Key
  */
-class SharedKey: Key {
+class SharedSecretKeyImpl: SharedSecretKey {
     
     // MARK: - Properties
-    public var keySize: UInt { return UInt(secret.count) * 8 }
-    
-    // MARK: Private Properties
-    private let secret: [UInt8]
+    public let encryptionAlogrithm : SymmetricEncryptionAlgorithm
+    public var keySize             : UInt { return UInt(secret.count) * 8 }
+
+    // MARK: - Private Properties
+    private let secret             : [UInt8]
     
     // MARK: - Initializers
     
-    init(with secret: [UInt8])
+    init(with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm)
     {
-        self.secret = secret
+        self.encryptionAlogrithm = encryptionAlgorithm
+        self.secret              = secret
     }
-    
+
     // MARK: - Signing
     
     func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]

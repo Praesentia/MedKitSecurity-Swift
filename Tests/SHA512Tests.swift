@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -19,14 +19,31 @@
  */
 
 
-#import <Cocoa/Cocoa.h>
-
-//! Project version number for MedKitSecurity macOS.
-FOUNDATION_EXPORT double MedKitSecurity_VersionNumber;
-
-//! Project version string for MedKitSecurity macOS.
-FOUNDATION_EXPORT const unsigned char MedKitSecurity_VersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <MedKitSecurity_macOS/PublicHeader.h>
+import XCTest
+@testable import SecurityKitAOS
 
 
+/**
+ SHA512 Tests
+ */
+class SHA512Tests: XCTestCase {
+    
+    let value = [UInt8](hexString: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e")!
+    
+    /**
+     - Remark:
+     Only confirms that the correct algorithm is being used.
+     */
+    func testSimple()
+    {
+        let digest = SHA512()
+        
+        digest.update(string: "")
+        
+        XCTAssert(digest.final() == value)
+    }
+    
+}
+
+
+// End of File

@@ -1,15 +1,15 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
-
+ This source file is part of SecurityKitAOS.
+ 
  Copyright 2017 Jon Griffeth
-
+ 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
+ 
  http://www.apache.org/licenses/LICENSE-2.0
-
+ 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,15 +19,14 @@
  */
 
 
-import Foundation
+#import <UIKit/UIKit.h>
 
+//! Project version number for SecurityKitAOS iOS.
+FOUNDATION_EXPORT double SecurityKitAOS_VersionNumber;
 
-protocol SSLContextDelegate: class {
-    func sslRead(_ context: SSLContext2, _ data: UnsafeMutableRawBufferPointer, _ dataLength: inout Int) -> OSStatus
-    func sslWrite(_ context: SSLContext2, _ data: Data, _ count: inout Int) -> OSStatus
-}
+//! Project version string for SecurityKitAOS iOS.
+FOUNDATION_EXPORT const unsigned char SecurityKitAOS_VersionString[];
 
-
-// End of File
+// In this header, you should import all the public headers of your framework using statements like #import <SecurityKitAOS_iOS/PublicHeader.h>
 
 

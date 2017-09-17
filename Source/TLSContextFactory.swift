@@ -1,8 +1,8 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2016-2017 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -19,14 +19,22 @@
  */
 
 
-#import <UIKit/UIKit.h>
+import Foundation
+import SecurityKit
 
-//! Project version number for MedKitSecurity iOS.
-FOUNDATION_EXPORT double MedKitSecurity_VersionNumber;
 
-//! Project version string for MedKitSecurity iOS.
-FOUNDATION_EXPORT const unsigned char MedKitSecurity_VersionString[];
+/**
+ */
+class TLSContextFactory: TLSFactory {
 
-// In this header, you should import all the public headers of your framework using statements like #import <MedKitSecurity_iOS/PublicHeader.h>
+    func instantiate(mode: TLSMode) -> TLS
+    {
+        return TLSContext(mode.protocolSide, .streamType)
+    }
+
+}
+
+
+// End of File
 
 

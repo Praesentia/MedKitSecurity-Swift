@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -20,7 +20,6 @@
 
 
 import Foundation
-import MedKitCore
 import SecurityKit
 
 
@@ -31,7 +30,7 @@ public func initialize()
 {
     Keychain.initialize(keychain: nil)
     SecurityManagerShared.initializeMain(SecurityManagerAOS())
-    PortSecureShared.main = PortSecureTLSFactory()
+    TLSFactoryShared.main = TLSContextFactory()
 }
 
 

@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -24,10 +24,19 @@ import SecurityKit
 
 
 extension SecurityKitError {
-    
+
     private static let osstatusMap: [OSStatus : SecurityKitError] = [
         errSecInvalidData        : .invalidData,
-        errSecMissingEntitlement : .notPermitted
+        errSecMissingEntitlement : .notPermitted,
+        errSSLClosedAbort        : .aborted,
+        errSSLWouldBlock         : .wouldBlock
+    ]
+
+    private static let errorMap: [SecurityKitError : OSStatus] = [
+        .aborted                    : errSSLClosedAbort,
+        .invalidData                : errSecInvalidData,
+        .notPermitted               : errSecMissingEntitlement,
+        .wouldBlock                 : errSSLWouldBlock
     ]
 
     init?(from osstatus: OSStatus)
@@ -61,6 +70,19 @@ extension SecurityKitError {
         default :
             self = .failed
         }
+    }
+
+    static func osstatus(from error: SecurityKitError?) -> OSStatus
+    {
+        var status: OSStatus = errSecSuccess
+
+        if let error = error {
+            if errorMap[error] == nil {
+                status = errSecSuccess
+            }
+            status = errorMap[error] ?? errSecSuccess // TODO
+        }
+        return status
     }
     
 }

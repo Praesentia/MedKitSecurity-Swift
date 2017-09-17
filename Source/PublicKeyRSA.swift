@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -29,15 +29,17 @@ import SecurityKit
 class PublicKeyRSA: PublicKey {
     
     // MARK: - Properties
-    public var keySize: UInt { return UInt(modulus.count) * 8 }
-    
+    public let              algorithm           = X509Algorithm.rsaEncryption
+    public let              encryptionAlgorithm = PublicKeyEncryptionAlgorithm.rsa
+    public var              keySize             : UInt { return UInt(modulus.count) * 8 }
+    public private(set) var privateKey          : PrivateKey?
+
     // MARK: - Internal Properties
-    let        algorithm = X509Algorithm.rsaEncryption
-    var        bytes     : [UInt8]  { return [UInt8](data) }
-    var        data      : Data     { return key.data! }
-    let        modulus   : [UInt8]
-    let        exponent  : [UInt8]
-    let        key       : SecKey
+    var        bytes               : [UInt8]  { return [UInt8](data) }
+    var        data                : Data     { return key.data! }
+    let        modulus             : [UInt8]
+    let        exponent            : [UInt8]
+    let        key                 : SecKey
     
     // MARK: - Initializers
     
@@ -47,7 +49,8 @@ class PublicKeyRSA: PublicKey {
         
         (modulus, exponent) = try! PublicKeyRSA.decode(decoder)
         
-        self.key = key
+        self.key        = key
+        self.privateKey = KeyStore.main.loadPrivateKey(for: self)
     }
     
     init(from data: Data) throws
@@ -56,6 +59,7 @@ class PublicKeyRSA: PublicKey {
         
         (modulus, exponent) = try PublicKeyRSA.decode(decoder)
         key                 = SecKey.create(from: data, withKeySize: UInt(modulus.count) * 8)!
+        privateKey          = KeyStore.main.loadPrivateKey(for: self)
     }
     
     // MARK: -

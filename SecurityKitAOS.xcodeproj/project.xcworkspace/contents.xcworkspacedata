@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:MedKitSecurity.xcodeproj">
+      location = "self:SecurityKitAOS.xcodeproj">
    </FileRef>
 </Workspace>

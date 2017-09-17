@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -57,9 +57,7 @@ class X509: Certificate {
     
     // MARK: - Internal Properties
     
-    var              certificate : SecCertificate
-    private(set) var privateKey  : PrivateKey?
-    
+    var certificate      : SecCertificate
     var algorithm        : X509Algorithm          { return _x509.algorithm }
     var issuer           : X509Name               { return _x509.tbsCertificate.issuer }
     var signature        : [UInt8]                { return _x509.signature }
@@ -84,7 +82,6 @@ class X509: Certificate {
     {
         self.certificate = certificate
         self._x509       = X509Certificate(from: certificate.data)!
-        self.privateKey  = KeyStore.main.loadPrivateKey(for: self.publicKey)
     }
     
     /**
@@ -97,7 +94,6 @@ class X509: Certificate {
     {
         self.certificate = identity.certificate!
         self._x509       = X509Certificate(from: certificate.data)!
-        self.privateKey  = PrivateKeyRSA(identity.privateKey)
     }
     
     /**

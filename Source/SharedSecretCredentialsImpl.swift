@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -26,24 +26,24 @@ import SecurityKit
 /**
  Shared secret credentials.
  */
-class SharedSecretCredentials: Credentials {
+class SharedSecretCredentialsImpl: SharedSecretCredentials {
     
     // MARK: - Properties
     public let identity : Identity?
+    public let key      : SharedSecretKey
     public var profile  : Any                { return getProfile() }
     public var type     : CredentialsType    { return .sharedSecret }
     public var validity : ClosedRange<Date>? { return nil } // TODO
-    
+
     // MARK: - Private Properties
     private let digestType: DigestType = .sha256
-    private let key       : Key
     
     // MARK: - Initializers
     
     /**
      Initialize instance.
      */
-    init(for identity: Identity, with key: Key)
+    init(for identity: Identity, with key: SharedSecretKeyImpl)
     {
         self.identity = identity
         self.key      = key

@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -32,10 +32,12 @@ extension Bundle {
     
     func url(forResource resource: String, ofType type: String) -> URL?
     {
+        var url: URL?
+
         if let path = path(forResource: resource, ofType: type) {
-            return URL(fileURLWithPath: path)
+            url = URL(fileURLWithPath: path)
         }
-        return nil
+        return url
     }
     
 }

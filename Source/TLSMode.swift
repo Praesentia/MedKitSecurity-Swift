@@ -1,8 +1,8 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
- Copyright 2016-2017 Jon Griffeth
+ Copyright 2017 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,16 +20,26 @@
 
 
 import Foundation
-import MedKitCore
+import SecurityKit
 
 
-/**
- */
-class PortSecureTLSFactory: PortSecureFactory {
+extension TLSMode {
 
-    func instantiate(port: MedKitCore.Port, mode: ProtocolMode) -> PortSecure
+    var protocolSide: SSLProtocolSide { return getProtocolSide() }
+    
+    private func getProtocolSide() -> SSLProtocolSide
     {
-        return PortSecureTLS(port: port, mode: mode)
+        let protocolSide: SSLProtocolSide
+        
+        switch self {
+        case .client :
+            protocolSide = .clientSide
+        
+        case .server :
+            protocolSide = .serverSide
+        }
+        
+        return protocolSide
     }
     
 }

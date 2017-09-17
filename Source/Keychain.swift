@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -29,7 +29,7 @@ import SecurityKit
  The Keychain class implements a facade for the Keychain facility provided by
  iOS and macOS.   The facade is intended to "paper-over" some differences
  between the two operating system and present a more conventional interface for
- Swift development.  It also provides some higher-level functionality for
+ Swift development.  It also provides some higher-level functionality in
  support of SecurityKit.
  */
 class Keychain {
@@ -388,7 +388,7 @@ class Keychain {
      - Returns:
 
      */
-    func importSharedKey(for identity: Identity, with secret: [UInt8]) -> Error?
+    func importSharedSecretKeyImpl(for identity: Identity, with secret: [UInt8]) -> Error?
     {
         var attributes : [CFString : Any] = [
             kSecClass       : kSecClassGenericPassword,
@@ -417,7 +417,7 @@ class Keychain {
      - Invariant:
          (error == nil) ⇒ (secret != nil)
      */
-    func loadSharedKey(for identity: Identity) -> (secret: [UInt8]?, error: Error?)
+    func loadSharedSecretKeyImpl(for identity: Identity) -> (secret: [UInt8]?, error: Error?)
     {
         var query : [CFString : Any] = [
             kSecClass       : kSecClassGenericPassword,
@@ -456,7 +456,7 @@ class Keychain {
          - completion: A completion handler that will be invoked will the result
                        of the operation.
      */
-    func removeSharedKey(for identity: Identity) -> Error?
+    func removeSharedSecretKeyImpl(for identity: Identity) -> Error?
     {
         var query : [CFString : Any] = [
             kSecClass       : kSecClassGenericPassword,

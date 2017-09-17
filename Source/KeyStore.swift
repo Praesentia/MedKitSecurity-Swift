@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -115,13 +115,13 @@ class KeyStore {
      - Invariant:
          (error == nil) ⇒ (key != nil)
      */
-    public func importSharedKey(for identity: Identity, with secret: [UInt8]) -> (key: SharedKey?, error: Error?)
+    public func importSharedSecretKeyImpl(for identity: Identity, with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm) -> (key: SharedSecretKeyImpl?, error: Error?)
     {
-        var key: SharedKey?
+        var key: SharedSecretKeyImpl?
         
-        let error = self.keychain.importSharedKey(for: identity, with: secret)
+        let error = self.keychain.importSharedSecretKeyImpl(for: identity, with: secret)
         if error == nil {
-            key = SharedKey(with: secret)
+            key = SharedSecretKeyImpl(with: secret, using: encryptionAlgorithm)
         }
         
         return (key, SecurityKitError(from: error))
@@ -143,13 +143,13 @@ class KeyStore {
      - Invariant:
          (error == nil) ⇒ (key != nil)
      */
-    func loadSharedKey(for identity: Identity) -> (key: SharedKey?, error: Error?)
+    func loadSharedSecretKeyImpl(for identity: Identity) -> (key: SharedSecretKeyImpl?, error: Error?)
     {
-        var key: SharedKey?
+        var key: SharedSecretKeyImpl?
         
-        let (secret, error) = keychain.loadSharedKey(for: identity)
+        let (secret, error) = keychain.loadSharedSecretKeyImpl(for: identity)
         if error == nil, let secret = secret {
-            key = SharedKey(with: secret)
+            key = SharedSecretKeyImpl(with: secret, using: .aes256)
         }
         
         return (key, SecurityKitError(from: error))
@@ -169,7 +169,7 @@ class KeyStore {
      */
     public func removeSharedSecretCredentials(for identity: Identity) -> Error?
     {
-        let error = keychain.removeSharedKey(for: identity)
+        let error = keychain.removeSharedSecretKeyImpl(for: identity)
         return SecurityKitError(from: error)
     }
 

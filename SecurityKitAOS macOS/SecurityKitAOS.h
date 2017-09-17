@@ -1,6 +1,6 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of MedKitSecurity.
+ This source file is part of SecurityKitAOS.
  
  Copyright 2017 Jon Griffeth
  
@@ -19,20 +19,14 @@
  */
 
 
-import UIKit
+#import <Cocoa/Cocoa.h>
 
-class ViewController: UIViewController {
+//! Project version number for SecurityKitAOS macOS.
+FOUNDATION_EXPORT double SecurityKitAOS_VersionNumber;
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
+//! Project version string for SecurityKitAOS macOS.
+FOUNDATION_EXPORT const unsigned char SecurityKitAOS_VersionString[];
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+// In this header, you should import all the public headers of your framework using statements like #import <SecurityKitAOS_macOS/PublicHeader.h>
 
-
-}
 
