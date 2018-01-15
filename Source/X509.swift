@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ class X509: Certificate {
     var certificate      : SecCertificate
     var algorithm        : X509Algorithm          { return _x509.algorithm }
     var issuer           : X509Name               { return _x509.tbsCertificate.issuer }
-    var signature        : [UInt8]                { return _x509.signature }
+    var signature        : Data                   { return _x509.signature }
     var subject          : X509Name               { return _x509.tbsCertificate.subject }
     
     var basicConstraints : X509BasicConstraints?  { return _x509.tbsCertificate.basicConstraints }
@@ -81,7 +81,7 @@ class X509: Certificate {
     init(from certificate: SecCertificate)
     {
         self.certificate = certificate
-        self._x509       = X509Certificate(from: certificate.data)!
+        self._x509       = try! DERDecoder().decode(X509Certificate.self, from: certificate.data)
     }
     
     /**
@@ -93,7 +93,7 @@ class X509: Certificate {
     init(from identity: SecIdentity)
     {
         self.certificate = identity.certificate!
-        self._x509       = X509Certificate(from: certificate.data)!
+        self._x509       = try! DERDecoder().decode(X509Certificate.self, from: certificate.data)
     }
     
     /**
@@ -103,7 +103,7 @@ class X509: Certificate {
      */
     convenience init?(from certificate: X509Certificate)
     {
-        if let certificate = SecCertificate.create(from: certificate.data) {
+        if let certificate = SecCertificate.create(from: certificate.data!) {
             self.init(from: certificate)
         }
         else {
@@ -117,14 +117,27 @@ class X509: Certificate {
      - Parameters:
         - data: DER encoded X.509 data.
      */
-    convenience init?(from data: Data)
+    convenience init(from data: Data)
     {
-        if let certificate = SecCertificate.create(from: data) {
-            self.init(from: certificate)
-        }
-        else {
-            return nil
-        }
+        let certificate = SecCertificate.create(from: data)
+        self.init(from: certificate!)
+    }
+
+    // MARK: - Codable
+
+    required convenience init(from decoder: Decoder) throws
+    {
+        let container = try decoder.singleValueContainer()
+        let base64    = try container.decode(String.self)
+        let data      = Data(base64Encoded: base64)! // TODO
+
+        self.init(from: data)
+    }
+
+    public func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.singleValueContainer()
+        try container.encode(data.base64EncodedString())
     }
     
     // MARK: -
@@ -135,7 +148,7 @@ class X509: Certificate {
     private func createCertificationRequestInfo() -> PCKS10CertificationRequestInfo
     {
         let subjectPublicKeyInfo   = X509SubjectPublicKeyInfo(publicKey: publicKey)
-        var certificateRequestInfo = PCKS10CertificationRequestInfo(subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
+        var certificateRequestInfo = PCKS10CertificationRequestInfo(version: 0, subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
         
         certificateRequestInfo.basicConstraints = basicConstraints
         certificateRequestInfo.keyUsage         = keyUsage
@@ -167,7 +180,7 @@ class X509: Certificate {
         
         if let privateKey = self.privateKey {
             let certificationRequestInfo = createCertificationRequestInfo()
-            let signature                = privateKey.sign(bytes: certificationRequestInfo.bytes, using: digestType)
+            let signature                = privateKey.sign(data: certificationRequestInfo.data!, using: digestType)
             
             certificationRequest = PCKS10CertificationRequest(certificationRequestInfo: certificationRequestInfo, signatureAlgorithm: algorithm, signature: signature)
             error                = nil
@@ -196,7 +209,7 @@ class X509: Certificate {
     {
         if let authority = authority as? X509, authority.subject == issuer {
             if let digest = algorithm.digest {
-                if authority.publicKey.verify(signature: signature, for: _x509.tbsCertificate.bytes, using: digest) {
+                if authority.publicKey.verify(signature: signature, for: _x509.tbsCertificate.data, using: digest) {
                     return true
                 }
             }
@@ -217,7 +230,7 @@ class X509: Certificate {
     
     private func decode() -> X509Certificate?
     {
-        return X509Certificate(from: data)
+        return try? DERDecoder().decode(X509Certificate.self, from: data)
     }
     
 }

@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import XCTest
  */
 class SHA224Tests: XCTestCase {
     
-    let value = [UInt8](hexString: "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f")!
+    let value = Data(hexString: "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f")!
     
     /**
      - Remark:

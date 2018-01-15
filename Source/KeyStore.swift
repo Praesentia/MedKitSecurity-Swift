@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class KeyStore {
      - Invariant:
          (error == nil) ⇒ (key != nil)
      */
-    public func importSharedSecretKeyImpl(for identity: Identity, with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm) -> (key: SharedSecretKeyImpl?, error: Error?)
+    public func importSharedSecretKeyImpl(for identity: Identity, with secret: Data, using encryptionAlgorithm: SymmetricEncryptionAlgorithm) -> (key: SharedSecretKeyImpl?, error: Error?)
     {
         var key: SharedSecretKeyImpl?
         

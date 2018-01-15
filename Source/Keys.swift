@@ -1,15 +1,15 @@
 /*
  -----------------------------------------------------------------------------
- This source file is part of SecurityKitAOS.
- 
- Copyright 2017 Jon Griffeth
- 
+ This source file is part of SecurityKit.
+
+ Copyright 2017-2018 Jon Griffeth
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
- 
+
  http://www.apache.org/licenses/LICENSE-2.0
- 
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,28 +20,19 @@
 
 
 import Foundation
-import SecurityKit
 
 
-/**
- SharedSecret factory.
- */
-class SharedSecretCredentialsFactory: CredentialsFactory {
-    
-    // MARK: - Class Properties
-    static let shared = SharedSecretCredentialsFactory()
-    
-    // MARK: - Instantiation
-    
-    /**
-     Create credentials from profile.
-     */
-    func instantiate(for identity: Identity, from profile: Any, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
-    {
-        SecurityManagerShared.main.loadSharedSecretCredentials(for: identity, completionHandler: completion)
-    }
-    
-}
-
+// JSON Keys
+/*
+let keyAuthorization    = "authorization"
+let keyCertificate      = "certificate"
+let keyCertificateChain = "certificateChain"
+let keyCredentials      = "credentials"
+let keyIdentity         = "identity"
+let keyName             = "name"
+let keyOperations       = "operations"
+let keyPrincipal        = "principal"
+let keyType             = "type"
+*/
 
 // End of File

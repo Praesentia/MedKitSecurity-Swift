@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import XCTest
  */
 class HMACSHA1Tests: XCTestCase {
     
-    let data   = [UInt8](hexString: "4869205468657265")! // "Hi There"
-    let key    = [UInt8](hexString: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")!
-    let value  = [UInt8](hexString: "b617318655057264e28bc0b6fb378c8ef146be00")!
+    let data   = Data(hexString: "4869205468657265")! // "Hi There"
+    let key    = Data(hexString: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")!
+    let value  = Data(hexString: "b617318655057264e28bc0b6fb378c8ef146be00")!
     
     /**
      - Remark:
@@ -42,9 +42,9 @@ class HMACSHA1Tests: XCTestCase {
     func testCorrectAlgorithm()
     {
         let hmac      = HMACSHA1()
-        var signature : [UInt8]
+        var signature : Data
         
-        signature = hmac.sign(bytes: data, using: key)
+        signature = hmac.sign(data: data, using: key)
         
         XCTAssert(signature == value)
     }

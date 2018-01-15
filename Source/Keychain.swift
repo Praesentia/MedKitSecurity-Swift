@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@ class Keychain {
      - Invariant:
          (error == nil) ⇒ (certificate != nil)
      */
-    func findCertificate(withFingerprint fingerprint: [UInt8]) -> (certificate: SecCertificate?, error: Error?)
+    func findCertificate(withFingerprint fingerprint: Data) -> (certificate: SecCertificate?, error: Error?)
     {
         var query : [CFString : Any] = [
             kSecClass      : kSecClassCertificate,
@@ -388,13 +388,13 @@ class Keychain {
      - Returns:
 
      */
-    func importSharedSecretKeyImpl(for identity: Identity, with secret: [UInt8]) -> Error?
+    func importSharedSecretKeyImpl(for identity: Identity, with secret: Data) -> Error?
     {
         var attributes : [CFString : Any] = [
             kSecClass       : kSecClassGenericPassword,
             kSecAttrService : service,
             kSecAttrAccount : identity.string,
-            kSecValueData   : Data(secret)
+            kSecValueData   : secret
         ]
 
         if let keychain = self.keychain {
@@ -404,7 +404,7 @@ class Keychain {
         var status: OSStatus
         
         status = SecItemDelete(attributes as CFDictionary)
-        if status == errSecSuccess || status == errSecCRLNotFound { // TODO: find correct
+        if status == errSecSuccess || status == errSecItemNotFound {
             status = SecItemAdd(attributes as CFDictionary, nil)
         }
         
@@ -417,7 +417,7 @@ class Keychain {
      - Invariant:
          (error == nil) ⇒ (secret != nil)
      */
-    func loadSharedSecretKeyImpl(for identity: Identity) -> (secret: [UInt8]?, error: Error?)
+    func loadSharedSecretKeyImpl(for identity: Identity) -> (secret: Data?, error: Error?)
     {
         var query : [CFString : Any] = [
             kSecClass       : kSecClassGenericPassword,
@@ -433,13 +433,13 @@ class Keychain {
         
         var result : AnyObject?
         var error  : Error?
-        var secret : [UInt8]?
+        var secret : Data?
         
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         error = NSError(osstatus: status)
         
         if error == nil, let data = result as? Data {
-            secret = [UInt8](data)
+            secret = data
         }
         
         return (secret, error)

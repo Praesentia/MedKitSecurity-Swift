@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -37,11 +37,16 @@ class PublicKeyCredentialsImpl: PublicKeyCredentials {
     // MARK: - Properties
     public var certificate : Certificate
     public var chain       : [Certificate]
-    public var profile     : Any                { return getProfile() }
     public var type        : CredentialsType    { return .publicKey }
     
     // MARK: - Internal Properties
     let trust: PublicKeyTrust = PublicKeyTrust.main
+
+    // MARK: - Private
+    private enum CodingKeys: CodingKey {
+        case certificate
+        case chain
+    }
 
     // MARK: - Initializers
     
@@ -82,6 +87,24 @@ class PublicKeyCredentialsImpl: PublicKeyCredentials {
     {
         self.certificate = certificate
         self.chain       = chain
+    }
+
+    // MARK: - Codable
+
+    required public init(from decoder: Decoder) throws
+    {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        certificate = try container.decode(X509.self,   forKey: .certificate)
+        chain       = try container.decode([X509].self, forKey: .chain)
+    }
+
+    public func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(certificate as! X509, forKey: .certificate)
+        try container.encode(chain as! [X509],     forKey: .chain)
     }
     
     // MARK: - Authentication
@@ -141,7 +164,8 @@ class PublicKeyCredentialsImpl: PublicKeyCredentials {
             let digestType = algorithm.digest!
             
             if let tbsCertificate = createTBSCertificate(from: certificationRequestInfo) {
-                let signature   = privateKey.sign(bytes: tbsCertificate.bytes, using: digestType)
+                let data        = try! DEREncoder().encode(tbsCertificate)
+                let signature   = privateKey.sign(data: data, using: digestType)
                 let certificate = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
                 
                 return (certificate, nil)
@@ -167,7 +191,7 @@ class PublicKeyCredentialsImpl: PublicKeyCredentials {
             
             let algorithm      = X509Algorithm.sha256WithRSAEncryption // TODO
             let validity       = X509Validity(period: from...expires)
-            let serialNumber   = Random.bytes(count: 8)
+            let serialNumber   = ASN1UnsignedInteger(bytes: Random.bytes(count: 8))
             
             tbsCertificate = X509TBSCertificate(serialNumber: serialNumber, algorithm: algorithm,
                                     issuer: issuer.subject, validity: validity,
@@ -182,35 +206,14 @@ class PublicKeyCredentialsImpl: PublicKeyCredentials {
     
     // MARK: - Signing
     
-    public func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]?
+    public func sign(data: Data, using digestType: DigestType) -> Data?
     {
-        return privateKey?.sign(bytes: bytes, using: digestType)
+        return privateKey?.sign(data: data, using: digestType)
     }
     
-    public func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
+    public func verify(signature: Data, for data: Data, using digestType: DigestType) -> Bool
     {
-        return publicKey.verify(signature: signature, for: bytes, using: digestType)
-    }
-    
-    // MARK: - Profile
-    
-    /**
-     Get profile.
-     
-     Generates a JSON representation of the credentials.
-     
-     - Returns:
-        Returns the generated JSON profile.
-     */
-    private func getProfile() -> Any
-    {
-        var profile = [String : Any]()
-        
-        profile[KeyType]             = type.string
-        profile[KeyCertificate]      = certificate.data.base64EncodedString()
-        profile[KeyCertificateChain] = chain.map { $0.data.base64EncodedString() }
-        
-        return profile
+        return publicKey.verify(signature: signature, for: data, using: digestType)
     }
     
 }

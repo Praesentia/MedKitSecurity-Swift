@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -40,19 +40,23 @@ extension SecKey {
     
     /**
      */
-    func sign(bytes: [UInt8], padding: SecPadding) -> [UInt8]?
+    func sign(data: Data, padding: SecPadding) -> Data?
     {
         var signature    = [UInt8](repeating: 0, count: SecKeyGetBlockSize(self))
         var signatureLen = signature.count
+        let bytes        = [UInt8](data)
         
         let status = SecKeyRawSign(self, padding, UnsafePointer(bytes), bytes.count, &signature, &signatureLen)
-        return (status == errSecSuccess) ? signature : nil
+        return (status == errSecSuccess) ? Data(signature) : nil
     }
     
     /**
      */
-    func verify(signature: [UInt8], for bytes: [UInt8], padding: SecPadding) -> Bool
+    func verify(signature: Data, for data: Data, padding: SecPadding) -> Bool
     {
+        let signature = [UInt8](signature)
+        let bytes     = [UInt8](data)
+
         let status = SecKeyRawVerify(self, padding, UnsafePointer(bytes), bytes.count, UnsafePointer(signature), signature.count)
         return status == errSecSuccess
     }

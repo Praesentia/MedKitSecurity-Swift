@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,26 +26,21 @@ import SecurityKit
 
 class X509Tests: XCTestCase {
     
-    func testInitializers()
+    func testInitializers() throws
     {
-        let data        = try! Data(contentsOf: testCACerURL)
-        let certificate = X509Certificate(from: data)
-        
-        XCTAssertNotNil(certificate)
+        let data = try Data(contentsOf: testCACerURL)
+        let _    = try DERDecoder().decode(X509Certificate.self, from: data)
     }
     
-    func testVerifySignature()
+    func testVerifySignature() throws
     {
-        let caData      = try! Data(contentsOf: testCACerURL)
-        let ca          = X509(from: caData)!
-        
-        let cerData     = try! Data(contentsOf: testCerURL)
-        let certificate = X509(from: cerData)!
+        let caData      = try Data(contentsOf: testCACerURL)
+        let ca          = try X509(from: caData)
+        let cerData     = try Data(contentsOf: testCerURL)
+        let certificate = try X509(from: cerData)
         let x509        = certificate.x509!
-        let digest      = x509.algorithm.digest!
         
-        let result = ca.publicKey.verify(signature: x509.signature, for: x509.tbsCertificate.bytes, using: digest)
-        
+        let result = ca.publicKey.verify(signature: x509.signature, for: x509.tbsCertificate.data, using: x509.algorithm.digest!)
         XCTAssertTrue(result)
     }
     

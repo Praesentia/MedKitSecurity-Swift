@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class CertificateStore {
     func createCertificationRequest(for subject: X509Name, withPublicKey publicKey: PublicKey) -> PCKS10CertificationRequestInfo
     {
         let subjectPublicKeyInfo = X509SubjectPublicKeyInfo(publicKey: publicKey)
-        return PCKS10CertificationRequestInfo(subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
+        return PCKS10CertificationRequestInfo(version: 0, subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
     }
     
     /**
@@ -115,7 +115,7 @@ class CertificateStore {
 
             // create basic TBS certificate
             let publicKeyInfo  = X509SubjectPublicKeyInfo(publicKey: publicKey)
-            let serialNumber   = Random.bytes(count: 8)
+            let serialNumber   = ASN1UnsignedInteger(bytes: Random.bytes(count: 8))
             var tbsCertificate = X509TBSCertificate(serialNumber: serialNumber, algorithm: algorithm, issuer: subject, validity: validity, subject: subject, publicKey: publicKeyInfo)
             
             // add extensions
@@ -126,7 +126,7 @@ class CertificateStore {
             tbsCertificate.keyUsage         = keyUsage
             
             // create certificate
-            let signature   = privateKey.sign(bytes: tbsCertificate.bytes, using: digestType)
+            let signature   = privateKey.sign(data: tbsCertificate.data, using: digestType)
             let certificate = X509Certificate(tbsCertificate: tbsCertificate, algorithm: algorithm, signature: signature)
             
             return importCertificate(certificate)
@@ -178,7 +178,7 @@ class CertificateStore {
      */
     func importCertificate(_ certificate: X509Certificate) -> (Certificate?, Error?)
     {
-        if let secCertificate = SecCertificate.create(from: certificate.data) {
+        if let secCertificate = SecCertificate.create(from: certificate.data!) {
             let error = keychain.importCertificate(from: secCertificate)
             
             if error == nil {
@@ -301,7 +301,7 @@ class CertificateStore {
      - Invariant:
          (error == nil) ⇒ (certificate != nil)
      */
-    func findCertificate(withFingerprint fingerprint: [UInt8]) -> (certificate: X509?, error: Error?)
+    func findCertificate(withFingerprint fingerprint: Data) -> (certificate: X509?, error: Error?)
     {
         let (certificate, error) = keychain.findCertificate(withFingerprint: fingerprint)
 
@@ -355,7 +355,7 @@ class CertificateStore {
         var chain = [X509]()
         
         for data in list {
-            if let certificate = X509(from: data) {
+            if let certificate = try? X509(from: data) {
                 chain.append(certificate)
             }
             else {

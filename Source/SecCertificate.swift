@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ extension SecCertificate {
     var commonName  : String? { return getCommonName() }
     var data        : Data    { return SecCertificateCopyData(self) as Data }
     var publicKey   : SecKey? { return SecCertificateCopyPublicKey(self) }
-    var fingerprint : [UInt8] { return getFingerprint() }
+    var fingerprint : Data    { return SHA1().hash(data: data) }
 
     /**
      Create certificate from data.
@@ -46,12 +46,6 @@ extension SecCertificate {
     
         let status = SecCertificateCopyCommonName(self, &commonName)
         return (status == errSecSuccess) ? commonName as String? : nil
-    }
-
-    private func getFingerprint() -> [UInt8]
-    {
-        let digest = SHA1()
-        return digest.hash(bytes: [UInt8](data))
     }
 
 }

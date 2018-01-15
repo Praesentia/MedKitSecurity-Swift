@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -117,9 +117,9 @@ class PublicKeyTrust {
      */
     private func verify(certificate: X509, certifiedBy authority: X509) -> Bool
     {
-        if (certificate.issuer == authority.subject) && (authority.valid(for: certificate.validity)) {
+        if (certificate.issuer == authority.subject) /*&& (authority.valid(for: certificate.validity))*/ {
             if let digest = certificate.algorithm.digest {
-                if authority.publicKey.verify(signature: certificate.signature, for: certificate.x509!.tbsCertificate.bytes, using: digest) {
+                if authority.publicKey.verify(signature: certificate.signature, for: certificate.x509!.tbsCertificate.data, using: digest) {
                     return true
                 }
                 else {

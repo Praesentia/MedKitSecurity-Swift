@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -85,43 +85,32 @@ class CertificateStoreTests: XCTestCase {
         }
     }
     
-    // MARK: - Instantiate
+    // MARK: - Factories
     
-    func testInstantiateCertificateFromData()
+    func testInstantiateCertificateFromData() throws
     {
-        let data        = try! Data(contentsOf: testCACerURL)
-        let x509        = X509Certificate(from: data)!
-        let certificate = X509(from: data)
-        
-        XCTAssertNotNil(certificate)
-        XCTAssertNotNil(certificate?.x509)
-        
-        if let certificate = certificate {
-            let selfSigned = certificate.selfSigned()
-            
-            XCTAssertTrue(selfSigned)
-            XCTAssertEqual(certificate.publicKey.keySize, keySize)
-            XCTAssertNil(certificate.privateKey)
-        }
+        let data        = try Data(contentsOf: testCACerURL)
+        let _           = try DERDecoder().decode(X509Certificate.self, from: data)
+        let certificate = try X509(from: data)
+
+        XCTAssertNotNil(certificate.x509)
+        XCTAssertTrue(certificate.selfSigned())
+        XCTAssertEqual(certificate.publicKey.keySize, keySize)
+        XCTAssertNil(certificate.privateKey)
     }
     
     // MARK: - Certificate chain building.
     
-    func testBuildChainForCertificate()
+    func testBuildChainForCertificate() throws
     {
-        let caData      = try! Data(contentsOf: testCACerURL)
-        let _           = CertificateStore.main.importCertificate(from: caData)
-        let cerData     = try! Data(contentsOf: testCerURL)
-        let certificate = X509(from: cerData)
-        
-        XCTAssertNotNil(certificate)
-        
-        if let certificate = certificate {
-            let (chain, error) = CertificateStore.main.buildCertificateChain(for: certificate)
-            
-            XCTAssertNil(error)
-            XCTAssertNotNil(chain)
-        }
+        let caData         = try Data(contentsOf: testCACerURL)
+        let _              = CertificateStore.main.importCertificate(from: caData)
+        let cerData        = try Data(contentsOf: testCerURL)
+        let certificate    = try X509(from: cerData)
+        let (chain, error) = CertificateStore.main.buildCertificateChain(for: certificate)
+
+        XCTAssertNil(error)
+        XCTAssertNotNil(chain)
     }
     
 }

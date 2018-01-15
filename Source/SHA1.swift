@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2016-2017 Jon Griffeth
+ Copyright 2016-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -46,12 +46,12 @@ class SHA1: Digest {
         CC_SHA1_Init(&context)
     }
     
-    public func final() -> [UInt8]
+    public func final() -> Data
     {
         var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
         
         CC_SHA1_Final(&digest, &context)
-        return digest
+        return Data(digest)
     }
     
     

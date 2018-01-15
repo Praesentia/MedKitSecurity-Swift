@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,22 +31,22 @@ class X509VerificationTests: XCTestCase {
         Keychain.initialize(keychain: SecKeychain.testKeychain)
     }
     
-    func testVerifyRootCertificate()
+    func testVerifyRootCertificate() throws
     {
-        let rootData = try! Data(contentsOf: testCACerURL)
-        let root     = X509(from: rootData)!
+        let rootData = try Data(contentsOf: testCACerURL)
+        let root     = try X509(from: rootData)
 
         XCTAssertTrue(root.selfSigned())
     }
     
-    func testVerifyLeafCertificate()
+    func testVerifyLeafCertificate() throws
     {
-        let rootData = try! Data(contentsOf: testCACerURL)
-        let root     = X509(from: rootData)!
-        let leafData = try! Data(contentsOf: testCerURL)
-        let leaf     = X509(from: leafData)!
+        let rootData = try Data(contentsOf: testCACerURL)
+        let root     = try X509(from: rootData)
+        let leafData = try Data(contentsOf: testCerURL)
+        let leaf     = try X509(from: leafData)
         
-        XCTAssertTrue(root.publicKey.verify(signature: leaf.signature, for: leaf.x509!.tbsCertificate.bytes, using: leaf.algorithm.digest!))
+        XCTAssertTrue(root.publicKey.verify(signature: leaf.signature, for: leaf.x509!.tbsCertificate.data, using: leaf.algorithm.digest!))
     }
     
 }

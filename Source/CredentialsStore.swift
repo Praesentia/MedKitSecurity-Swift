@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ class CredentialsStore {
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
      */
-    func findPublicKeyCredentials(withFingerprint fingerprint: [UInt8]) -> (credentials: PublicKeyCredentials?, error: Error?)
+    func findPublicKeyCredentials(withFingerprint fingerprint: Data) -> (credentials: PublicKeyCredentials?, error: Error?)
     {
         var certificate : X509?
         var credentials : PublicKeyCredentials?
@@ -180,7 +180,7 @@ class CredentialsStore {
      - Invariant:
          (error == nil) ⇒ (credentials != nil)
      */
-    func importSharedSecretCredentials(for identity: Identity, with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm) -> (Credentials?, Error?)
+    func importSharedSecretCredentials(for identity: Identity, with secret: Data, using encryptionAlgorithm: SymmetricEncryptionAlgorithm) -> (Credentials?, Error?)
     {
         var credentials: SharedSecretCredentials?
         

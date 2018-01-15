@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -46,14 +46,14 @@ class SHA224: Digest {
         CC_SHA224_Init(&context)
     }
     
-    public func final() -> [UInt8]
+    public func final() -> Data
     {
         var digest = [UInt8](repeating: 0, count: Int(CC_SHA224_DIGEST_LENGTH))
         
         CC_SHA224_Final(&digest, &context)
         CC_SHA224_Init(&context)
         
-        return digest
+        return Data(digest)
     }
     
     public func update(bytes: [UInt8])

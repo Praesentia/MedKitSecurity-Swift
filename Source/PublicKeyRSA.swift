@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,71 +31,50 @@ class PublicKeyRSA: PublicKey {
     // MARK: - Properties
     public let              algorithm           = X509Algorithm.rsaEncryption
     public let              encryptionAlgorithm = PublicKeyEncryptionAlgorithm.rsa
-    public var              keySize             : UInt { return UInt(modulus.count) * 8 }
+    public var              keySize             : UInt { return keyData.size }
     public private(set) var privateKey          : PrivateKey?
 
     // MARK: - Internal Properties
-    var        bytes               : [UInt8]  { return [UInt8](data) }
-    var        data                : Data     { return key.data! }
-    let        modulus             : [UInt8]
-    let        exponent            : [UInt8]
-    let        key                 : SecKey
+    var data     : Data { return key.data! }
+    var keyData  : PKCS1RSAPublicKey
+    let key      : SecKey
     
     // MARK: - Initializers
     
     init(_ key: SecKey)
     {
-        let decoder = DERDecoder(bytes: [UInt8](key.data!))
-        
-        (modulus, exponent) = try! PublicKeyRSA.decode(decoder)
-        
+        self.keyData    = try! DERDecoder().decode(PKCS1RSAPublicKey.self, from: key.data!)
         self.key        = key
         self.privateKey = KeyStore.main.loadPrivateKey(for: self)
     }
     
     init(from data: Data) throws
     {
-        let decoder = DERDecoder(bytes: [UInt8](data))
-        
-        (modulus, exponent) = try PublicKeyRSA.decode(decoder)
-        key                 = SecKey.create(from: data, withKeySize: UInt(modulus.count) * 8)!
-        privateKey          = KeyStore.main.loadPrivateKey(for: self)
-    }
-    
-    // MARK: -
-    
-    private static func decode(_ decoder: DERDecoder) throws -> ([UInt8], [UInt8])
-    {
-        let sequence = try decoder.decoderFromSequence()
-        let modulus  = try sequence.decodeUnsignedInteger()
-        let exponent = try sequence.decodeUnsignedInteger()
-        
-        try sequence.assertAtEnd()
-        try decoder.assertAtEnd()
-        
-        return (modulus, exponent)
+        keyData    = try! DERDecoder().decode(PKCS1RSAPublicKey.self, from: data)
+        key        = SecKey.create(from: data, withKeySize: keyData.size)!
+        privateKey = KeyStore.main.loadPrivateKey(for: self)
     }
     
     // MARK: Fingerprint
     
-    public func fingerprint(using digestType: DigestType) -> [UInt8]
+    public func fingerprint(using digestType: DigestType) -> Data
     {
         let digest = instantiateDigest(ofType: digestType)
-        return digest.hash(bytes: bytes)
+        return digest.hash(data: data)
     }
     
     // MARK: - Signing
     
-    func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]
+    func sign(data: Data, using digestType: DigestType) -> Data
     {
         let digest = instantiateDigest(ofType: digestType)
-        return key.sign(bytes: digest.hash(bytes: bytes), padding: digestType.padding)!
+        return key.sign(data: digest.hash(data: data), padding: digestType.padding)!
     }
     
-    func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
+    func verify(signature: Data, for data: Data, using digestType: DigestType) -> Bool
     {
         let digest = instantiateDigest(ofType: digestType)
-        let hash   = digest.hash(bytes: bytes)
+        let hash   = digest.hash(data: data)
         return key.verify(signature: signature, for: hash, padding: digestType.padding)
     }
     

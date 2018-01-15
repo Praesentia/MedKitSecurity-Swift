@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -55,17 +55,17 @@ class PrivateKeyRSA: PrivateKey {
     
     // MARK: - Signing
     
-    func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]
+    func sign(data: Data, using digestType: DigestType) -> Data
     {
         let digest = instantiateDigest(ofType: digestType)
-        let hash   = digest.hash(bytes: bytes)
-        return key.sign(bytes: hash, padding: digestType.padding)!
+        let hash   = digest.hash(data: data)
+        return key.sign(data: hash, padding: digestType.padding)!
     }
     
-    func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
+    func verify(signature: Data, for data: Data, using digestType: DigestType) -> Bool
     {
         let digest = instantiateDigest(ofType: digestType)
-        return key.verify(signature: signature, for: digest.hash(bytes: bytes), padding: digestType.padding)
+        return key.verify(signature: signature, for: digest.hash(data: data), padding: digestType.padding)
     }
     
 }

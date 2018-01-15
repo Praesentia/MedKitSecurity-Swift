@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import XCTest
  */
 class HMACSHA512Tests: XCTestCase {
     
-    let data   = [UInt8](hexString: "4869205468657265")! // "Hi There"
-    let key    = [UInt8](hexString: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")!
-    let value  = [UInt8](hexString: "87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854")!
+    let data   = Data(hexString: "4869205468657265")! // "Hi There"
+    let key    = Data(hexString: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")!
+    let value  = Data(hexString: "87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854")!
     
     /**
      - Remark:
@@ -42,9 +42,9 @@ class HMACSHA512Tests: XCTestCase {
     func testCorrectAlgorithm()
     {
         let hmac      = HMACSHA512()
-        var signature : [UInt8]
+        var signature : Data
         
-        signature = hmac.sign(bytes: data, using: key)
+        signature = hmac.sign(data: data, using: key)
         
         XCTAssert(signature == value)
     }

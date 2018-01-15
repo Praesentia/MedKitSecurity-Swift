@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -27,15 +27,19 @@ import SecurityKit
  Shared secret credentials.
  */
 class SharedSecretCredentialsImpl: SharedSecretCredentials {
-    
+
     // MARK: - Properties
     public let identity : Identity?
     public let key      : SharedSecretKey
-    public var profile  : Any                { return getProfile() }
     public var type     : CredentialsType    { return .sharedSecret }
     public var validity : ClosedRange<Date>? { return nil } // TODO
 
-    // MARK: - Private Properties
+    // MARK: - Private
+    private enum CodingKeys: CodingKey {
+        case identity
+        case key
+    }
+
     private let digestType: DigestType = .sha256
     
     // MARK: - Initializers
@@ -48,6 +52,24 @@ class SharedSecretCredentialsImpl: SharedSecretCredentials {
         self.identity = identity
         self.key      = key
     }
+
+    // MARK: - Codable
+
+    required init(from decoder: Decoder) throws
+    {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        identity = try container.decode(Identity.self,            forKey: .identity)
+        key      = try container.decode(SharedSecretKeyImpl.self, forKey: .key)
+    }
+
+    public func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(identity,               forKey: .identity)
+        try container.encode(ConcreteEncodable(key), forKey: .key)
+    }
     
     // MARK: - Authentication
     
@@ -58,36 +80,14 @@ class SharedSecretCredentialsImpl: SharedSecretCredentials {
     
     // MARK: Signing
     
-    public func sign(bytes: [UInt8], using digestType: DigestType) -> [UInt8]?
+    public func sign(data: Data, using digestType: DigestType) -> Data?
     {
-        return key.sign(bytes: bytes, using: digestType)
+        return key.sign(data: data, using: digestType)
     }
     
-    public func verify(signature: [UInt8], for bytes: [UInt8], using digestType: DigestType) -> Bool
+    public func verify(signature: Data, for data: Data, using digestType: DigestType) -> Bool
     {
-        return key.verify(signature: signature, for: bytes, using: digestType)
-    }
-
-    // MARK: - Private
-    
-    /**
-     Get profile.
-     
-     Generates a JSON profile representing the credentials.  In this case, the
-     profile only includes the credentials type, as both sides are expected to
-     know the secret.
-     
-     - Returns:
-        Returns the generated JSON profile.
-     */
-    private func getProfile() -> Any
-    {
-        var profile = [String : Any]()
-        
-        profile[KeyType]     = type.string
-        profile[KeyIdentity] = identity?.string
-        
-        return profile
+        return key.verify(signature: signature, for: data, using: digestType)
     }
     
 }

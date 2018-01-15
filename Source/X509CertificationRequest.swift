@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ extension PCKS10CertificationRequest {
     func verifySignature() -> Bool
     {
         if let publicKey = try? PublicKeyRSA(from: certificationRequestInfo.subjectPublicKeyInfo.subjectPublicKey.data), let digestType = signatureAlgorithm.digest {
-            return publicKey.verify(signature: signature, for: certificationRequestInfo.bytes, using: digestType)
+            let data = try! DEREncoder().encode(certificationRequestInfo)
+            return publicKey.verify(signature: Data(signature), for: data, using: digestType)
         }
         return false
     }

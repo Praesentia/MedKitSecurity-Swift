@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import SecurityKit
 
 class KeyPairTests: XCTestCase {
     
-    let timeout  = TimeInterval(10)
-    var bytes    = [UInt8]()
+    let timeout = TimeInterval(10)
+    var data    = Data()
     
     override func setUp()
     {
         let digest = SHA256()
         
         digest.update(bytes: [0, 1, 2, 3, 4, 5, 6, 7])
-        bytes = digest.final()
+        data = digest.final()
         
         Keychain.initialize(keychain: SecKeychain.testKeychain)
         _ = Keychain.main.removeKeyPair(for: testName)

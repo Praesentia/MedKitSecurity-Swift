@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
 
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -32,73 +32,86 @@ import SecurityKit
 class TLSContext : TLS {
 
     // MARK: - Properties
-    weak var delegate  : TLSDelegate?
-    var      state     : TLSState     { return getSessionState() }
-    weak var stream    : TLSDataStream?
-    var      peerTrust : SecTrust?    { return getPeerTrust() }
+    weak var delegate : TLSDelegate?
+    let      mode     : TLSMode
+    var      state    : TLSState { return getSessionState() }
+    weak var stream   : TLSDataStream?
 
     // MARK: - Private Properties
-    private var context      : SSLContext
-    private var protocolSide : SSLProtocolSide;
+    private var context   : SSLContext
+    private var peerTrust : SecTrust? { return getPeerTrust() }
 
     // MARK: - Initializers
 
-    init(_ protocolSide: SSLProtocolSide, _ connectionType: SSLConnectionType)
-    {
-        self.context      = SSLCreateContext(nil, protocolSide, connectionType)!
-        self.protocolSide = protocolSide;
+    /**
+     Initializer
 
-        let connection = UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        let _          = SSLSetConnection(context, connection)
-        let _          = SSLSetIOFuncs(context, readFunc, writeFunc)
+     - Parameters:
+         - mode: The TLS mode indicating whether this is a client or server
+                 side connection.
+     */
+    init(mode: TLSMode)
+    {
+        self.context = SSLCreateContext(nil, mode.protocolSide, .streamType)!
+        self.mode    = mode
     }
 
-    // MARK: - State Management
+    // MARK: - Session Management
 
-    func close() -> Error?
+    /**
+     Handshake
+
+     Continue the TLS handshake.
+     */
+    func handshake() -> Error?
     {
-        let status = SSLClose(context)
+        let status = handshakeP();
         return SecurityKitError(from: status)
     }
 
-    func handshake() -> Error?
+    /**
+     Start session.
+
+     Configures the session context and initiates the TLS handshake.
+     */
+    func start() -> Error?
     {
-        var status : OSStatus = errSecSuccess
-        var ok     = true
+        var status: OSStatus
 
-        if state == .idle {
-            status = configure();
-            if status != errSecSuccess {
-                ok = false
-            }
+        status = configure();
+        if status == errSecSuccess {
+            status = handshakeP();
         }
 
-        while ok {
-            status = SSLHandshake(context)
+        return SecurityKitError(from: status)
+    }
 
-            switch status {
-            case errSSLPeerAuthCompleted :
-                let error = delegate?.tlsPeerAuthenticationComplete(self) ?? nil // TODO
-                if error != nil {
-                    return error
-                }
+    /**
+     Shutdown session.
 
-            default :
-                return SecurityKitError(from: status)
-            }
-        }
-
+     Initiates a graceful shutdown of the session.
+     */
+    func shutdown() -> Error?
+    {
+        let status = SSLClose(context)
         return SecurityKitError(from: status)
     }
 
     // MARK: - Private
 
     /**
-     Configure TLS session.
+     Configure TLS session context.
      */
     private func configure() -> OSStatus
     {
-        var status: OSStatus = errSecSuccess
+        let connection = UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        var status : OSStatus = errSecSuccess
+
+        status = SSLSetConnection(context, connection)
+        guard status == errSecSuccess else { return status }
+
+        status = SSLSetIOFuncs(context, readFunc, writeFunc)
+        guard status == errSecSuccess else { return status }
 
         // set general configuration
         status = setSessionConfig(kSSLSessionConfig_ATSv1)
@@ -106,18 +119,18 @@ class TLSContext : TLS {
 
         // set peer name
         if let peerName = delegate?.tlsPeerName(self) {
-            status = setPeerDomainName(peerName)
+            status = setPeerName(peerName)
             guard status == errSecSuccess else { return status }
         }
 
         // set client-side options
-        if protocolSide == .clientSide {
+        if mode == .client {
             status = setSessionOption(.breakOnServerAuth, true)
             guard status == errSecSuccess else { return status }
         }
 
         // set server-side options
-        if protocolSide == .serverSide {
+        if mode == .server {
             if let credentials = delegate?.tlsCredentials(self) {
                 status = setCredentials(credentials)
                 guard status == errSecSuccess else { return status }
@@ -127,6 +140,44 @@ class TLSContext : TLS {
         return status
     }
 
+    /**
+     Initiate or otherwise continue the TLS handshake.
+
+     - Returns:
+         - errSecSuccess:
+             Indicates that the handshake completed successfully.
+         - errSSLClosedAbort:
+             Indicates that the handshake has failed.
+         - errSSLWouldBlock:
+             Indicates that the handshake should be continued when additional
+             data is available for reading.
+     */
+    private func handshakeP() -> OSStatus
+    {
+        var status : OSStatus = errSecSuccess
+        var ok     = true
+
+        while ok {
+            status = SSLHandshake(context)
+            switch status {
+            case errSSLPeerAuthCompleted :
+                let error = delegate?.tlsPeerAuthenticationComplete(self) ?? nil // TODO
+                if error != nil {
+                    status = errSSLClosedAbort
+                    ok     = false
+                }
+
+            default :
+                ok = false
+            }
+        }
+
+        return status
+    }
+
+    /**
+     Set credentials.
+     */
     private func setCredentials(_ credentials: PublicKeyCredentials) -> OSStatus
     {
         var status: OSStatus = errSecSuccess
@@ -148,7 +199,10 @@ class TLSContext : TLS {
         return status
     }
 
-    private func setPeerDomainName(_ peerName: String) -> OSStatus
+    /**
+     Set peer name.
+     */
+    private func setPeerName(_ peerName: String) -> OSStatus
     {
         let utf8   = Data(peerName.utf8)
         var status : OSStatus = errSecSuccess
@@ -160,11 +214,17 @@ class TLSContext : TLS {
         return status
     }
 
+    /**
+     Set session configuration.
+     */
     private func setSessionConfig(_ config: CFString) -> OSStatus
     {
         return SSLSetSessionConfig(context, config)
     }
 
+    /**
+     Set session option.
+     */
     private func setSessionOption(_ option: SSLSessionOption, _ value: Bool) -> OSStatus
     {
         return SSLSetSessionOption(context, option, value)
@@ -172,6 +232,9 @@ class TLSContext : TLS {
 
     // MARK: - I/O
 
+    /**
+     Read data.
+     */
     func read(_ data: inout Data, _ dataLength: inout Int) -> Error?
     {
         var status: OSStatus = errSecSuccess
@@ -179,9 +242,13 @@ class TLSContext : TLS {
         data.withUnsafeMutableBytes() {
             status = SSLRead(context, $0, data.count, &dataLength)
         }
+
         return SecurityKitError(from: status)
     }
 
+    /**
+     Write data.
+     */
     func write(_ data: Data, _ dataLength: inout Int) -> Error?
     {
         var status: OSStatus = errSecSuccess
@@ -189,11 +256,17 @@ class TLSContext : TLS {
         data.withUnsafeBytes() {
             status = SSLWrite(context, $0, data.count, &dataLength)
         }
+
         return SecurityKitError(from: status)
     }
 
     // MARK: - Private
 
+    /**
+     Get session state.
+
+     Maps the context's SSLSessionState to the TLSState.
+     */
     private func getSessionState() -> TLSState
     {
         var stateSSL: SSLSessionState = .idle
@@ -238,14 +311,28 @@ class TLSContext : TLS {
  */
 fileprivate func readFunc(_ connection: SSLConnectionRef, _ data: UnsafeMutableRawPointer, _ dataLength: UnsafeMutablePointer<Int>) -> OSStatus
 {
-    let connection : TLSContext = Unmanaged<TLSContext>.fromOpaque(connection).takeUnretainedValue()
-    var status     : OSStatus   = errSecIO
+    let context : TLSContext = Unmanaged<TLSContext>.fromOpaque(connection).takeUnretainedValue()
+    var status  : OSStatus   = errSSLClosedAbort
 
-    if let stream = connection.stream {
-        let buffer = UnsafeMutableRawBufferPointer(start: data, count: dataLength.pointee)
+    if let stream = context.stream {
+        var input  : Data?
         var error  : Error?
 
-        error  = stream.tlsRead(connection, buffer, &dataLength.pointee)
+        (input, error) = stream.tlsRead(context, dataLength.pointee)
+        if error == nil, let input = input {
+            let buffer = UnsafeMutableRawBufferPointer(start: data, count: dataLength.pointee)
+            let bytes  = [UInt8](input)
+
+            for i in 0..<bytes.count {
+                buffer[i] = bytes[i]
+            }
+
+            dataLength.pointee = bytes.count
+        }
+        else {
+            dataLength.pointee = 0
+        }
+
         status = SecurityKitError.osstatus(from: error as? SecurityKitError)
     }
 
@@ -257,14 +344,22 @@ fileprivate func readFunc(_ connection: SSLConnectionRef, _ data: UnsafeMutableR
  */
 fileprivate func writeFunc(_ connection: SSLConnectionRef, _ data: UnsafeRawPointer, _ dataLength: UnsafeMutablePointer<Int>) -> OSStatus
 {
-    let connection : TLSContext = Unmanaged<TLSContext>.fromOpaque(connection).takeUnretainedValue()
-    var status     : OSStatus   = errSecIO
+    let context : TLSContext = Unmanaged<TLSContext>.fromOpaque(connection).takeUnretainedValue()
+    var status  : OSStatus   = errSSLClosedAbort
 
-    if let stream = connection.stream {
-        let buffer = Data(bytes: data, count: dataLength.pointee)
+    if let stream = context.stream {
+        let output = Data(bytes: data, count: dataLength.pointee)
+        var count  : Int?
         var error  : Error?
 
-        error  = stream.tlsWrite(connection, buffer, &dataLength.pointee)
+        (count, error) = stream.tlsWrite(context, output)
+        if error == nil, let count = count {
+            dataLength.pointee = count
+        }
+        else {
+            dataLength.pointee = 0
+        }
+
         status = SecurityKitError.osstatus(from: error as? SecurityKitError)
     }
 

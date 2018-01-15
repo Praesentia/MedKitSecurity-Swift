@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -35,13 +35,14 @@ class HMACSHA384: HMAC {
     
     // MARK: -
     
-    func sign(bytes: [UInt8], using secret: [UInt8]) -> [UInt8]
+    func sign(data: Data, using secret: Data) -> Data
     {
         var output = [UInt8](repeating: 0, count: HMACSHA384.size)
+        let bytes  = [UInt8](data)
+        let secret = [UInt8](secret)
         
         CCHmac(HMACSHA384.algorithm, secret, secret.count, bytes, bytes.count, &output)
-        
-        return output
+        return Data(output)
     }
     
 }

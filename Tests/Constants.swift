@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ let testCAP12Password = "TestCA"
 let testCACerURL      = Bundle.tests.url(forResource: "TestCA", ofType: "cer")!
 
 // Test Certificate
-let testIdentity      = Identity(named: "Test", type: .user)
+let testIdentity      = Identity(named: "Test", type: .person)
 let testName          = X509Name(from: testIdentity)
 let testCerURL        = Bundle.tests.url(forResource: "Test", ofType: "cer")!
 let testCerData       = try! Data(contentsOf: testCerURL)

@@ -2,7 +2,7 @@
  -----------------------------------------------------------------------------
  This source file is part of SecurityKitAOS.
  
- Copyright 2017 Jon Griffeth
+ Copyright 2017-2018 Jon Griffeth
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -81,23 +81,9 @@ class SecurityManagerAOS: SecurityManager {
     /**
      Create credentials from profile.
      */
-    public func instantiateCredentials(for identity: Identity, from profile: Any, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    public func decodeCredentials(from decoder: Decoder) throws -> Credentials
     {
-        if let profile = profile as? [String : Any], let string = profile[KeyType] as? String, let type = CredentialsType(string: string) {
-            switch type {
-            case .null :
-                DispatchQueue.main.async { completion(NullCredentials.shared, nil) }
-                
-            case .publicKey :
-                PublicKeyCredentialsFactory.shared.instantiate(for: identity, from: profile, completionHandler: completion)
-                
-            case .sharedSecret :
-                SharedSecretCredentialsFactory.shared.instantiate(for: identity, from: profile, completionHandler: completion)
-            }
-        }
-        else {
-            DispatchQueue.main.async { completion(nil, SecurityKitError.failed) }
-        }
+        return try CredentialsCoder(from: decoder).credentials
     }
     
     // MARK: - Public Key Certificates
@@ -141,7 +127,7 @@ class SecurityManagerAOS: SecurityManager {
         }
     }
 
-    func findPublicKeyCredentials(withFingerprint fingerprint: [UInt8], completionHandler completion: @escaping (PublicKeyCredentials?, Error?) -> Void)
+    func findPublicKeyCredentials(withFingerprint fingerprint: Data, completionHandler completion: @escaping (PublicKeyCredentials?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             let (credentials, error) = CredentialsStore.main.findPublicKeyCredentials(withFingerprint: fingerprint)
@@ -149,7 +135,7 @@ class SecurityManagerAOS: SecurityManager {
         }
     }
 
-    func findPublicKeyCredentials(withFingerprints fingerprints: [[UInt8]], completionHandler completion: @escaping ([PublicKeyCredentials]?, Error?) -> Void)
+    func findPublicKeyCredentials(withFingerprints fingerprints: [Data], completionHandler completion: @escaping ([PublicKeyCredentials]?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             var credentials = [PublicKeyCredentials]()
@@ -297,7 +283,7 @@ class SecurityManagerAOS: SecurityManager {
         let subject                  = certificate.x509!.tbsCertificate.subject
         let publicKey                = certificate.publicKey
         let subjectPublicKeyInfo     = X509SubjectPublicKeyInfo(publicKey: publicKey)
-        let certificationRequestInfo = PCKS10CertificationRequestInfo(subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
+        let certificationRequestInfo = PCKS10CertificationRequestInfo(version: 0, subject: subject, subjectPublicKeyInfo: subjectPublicKeyInfo)
         let issuer                   = issuer as! PublicKeyCredentialsImpl
         
         DispatchQueue.module.async {
@@ -370,14 +356,14 @@ class SecurityManagerAOS: SecurityManager {
     /**
      Instantiate public key credentials from X509 data.
      */
-    func instantiatePublicKeyCredentials(for identity: Identity, from data: Data, chain: [Data], completionHandler completion: @escaping (PublicKeyCredentials?, Error?) -> Void)
+    func instantiatePublicKeyCredentials(from data: Data, chain: [Data], completionHandler completion: @escaping (PublicKeyCredentials?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             
             var credentials : PublicKeyCredentials?
             var error       : Error?
             
-            if let certificate = X509(from: data), let chain = CertificateStore.main.instantiateCertificateChain(from: chain) {
+            if let certificate = try? X509(from: data), let chain = CertificateStore.main.instantiateCertificateChain(from: chain) {
                 credentials = PublicKeyCredentialsImpl(with: certificate, chain: chain)
             }
             else {
@@ -409,7 +395,7 @@ class SecurityManagerAOS: SecurityManager {
         - completion A completion handler that will be invoked with the result
                      of the operation.
      */
-    public func importSharedSecretCredentials(for identity: Identity, with secret: [UInt8], using encryptionAlgorithm: SymmetricEncryptionAlgorithm, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
+    public func importSharedSecretCredentials(for identity: Identity, with secret: Data, using encryptionAlgorithm: SymmetricEncryptionAlgorithm, completionHandler completion: @escaping (Credentials?, Error?) -> Void)
     {
         DispatchQueue.module.async {
             let (credentials, error) = CredentialsStore.main.importSharedSecretCredentials(for: identity, with: secret, using: encryptionAlgorithm)
