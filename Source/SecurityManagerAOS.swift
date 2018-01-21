@@ -61,7 +61,37 @@ class SecurityManagerAOS: SecurityManager {
     }
     
     // MARK: - Random
-    
+
+    public func random(_ type: Int.Type) -> Int
+    {
+        return Random.value(Int.self)
+    }
+
+    public func random(_ type: UInt.Type) -> UInt
+    {
+        return Random.value(UInt.self)
+    }
+
+    public func random(_ type: UInt8.Type) -> UInt8
+    {
+        return Random.value(UInt8.self)
+    }
+
+    public func random(_ type: UInt16.Type) -> UInt16
+    {
+        return Random.value(UInt16.self)
+    }
+
+    public func random(_ type: UInt32.Type) -> UInt32
+    {
+        return Random.value(UInt32.self)
+    }
+
+    public func random(_ type: UInt64.Type) -> UInt64
+    {
+        return Random.value(UInt64.self)
+    }
+
     /**
      Generate random bytes.
      

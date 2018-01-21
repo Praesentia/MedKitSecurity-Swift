@@ -26,7 +26,37 @@ import Foundation
  Secure random number generator.
  */
 class Random {
-    
+
+    static func value(_ type: Int.Type) -> Int
+    {
+        return integer(Int.self)
+    }
+
+    static func value(_ type: UInt.Type) -> UInt
+    {
+        return integer(UInt.self)
+    }
+
+    static func value(_ type: UInt8.Type) -> UInt8
+    {
+        return integer(UInt8.self)
+    }
+
+    static func value(_ type: UInt16.Type) -> UInt16
+    {
+        return integer(UInt16.self)
+    }
+
+    static func value(_ type: UInt32.Type) -> UInt32
+    {
+        return integer(UInt32.self)
+    }
+
+    static func value(_ type: UInt64.Type) -> UInt64
+    {
+        return integer(UInt64.self)
+    }
+
     /**
      Generate random bytes.
      
@@ -47,6 +77,20 @@ class Random {
         }
         
         return bytes
+    }
+
+    private static func integer<T: ExpressibleByIntegerLiteral>(_ type: T.Type) -> T
+    {
+        var value: T = 0
+
+        withUnsafeMutablePointer(to: &value) {
+            let status = SecRandomCopyBytes(kSecRandomDefault, MemoryLayout<T>.size, $0)
+            if status != errSecSuccess { // TODO: Under what circumstances would this occur?
+                fatalError("Unexpected error.")
+            }
+        }
+
+        return value
     }
 
 }
