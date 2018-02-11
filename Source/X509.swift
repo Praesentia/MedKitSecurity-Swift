@@ -129,7 +129,7 @@ class X509: Certificate {
     {
         let container = try decoder.singleValueContainer()
         let base64    = try container.decode(String.self)
-        let data      = Data(base64Encoded: base64)! // TODO
+        let data      = try Data(base64encoded: base64)
 
         self.init(from: data)
     }

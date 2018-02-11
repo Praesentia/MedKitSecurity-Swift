@@ -29,8 +29,7 @@ extension X509SubjectPublicKeyInfo {
     
     init(publicKey: PublicKey)
     {
-        self.algorithm        = publicKey.algorithm
-        self.subjectPublicKey = X509PublicKey(data: publicKey.data)
+        self = X509SubjectPublicKeyInfo(algorithm: publicKey.algorithm, subjectPublicKey: X509PublicKey(data: publicKey.data))
     }
     
 }

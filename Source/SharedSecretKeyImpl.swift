@@ -56,7 +56,7 @@ class SharedSecretKeyImpl: SharedSecretKey {
         let base64    = try container.decode(String.self, forKey: .secret)
 
         encryptionAlogrithm = try container.decode(SymmetricEncryptionAlgorithm.self, forKey: .encryptionAlgorithm)
-        secret              = Data(base64Encoded: base64)!
+        secret              = try Data(base64encoded: base64)
     }
 
     public func encode(to encoder: Encoder) throws
